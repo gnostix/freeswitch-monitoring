@@ -1,9 +1,6 @@
 package gr.gnostix.freeswitch;
 
 import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import gr.gnostix.freeswitch.actors.Event;
 import org.freeswitch.esl.client.IEslEventListener;
 import org.freeswitch.esl.client.transport.event.EslEvent;
 import org.slf4j.Logger;
@@ -13,16 +10,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import gr.gnostix.freeswitch.actors.EventRouter;
+import gr.gnostix.freeswitch.actors.CallRouter;
 
 public class MyEslEventListener implements IEslEventListener {
 
-    public  MyEslEventListener(ActorSystem system){
-        this.system = system;
-        eventAct = system.actorOf(Props.create(EventRouter.class), "eventAct");
+    public  MyEslEventListener(ActorRef callRouter){
+        this.callRouter = callRouter;
     }
-    private ActorSystem system;
-    private ActorRef eventAct = null;
+    private ActorRef callRouter = null;
     // Create the 'helloakka' actor system
     //final ActorSystem system = ActorSystem.create("HelloFS");
 
@@ -38,7 +33,7 @@ public class MyEslEventListener implements IEslEventListener {
 //        System.out.println(" ---------------------------- event received END ------------------------------");
 
         // eventAct should be the router where the events will be dispatched!!!!!!
-        eventAct.tell(new Event(event.getEventName()), ActorRef.noSender());
+        callRouter.tell(CallRouter.mkEvent(event), ActorRef.noSender());
 
         //System.out.println(getEventBodyLinesToLog(event));
         //log.info("eventReceived [{}]\n[{}]\n", event, getEventToLog(event));

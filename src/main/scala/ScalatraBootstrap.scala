@@ -1,5 +1,5 @@
 import gr.gnostix.freeswitch._
-import gr.gnostix.freeswitch.actors.EventRouter
+import gr.gnostix.freeswitch.actors.{CallRouter}
 import gr.gnostix.freeswitch.servlets.{EslActorApp, CentralServlet}
 import org.scalatra._
 import javax.servlet.ServletContext
@@ -7,8 +7,8 @@ import _root_.akka.actor.{Props, ActorSystem}
 
 class ScalatraBootstrap extends LifeCycle {
   val system = ActorSystem()
-  val myRouter = system.actorOf(Props[EventRouter])
-  val myConn = new MyEslConnection(system)
+  val myRouter = system.actorOf(Props[CallRouter])
+  val myConn = new MyEslConnection(myRouter)
 
   override def init(context: ServletContext) {
     context.mount(new CentralServlet, "/*")

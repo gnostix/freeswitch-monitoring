@@ -1,6 +1,6 @@
 package gr.gnostix.freeswitch;
 
-import akka.actor.ActorSystem;
+import akka.actor.ActorRef;
 import org.freeswitch.esl.client.inbound.Client;
 import org.freeswitch.esl.client.inbound.InboundConnectionFailure;
 
@@ -11,7 +11,7 @@ public class MyEslConnection {
 
     private Client conn = null;
 
-    public MyEslConnection(ActorSystem system) {
+    public MyEslConnection(ActorRef callRouter) {
         conn = new Client();
         try {
             conn.connect("192.168.10.128", 8021, "ClueCon", 60);
@@ -19,7 +19,7 @@ public class MyEslConnection {
             if (conn.canSend() == true) System.out.println("connected");
             //conn.setEventSubscriptions( "plain", "CHANNEL_HANGUP_COMPLETE CHANNEL_CALLSTATE  CHANNEL_CREATE CHANNEL_EXECUTE CHANNEL_EXECUTE_COMPLETE CHANNEL_DESTROY" );
             conn.setEventSubscriptions( "plain", "all" );
-            conn.addEventListener(new MyEslEventListener(system));
+            conn.addEventListener(new MyEslEventListener(callRouter));
 
         } catch (InboundConnectionFailure e) {
             e.printStackTrace();

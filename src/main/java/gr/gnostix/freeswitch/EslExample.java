@@ -1,7 +1,10 @@
 package gr.gnostix.freeswitch;
 
+import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.actor.Props;
 import akka.actor.UntypedActor;
+import gr.gnostix.freeswitch.actors.CallRouter;
 
 import java.io.Serializable;
 
@@ -37,7 +40,8 @@ public class EslExample {
 
     public static void main(String[] args) {
         ActorSystem system = ActorSystem.create("HelloFS");
-      MyEslConnection myConn = new MyEslConnection(system);
+        ActorRef myRouter = system.actorOf(Props.create(CallRouter.class));
+      MyEslConnection myConn = new MyEslConnection(myRouter);
       system.awaitTermination();
         myConn.deinitConnection();
     }

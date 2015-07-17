@@ -31,7 +31,8 @@ object FreeswitchopBuild extends Build {
         "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided",
         "com.typesafe.akka" %% "akka-actor" % "2.3.4",
         "net.databinder.dispatch" %% "dispatch-core" % "0.11.1",
-        "org.freeswitch.esl.client" % "org.freeswitch.esl.client" % "0.9.2"
+        "org.freeswitch.esl.client" % "org.freeswitch.esl.client" % "0.9.2",
+        "com.typesafe.akka" %% "akka-slf4j" % "2.3.4"
       ),
       scalateTemplateConfig in Compile <<= (sourceDirectory in Compile){ base =>
         Seq(
