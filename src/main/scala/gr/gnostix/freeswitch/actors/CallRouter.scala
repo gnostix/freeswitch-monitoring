@@ -1,10 +1,20 @@
 package gr.gnostix.freeswitch.actors
 
 import akka.actor.SupervisorStrategy.Restart
+import org.json4s.DefaultReaders.JValueReader
+import org.json4s.JsonAST.JValue
+import org.json4s.jackson.Json
+import org.scalatra.atmosphere.{JsonMessage, AtmosphereClient, TextMessage}
 
 import scala.collection.JavaConverters._
 import akka.actor.{OneForOneStrategy, ActorRef, ActorLogging, Actor}
 import org.freeswitch.esl.client.transport.event.EslEvent
+import scala.concurrent.ExecutionContext.Implicits.global
+// JSON-related libraries
+import org.json4s.{DefaultFormats, Formats}
+
+// JSON handling support from Scalatra
+import org.scalatra.json._
 
 sealed trait CallEventType {
   def name: String
@@ -19,6 +29,8 @@ case class CallEnd(uuid: String) extends CallEventType {
 case class CallOther(name: String, uuid: String) extends CallEventType
 
 object CallRouter {
+  protected implicit lazy val jsonFormats: Formats = DefaultFormats
+
   sealed trait RouterProtocol
   sealed trait RouterRequest extends RouterProtocol
   sealed trait RouterResponse extends RouterProtocol
@@ -55,6 +67,12 @@ class CallRouter extends Actor with ActorLogging {
 
   def idle(activeCalls: scala.collection.Map[String, ActorRef]): Receive = {
     case Event(headers) =>
+
+      object TextCallHeaders extends TextMessage(headers.mkString)
+      //object JsonCallHeaders extends JsonMessage(Json(headers))
+
+      AtmosphereClient.broadcast("/live/events", TextCallHeaders)
+
       getCallEventType(headers) match {
         case x @ CallNew(uuid) if uuid != "_UNKNOWN" =>
           log info x.toString

@@ -9,7 +9,8 @@ import org.scalatra.{Accepted, FutureSupport, ScalatraServlet}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-class EslActorApp(system:ActorSystem, myActor:ActorRef) extends ScalatraServlet with FutureSupport {
+class EslActorApp(system:ActorSystem, myActor:ActorRef)
+  extends ScalatraServlet with FutureSupport {
 
   implicit val timeout = new Timeout(2 seconds)
   protected implicit def executor: ExecutionContext = system.dispatcher
