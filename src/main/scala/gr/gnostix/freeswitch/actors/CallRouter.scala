@@ -2,7 +2,7 @@ package gr.gnostix.freeswitch.actors
 
 import akka.actor.SupervisorStrategy.Restart
 import org.json4s.DefaultReaders.JValueReader
-import org.json4s.JsonAST.JValue
+import org.json4s.JsonAST.{JString, JObject, JValue}
 import org.json4s.jackson.Json
 import org.scalatra.atmosphere.{JsonMessage, AtmosphereClient, TextMessage}
 
@@ -93,7 +93,10 @@ class CallRouter extends Actor with ActorLogging {
           (activeCalls get uuid) match {
             case None =>
               object TextCallInfo extends TextMessage(x.toString)
+              object JsonCallInfo extends JsonMessage( JObject(List(("author",JString(x.fromUser)), ("message",JString(x.toString)))))
+
               AtmosphereClient.broadcast("/live/events", TextCallInfo)
+              AtmosphereClient.broadcast("/the-chat", JsonCallInfo)
 
               val actor = context actorOf CallActor.props(uuid)
               val newMap = activeCalls updated (uuid, actor)
@@ -110,9 +113,12 @@ class CallRouter extends Actor with ActorLogging {
             case None =>
               log warning s"Call $uuid not found"
             case Some(actor) =>
-              log info "call removed from activeCalls"
+              log info "channel removed from activeCalls"
               object TextCallInfo extends TextMessage(x.toString)
+              object JsonCallInfo extends JsonMessage( JObject(List(("author",JString(x.fromUser)), ("message",JString(x.toString)))))
+
               AtmosphereClient.broadcast("/live/events", TextCallInfo)
+              AtmosphereClient.broadcast("/the-chat", JsonCallInfo)
 
               context stop actor
               val newMap = activeCalls - uuid
