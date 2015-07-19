@@ -16,17 +16,24 @@ import org.json4s.{DefaultFormats, Formats}
 // JSON handling support from Scalatra
 import org.scalatra.json._
 
-sealed trait CallEventType {
+sealed trait EventType {
   def name: String
   def uuid: String
 }
-case class CallNew(uuid: String) extends CallEventType {
+
+sealed trait CallEventType extends EventType {
+  def fromUser: String
+  def toUser: String
+}
+case class CallNew(uuid: String,fromUser: String,toUser: String) extends CallEventType {
   val name = "CHANNEL_STATE"
 }
-case class CallEnd(uuid: String) extends CallEventType {
+case class CallEnd(uuid: String,fromUser: String,toUser: String) extends CallEventType {
   val name = "CHANNEL_STATE"
 }
-case class CallOther(name: String, uuid: String) extends CallEventType
+case class CallOther(name: String, uuid: String) extends EventType
+
+
 
 object CallRouter {
   protected implicit lazy val jsonFormats: Formats = DefaultFormats
@@ -47,6 +54,8 @@ object CallRouter {
   def mkEvent(event: EslEvent): Event = Event(event)
 }
 
+
+
 class CallRouter extends Actor with ActorLogging {
   import CallRouter._
 
@@ -55,11 +64,15 @@ class CallRouter extends Actor with ActorLogging {
       case _ => Restart
     }
 
-  def getCallEventType(headers: scala.collection.Map[String, String]): CallEventType = {
-    val uuid = headers get "Core-UUID" getOrElse "_UNKNOWN"
+  def getCallEventType(headers: scala.collection.Map[String, String]): EventType = {
+    // Channel-Call-UUID is unique for call but since we have one event for every channel it comes twice
+    // Unique-ID is unique per channel. In every call we have two channels
+    val uuid = headers get "Unique-ID" getOrElse "_UNKNOWN"
     (headers get "Event-Name") match {
-      case Some("CHANNEL_ANSWER") => CallNew(uuid)
-      case Some("CHANNEL_HANGUP_COMPLETE") => CallEnd(uuid)
+      case Some("CHANNEL_ANSWER") => CallNew(uuid,headers get "Caller-Caller-ID-Number" getOrElse "_UNKNOWN",
+        headers get "Caller-Destination-Number" getOrElse "_UNKNOWN")
+      case Some("CHANNEL_HANGUP_COMPLETE") => CallEnd(uuid,headers get "Caller-Caller-ID-Number" getOrElse "_UNKNOWN",
+        headers get "Caller-Destination-Number" getOrElse "_UNKNOWN")
       case Some(x) => CallOther(x, uuid)
       case None => CallOther("_UNKNOWN", uuid)
     }
@@ -68,38 +81,47 @@ class CallRouter extends Actor with ActorLogging {
   def idle(activeCalls: scala.collection.Map[String, ActorRef]): Receive = {
     case Event(headers) =>
 
-      object TextCallHeaders extends TextMessage(headers.mkString)
+      //object TextCallHeaders extends TextMessage(headers.mkString)
       //object JsonCallHeaders extends JsonMessage(Json(headers))
 
-      AtmosphereClient.broadcast("/live/events", TextCallHeaders)
+      //AtmosphereClient.broadcast("/live/events", TextCallHeaders)
 
       getCallEventType(headers) match {
-        case x @ CallNew(uuid) if uuid != "_UNKNOWN" =>
+        case x @ CallNew(uuid,fromUser,toUser) if uuid != "_UNKNOWN" =>
           log info x.toString
+
           (activeCalls get uuid) match {
             case None =>
+              object TextCallInfo extends TextMessage(x.toString)
+              AtmosphereClient.broadcast("/live/events", TextCallInfo)
+
               val actor = context actorOf CallActor.props(uuid)
               val newMap = activeCalls updated (uuid, actor)
               context become idle(newMap)
             case Some(actor) =>
               log warning s"Call $uuid already active"
           }
-        case x @ CallNew(uuid) =>
-          log warning x.toString
-        case x @ CallEnd(uuid) if uuid != "_UNKNOWN" =>
+        case x @ CallNew(uuid,fromUser,toUser) =>
           log info x.toString
+        case x @ CallEnd(uuid,fromUser,toUser) if uuid != "_UNKNOWN" =>
+          log info "-----> " + x.toString
+
           (activeCalls get uuid) match {
             case None =>
               log warning s"Call $uuid not found"
             case Some(actor) =>
+              log info "call removed from activeCalls"
+              object TextCallInfo extends TextMessage(x.toString)
+              AtmosphereClient.broadcast("/live/events", TextCallInfo)
+
               context stop actor
               val newMap = activeCalls - uuid
               context become idle(newMap)
           }
-        case x @ CallEnd(uuid) =>
-          log warning x.toString
+        case x @ CallEnd(uuid,fromUser,toUser) =>
+          log info s"no uuid $uuid" + x.toString
         case x @ CallOther(name, uuid) =>
-          log info x.toString
+          //log info x.toString
       }
     case GetCalls =>
       val calls = activeCalls.keys.toList

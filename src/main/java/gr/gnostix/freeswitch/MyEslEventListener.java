@@ -28,7 +28,7 @@ public class MyEslEventListener implements IEslEventListener {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     public void eventReceived(EslEvent event) {
-        System.out.println(" --- event received ---" + event.getEventName());
+ //       System.out.println(" --- event received ---" + event.getEventName());
 //        System.out.println(getEventToLog(event));
 //        System.out.println(" ---------------------------- event received END ------------------------------");
 
