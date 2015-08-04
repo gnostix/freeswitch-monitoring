@@ -1,5 +1,5 @@
     <div class="row">
-        <h1>Atmosphere Chat</h1>
+        <h1>Freeswitch monitoring</h1>
         <p class="lead">Default transport is WebSocket, fallback is long-polling.</p>
         <div id="detect" class="alert alert-warning">
             <p><span class="label label-info">Info</span> Detecting what the browser and server are supported...</p>

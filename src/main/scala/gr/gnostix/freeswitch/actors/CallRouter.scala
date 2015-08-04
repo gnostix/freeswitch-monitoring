@@ -93,10 +93,11 @@ class CallRouter extends Actor with ActorLogging {
           (activeCalls get uuid) match {
             case None =>
               object TextCallInfo extends TextMessage(x.toString)
-              object JsonCallInfo extends JsonMessage( JObject(List(("author",JString(x.fromUser)), ("message",JString(x.toString)))))
+              object JsonCallInfo extends JsonMessage( JObject(List(("author",JString(x.fromUser)),
+                ("message",JString(x.toString)))))
 
               AtmosphereClient.broadcast("/live/events", TextCallInfo)
-              AtmosphereClient.broadcast("/the-chat", JsonCallInfo)
+              AtmosphereClient.broadcast("/the-chat", TextCallInfo)
 
               val actor = context actorOf CallActor.props(uuid)
               val newMap = activeCalls updated (uuid, actor)
@@ -118,7 +119,7 @@ class CallRouter extends Actor with ActorLogging {
               object JsonCallInfo extends JsonMessage( JObject(List(("author",JString(x.fromUser)), ("message",JString(x.toString)))))
 
               AtmosphereClient.broadcast("/live/events", TextCallInfo)
-              AtmosphereClient.broadcast("/the-chat", JsonCallInfo)
+              AtmosphereClient.broadcast("/the-chat", TextCallInfo)
 
               context stop actor
               val newMap = activeCalls - uuid

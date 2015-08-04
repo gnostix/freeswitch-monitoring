@@ -33,7 +33,7 @@ with AtmosphereSupport {
   }
 
   atmosphere("/live/events") {
-    log("---------------> atmosphere")
+    log("---------------> atmosphere /live/events")
     new AtmosphereClient {
       def receive: AtmoReceive = {
         case Connected =>
