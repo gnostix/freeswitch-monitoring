@@ -14,7 +14,7 @@ public class MyEslConnection {
     public MyEslConnection(ActorRef callRouter) {
         conn = new Client();
         try {
-            conn.connect("192.168.2.128", 8021, "ClueCon", 60);
+            conn.connect("192.168.1.128", 8021, "ClueCon", 60);
 
             if (conn.canSend() == true) System.out.println("connected");
             //conn.setEventSubscriptions( "plain", "CHANNEL_HANGUP_COMPLETE CHANNEL_CALLSTATE  CHANNEL_CREATE CHANNEL_EXECUTE CHANNEL_EXECUTE_COMPLETE CHANNEL_DESTROY" );
