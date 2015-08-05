@@ -43,6 +43,7 @@ case class CallEnd(uuid: String, name: String, fromUser: String, toUser: String,
                    callerChannelHangupTime: String, freeSWITCHHostname: String, freeSWITCHIPv4: String, hangupCause: String)
   extends CallEventType
 
+
 case class CallOther(name: String, uuid: String) extends EventType
 
 
@@ -59,7 +60,7 @@ object CallRouter {
 
   case object GetCalls extends RouterRequest
 
-  case class GetCallsResponse(activeCalls: List[String]) extends RouterResponse
+  case class GetCallsResponse(totalCalls: Int, activeCalls: List[String]) extends RouterResponse
 
   case class GetCallInfo(uuid: String) extends RouterRequest
 
@@ -175,9 +176,9 @@ class CallRouter extends Actor with ActorLogging {
                 ("message", JString(x.toString)))))
 
               AtmosphereClient.broadcast("/live/events", TextCallInfo)
-              AtmosphereClient.broadcast("/the-chat", TextCallInfo)
+              AtmosphereClient.broadcast("/the-chat", JsonCallInfo)
 
-              val actor = context actorOf CallActor.props(uuid)
+              val actor = context actorOf CallActor.props(x)
               val newMap = activeCalls updated(uuid, actor)
               context become idle(newMap)
             case Some(actor) =>
@@ -200,7 +201,7 @@ class CallRouter extends Actor with ActorLogging {
               object JsonCallInfo extends JsonMessage(JObject(List(("author", JString(x.fromUser)), ("message", JString(x.toString)))))
 
               AtmosphereClient.broadcast("/live/events", TextCallInfo)
-              AtmosphereClient.broadcast("/the-chat", TextCallInfo)
+              AtmosphereClient.broadcast("/the-chat", JsonCallInfo)
 
               context stop actor
               val newMap = activeCalls - uuid
@@ -210,16 +211,23 @@ class CallRouter extends Actor with ActorLogging {
         callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
         freeSWITCHIPv4, hangupCause) =>
           log info s"no uuid $uuid" + x.toString
+
         case x@HeartBeat(uuid, eventType, eventInfo, upTime, sessionCount, sessionPerSecond, eventDateTimestamp, idleCPU,
         sessionPeakMax, sessionPeakMaxFiveMin, freeSWITCHHostname, freeSWITCHIPv4, uptimeMsec) =>
+          object JsonCallInfo extends JsonMessage(JObject(List(("author", JString(x.name)), ("message", JString(x.toString)))))
+
+          AtmosphereClient.broadcast("/live/events", JsonCallInfo)
+          AtmosphereClient.broadcast("/the-chat", JsonCallInfo)
+
           log info x.toString()
         case x@CallOther(name, uuid) =>
-          log info x.toString
+          // log info x.toString
       }
     case GetCalls =>
       val calls = activeCalls.keys.toList
       log info s"======== $calls"
-      sender() ! GetCallsResponse(calls)
+      // channels / 2 (each call has two channels)
+      sender() ! GetCallsResponse(calls.size/2, calls)
     case x@GetCallInfo(uuid) =>
       (activeCalls get uuid) match {
         case None =>

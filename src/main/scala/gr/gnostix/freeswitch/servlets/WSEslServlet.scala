@@ -32,7 +32,7 @@ with AtmosphereSupport {
     ssp("/index")
   }
 
-  atmosphere("/live/events") {
+  atmosphere("/events") {
     log("---------------> atmosphere /live/events")
     new AtmosphereClient {
       def receive: AtmoReceive = {

@@ -7,18 +7,19 @@ import akka.actor.{Props, ActorLogging, Actor}
  */
 
 object CallActor {
-  def props(uuid: String): Props = Props(new CallActor(uuid))
+  def props(channelA: CallNew): Props = Props(new CallActor(channelA))
 }
 
-class CallActor(uuid: String) extends Actor with ActorLogging {
-  val start = System.currentTimeMillis()
+class CallActor(channelA: CallNew) extends Actor with ActorLogging {
+  val chA = channelA
+  var chB: Map[String,AnyRef] = Map()
 
   def receive: Receive = {
     case CallRouter.GetCallInfo(_) =>
-      val now = System.currentTimeMillis()
-      val delta = (now - start) / 1000.0
-      val response = s"$uuid is up for $delta secs"
+      val response = s"${channelA.callUUID} details ${channelA.toString} "
       log info response
       sender() ! response
+    case x @ CallEnd => chB += "uuid_alx" -> x
   }
+
 }
