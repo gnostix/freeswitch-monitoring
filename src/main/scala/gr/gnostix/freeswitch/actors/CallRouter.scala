@@ -60,9 +60,12 @@ object CallRouter {
 
   case object GetCalls extends RouterRequest
 
-  case class GetCallsResponse(totalCalls: Int, activeCalls: List[String]) extends RouterResponse
+  case class GetCallsResponse(totalCalls: Int, activeCallsUUID: List[String]) extends RouterResponse
 
   case class GetCallInfo(uuid: String) extends RouterRequest
+
+  case class GetChannelInfo(uuid: String) extends RouterRequest
+
 
   object Event {
     def apply(event: EslEvent): Event = Event(event.getEventHeaders.asScala)
@@ -165,11 +168,12 @@ class CallRouter extends Actor with ActorLogging {
       //AtmosphereClient.broadcast("/live/events", TextCallHeaders)
 
       getCallEventType(headers) match {
-        case x@CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
-        callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4) if uuid != "_UNKNOWN" =>
+        case x @ CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
+        callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4)
+          if callUUID != "_UNKNOWN" =>
           log info x.toString
 
-          (activeCalls get uuid) match {
+          (activeCalls get callUUID) match {
             case None =>
               object TextCallInfo extends TextMessage(x.toString)
               object JsonCallInfo extends JsonMessage(JObject(List(("author", JString(x.fromUser)),
@@ -179,40 +183,35 @@ class CallRouter extends Actor with ActorLogging {
               AtmosphereClient.broadcast("/the-chat", JsonCallInfo)
 
               val actor = context actorOf CallActor.props(x)
-              val newMap = activeCalls updated(uuid, actor)
+              val newMap = activeCalls updated(callUUID, actor)
               context become idle(newMap)
             case Some(actor) =>
-              log warning s"Call $uuid already active"
+              actor ! x
+              log info s"Call $uuid already active"
           }
-        case x@CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
+/*        case x@CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
         callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4) =>
-          log info x.toString
-        case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
+          log info x.toString*/
+
+        case x @ CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
         callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
-        freeSWITCHIPv4, hangupCause) if uuid != "_UNKNOWN" =>
+        freeSWITCHIPv4, hangupCause) if callUUID != "_UNKNOWN" =>
           log info "-----> " + x.toString
 
-          (activeCalls get uuid) match {
+          (activeCalls get callUUID) match {
             case None =>
-              log warning s"Call $uuid not found"
+              log info s"Call $uuid doesn't exist!"
+
             case Some(actor) =>
-              log info "channel removed from activeCalls"
-              object TextCallInfo extends TextMessage(x.toString)
-              object JsonCallInfo extends JsonMessage(JObject(List(("author", JString(x.fromUser)), ("message", JString(x.toString)))))
-
-              AtmosphereClient.broadcast("/live/events", TextCallInfo)
-              AtmosphereClient.broadcast("/the-chat", JsonCallInfo)
-
-              context stop actor
-              val newMap = activeCalls - uuid
-              context become idle(newMap)
+              actor ! x
+              log info s"Call $uuid already active"
           }
-        case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
+/*        case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
         callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
         freeSWITCHIPv4, hangupCause) =>
-          log info s"no uuid $uuid" + x.toString
+          log info s"no uuid $uuid" + x.toString*/
 
-        case x@HeartBeat(uuid, eventType, eventInfo, upTime, sessionCount, sessionPerSecond, eventDateTimestamp, idleCPU,
+        case x @ HeartBeat(uuid, eventType, eventInfo, upTime, sessionCount, sessionPerSecond, eventDateTimestamp, idleCPU,
         sessionPeakMax, sessionPeakMaxFiveMin, freeSWITCHHostname, freeSWITCHIPv4, uptimeMsec) =>
           object JsonCallInfo extends JsonMessage(JObject(List(("author", JString(x.name)), ("message", JString(x.toString)))))
 
@@ -227,16 +226,27 @@ class CallRouter extends Actor with ActorLogging {
       val calls = activeCalls.keys.toList
       log info s"======== $calls"
       // channels / 2 (each call has two channels)
-      sender() ! GetCallsResponse(calls.size/2, calls)
-    case x@GetCallInfo(uuid) =>
+      sender() ! GetCallsResponse(calls.size, calls)
+
+    case x @ GetCallInfo(uuid) =>
       (activeCalls get uuid) match {
         case None =>
           val response = s"Invalid call $uuid"
           log warning response
           sender() ! response
         case Some(actor) =>
+          // get both channels from the next call actor
+          sender ! uuid
+      }
+
+    case x @ CallRouter.GetChannelInfo(uuid) =>
+      (activeCalls get uuid) match {
+        case None =>
+          log warning s"Call $uuid not found"
+        case Some(actor) =>
           actor forward x
       }
+
     case _ =>
       log.info("---- I don't know this event")
   }
