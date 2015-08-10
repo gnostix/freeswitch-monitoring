@@ -34,12 +34,12 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
     myActor ? GetCalls
   }
 
-  get("/channel/:callid"){
-    myActor ? GetCallInfo(params("callid"))
+  get("/call/:callUuid/channel/:channelUuid"){
+    myActor ? GetChannelInfo(params("callUuid"), params("channelUuid"))
   }
 
   get("/call/:callid"){
-    myActor ? GetChannelInfo(params("callid"))
+    myActor ? GetCallInfo(params("callid"))
   }
 
   // You'll see the output from this in your terminal.
