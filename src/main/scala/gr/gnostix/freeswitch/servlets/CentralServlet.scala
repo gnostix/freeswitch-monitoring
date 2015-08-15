@@ -15,10 +15,10 @@ class CentralServlet extends FreeswitchopStack {
     </html>
   }
 
-  get("/brd"){
+ /* get("/brd"){
     object Koko extends TextMessage("koko--------------->")
 
     AtmosphereClient.broadcast("/live/events", Koko)
-}
+}*/
 
 }

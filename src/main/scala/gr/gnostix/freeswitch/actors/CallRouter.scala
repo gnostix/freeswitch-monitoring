@@ -9,11 +9,7 @@ import org.scalatra.atmosphere.{AtmosphereClient, JsonMessage, TextMessage}
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-// JSON-related libraries
-
-import org.json4s.{DefaultFormats, Formats}
-
-// JSON handling support from Scalatra
+import ActorsJsonProtocol._
 
 sealed trait EventType {
   def eventName: String
@@ -21,10 +17,12 @@ sealed trait EventType {
   def uuid: String
 }
 
-case class HeartBeat(uuid: String, eventName: String, eventInfo: String, upTime: String, uptimeMsec: String, sessionCount: String,
-                     sessionPerSecond: String, eventDateTimestamp: String, idleCPU: String, sessionPeakMax: String,
-                     sessionPeakMaxFiveMin: String, freeSWITCHHostname: String, freeSWITCHIPv4: String)
-  extends EventType
+case class HeartBeat(uuid: String, eventName: String, eventInfo: String, upTime: String, uptimeMsec: Long, sessionCount: Int,
+                     sessionPerSecond: Int, eventDateTimestamp: Long, idleCPU: String, sessionPeakMax: Int,
+                     sessionPeakMaxFiveMin: Int, freeSWITCHHostname: String, freeSWITCHIPv4: String)
+ extends EventType
+
+case class ChatHeartBeat(author: String, message: String)
 
 sealed trait CallEventType extends EventType {
   def fromUser: String
@@ -33,18 +31,19 @@ sealed trait CallEventType extends EventType {
 }
 
 case class CallNew(uuid: String, eventName: String, fromUser: String, toUser: String, readCodec: String, writeCodec: String,
-                   fromUserIP: String, callUUID: String, callerChannelCreatedTime: String,
-                   callerChannelAnsweredTime: String, freeSWITCHHostname: String, freeSWITCHIPv4: String)
+                   fromUserIP: String, callUUID: String, callerChannelCreatedTime: Long,
+                   callerChannelAnsweredTime: Long, freeSWITCHHostname: String, freeSWITCHIPv4: String)
   extends CallEventType
 
 
 case class CallEnd(uuid: String, eventName: String, fromUser: String, toUser: String, readCodec: String, writeCodec: String,
-                   fromUserIP: String, callUUID: String, callerChannelCreatedTime: String, callerChannelAnsweredTime: String,
-                   callerChannelHangupTime: String, freeSWITCHHostname: String, freeSWITCHIPv4: String, hangupCause: String)
+                   fromUserIP: String, callUUID: String, callerChannelCreatedTime: Long, callerChannelAnsweredTime: Long,
+                   callerChannelHangupTime: Long, freeSWITCHHostname: String, freeSWITCHIPv4: String, hangupCause: String)
   extends CallEventType
 
 
 case class CallOther(eventName: String, uuid: String) extends EventType
+
 
 
 object CallRouter {
@@ -85,6 +84,8 @@ class CallRouter extends Actor with ActorLogging {
       case _ => Restart
     }
 
+
+
   def getCallEventTypeChannelCall(headers: scala.collection.Map[String, String]): EventType = {
     // Channel-Call-UUID is unique for call but since we have one event for every channel it comes twice
     // Unique-ID is unique per channel. In every call we have two channels
@@ -96,20 +97,20 @@ class CallRouter extends Actor with ActorLogging {
     val writeCodec = headers get "Channel-Write-Codec-Name" getOrElse "_UNKNOWN"
     val fromUserIP = headers get "Caller-Network-Addr" getOrElse "_UNKNOWN"
     val callUUID = headers get "Channel-Call-UUID" getOrElse "_UNKNOWN"
-    val callerChannelCreatedTime = headers get "Caller-Channel-Created-Time" getOrElse "_UNKNOWN"
-    val callerChannelAnsweredTime = headers get "Caller-Channel-Answered-Time" getOrElse "_UNKNOWN"
+    val callerChannelCreatedTime = headers get "Caller-Channel-Created-Time" getOrElse "0"
+    val callerChannelAnsweredTime = headers get "Caller-Channel-Answered-Time" getOrElse "0"
     val freeSWITCHHostname = headers get "FreeSWITCH-Hostname" getOrElse "0"
     val freeSWITCHIPv4 = headers get "FreeSWITCH-IPv4" getOrElse "0"
 
     eventName match {
       case "CHANNEL_ANSWER" => CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
-        callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4)
+        callerChannelCreatedTime.toLong, callerChannelAnsweredTime.toLong, freeSWITCHHostname, freeSWITCHIPv4)
       case "CHANNEL_HANGUP_COMPLETE" =>
         val hangupCause = headers get "Hangup-Cause" getOrElse "_UNKNOWN"
-        val callerChannelHangupTime = headers get "Caller-Channel-Hangup-Time" getOrElse "_UNKNOWN"
+        val callerChannelHangupTime = headers get "Caller-Channel-Hangup-Time" getOrElse "0"
 
-        CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID, callerChannelCreatedTime,
-          callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname, freeSWITCHIPv4, hangupCause)
+        CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID, callerChannelCreatedTime.toLong,
+          callerChannelAnsweredTime.toLong, callerChannelHangupTime.toLong, freeSWITCHHostname, freeSWITCHIPv4, hangupCause)
 
     }
 
@@ -128,8 +129,9 @@ class CallRouter extends Actor with ActorLogging {
     val freeSWITCHHostname = headers get "FreeSWITCH-Hostname" getOrElse "0"
     val freeSWITCHIPv4 = headers get "FreeSWITCH-IPv4" getOrElse "0"
     val uptimeMsec = headers get "Uptime-msec" getOrElse "0"
-    HeartBeat(uuid, "HEARTBEAT", eventInfo, upTime, sessionCount, sessionPerSecond, eventDateTimestamp, idleCPU, sessionPeakMax,
-      sessionPeakMaxFiveMin, freeSWITCHHostname, freeSWITCHIPv4, uptimeMsec)
+    HeartBeat(uuid, "HEARTBEAT", eventInfo, upTime, uptimeMsec.toLong, sessionCount.toInt, sessionPerSecond.toInt,
+      eventDateTimestamp.toLong, idleCPU, sessionPeakMax.toInt,
+      sessionPeakMaxFiveMin.toInt, freeSWITCHHostname, freeSWITCHIPv4)
   }
 
   def getCallEventType(headers: scala.collection.Map[String, String]): EventType = {
@@ -167,14 +169,15 @@ class CallRouter extends Actor with ActorLogging {
           if callUUID != "_UNKNOWN" =>
           log info x.toString
 
-          (activeCalls get callUUID) match {
-            case None =>
-              object TextCallInfo extends TextMessage(x.toString)
-              object JsonCallInfo extends JsonMessage(JObject(List(("author", JString(x.fromUser)),
-                ("message", JString(x.toString)))))
+          object JsonCallInfo extends JsonMessage(JObject(List(("author", JString(x.fromUser)),
+            ("message", JString(x.toString)))))
 
-              AtmosphereClient.broadcast("/live/events", TextCallInfo)
-              AtmosphereClient.broadcast("/the-chat", JsonCallInfo)
+           (activeCalls get callUUID) match {
+            case None =>
+
+
+              AtmosphereClient.broadcast("/live/events", x)
+              AtmosphereClient.broadcast("/live/the-chat", JsonCallInfo)
 
               //val actor = context actorOf CallActor
               val actor = context.actorOf(Props[CallActor], callUUID)
@@ -184,6 +187,8 @@ class CallRouter extends Actor with ActorLogging {
               val newMap = activeCalls updated(callUUID, actor)
               context become idle(newMap)
             case Some(actor) =>
+              AtmosphereClient.broadcast("/live/events", x)
+              AtmosphereClient.broadcast("/live/the-chat", JsonCallInfo)
               actor ! x
               log info s"Call $uuid already active, sending the second channel .."
           }
@@ -196,12 +201,16 @@ class CallRouter extends Actor with ActorLogging {
         callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
         freeSWITCHIPv4, hangupCause) if callUUID != "_UNKNOWN" =>
           log info "-----> " + x.toString
+          object JsonCallInfo extends JsonMessage(JObject(List(("author", JString(x.fromUser)),
+            ("message", JString(x.toString)))))
 
           (activeCalls get callUUID) match {
             case None =>
               log info s"Call $uuid doesn't exist!"
 
             case Some(actor) =>
+              AtmosphereClient.broadcast("/live/events", x)
+              AtmosphereClient.broadcast("/live/the-chat", JsonCallInfo)
               actor ! x
               log info s"Call $uuid already active"
           }
@@ -213,12 +222,16 @@ class CallRouter extends Actor with ActorLogging {
 
         case x @ HeartBeat(uuid, eventType, eventInfo, upTime, sessionCount, sessionPerSecond, eventDateTimestamp, idleCPU,
         sessionPeakMax, sessionPeakMaxFiveMin, freeSWITCHHostname, freeSWITCHIPv4, uptimeMsec) =>
-          object JsonCallInfo extends JsonMessage(JObject(List(("author", JString(x.eventName)), ("message", JString(x.toString)))))
 
-          AtmosphereClient.broadcast("/live/events", JsonCallInfo)
-          AtmosphereClient.broadcast("/the-chat", JsonCallInfo)
+          AtmosphereClient.broadcast("/live/the-chat",
+            JsonMessage(JObject(List(("author", JString("roulis")),
+            ("message", JString("malakies")))))
+          )
 
-         // log info x.toString()
+          //AtmosphereClient.broadcast("/live/events", x)
+          AtmosphereClient.broadcast("/live/events", ActorsJsonProtocol.heartbeatToJson(x))
+
+         log info "BEAT " + x.toString()
         case x@CallOther(name, uuid) =>
           // log info x.toString
       }

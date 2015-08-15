@@ -41,6 +41,7 @@ $(function() {
     socket.info("Reconnecting")
   };
 
+
   request.onMessage = function(rs) {
 
     // We need to be logged first.

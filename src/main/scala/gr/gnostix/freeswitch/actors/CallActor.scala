@@ -1,5 +1,6 @@
 package gr.gnostix.freeswitch.actors
 
+import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
@@ -18,12 +19,12 @@ import scala.concurrent.Future
 
 class CallActor extends Actor with ActorLogging {
 
-/*
+
   override val supervisorStrategy =
     OneForOneStrategy() {
       case _ => Restart
     }
-*/
+
 implicit val timeout = Timeout(1 seconds) // needed for `?` below
 
   var terminatedChannels = 0

@@ -12,9 +12,9 @@ class ScalatraBootstrap extends LifeCycle {
   val myConn = new MyEslConnection(myRouter)
 
   override def init(context: ServletContext) {
-    context.mount(new ChatController, "/*")
+    context.mount(new ChatController, "/live/*")
     context.mount(new CentralServlet, "/ko/*")
-    context.mount(new WSEslServlet, "/live/*")
+    //context.mount(new WSEslServlet, "/live/*")
     context.mount(new EslActorApp(system, myRouter), "/actors/*")
   }
 

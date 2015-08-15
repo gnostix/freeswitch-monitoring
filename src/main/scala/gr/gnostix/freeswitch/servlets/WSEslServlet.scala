@@ -26,12 +26,6 @@ with AtmosphereSupport {
 
   protected implicit val jsonFormats: Formats = DefaultFormats
 
-
-  get("/") {
-    contentType = "text/html"
-    ssp("/index")
-  }
-
   atmosphere("/events") {
     log("---------------> atmosphere /live/events")
     new AtmosphereClient {
@@ -45,13 +39,14 @@ with AtmosphereSupport {
 
         case Disconnected(ServerDisconnected, _) =>
           println("Server disconnected the client %s" format uuid)
+
         case _: TextMessage =>
-          send(("author" -> "system") ~ ("message" -> "Only json is allowed") ~ ("time" -> (new Date().getTime.toString)))
+          broadcast(("author" -> "system") ~ ("message" -> "Only json is allowed") ~ ("time" -> (new Date().getTime.toString)))
 
         case JsonMessage(json) =>
-          println("Got message %s from %s".format((json \ "message").extract[String], (json \ "author").extract[String]))
-          val msg = json merge (("time" -> (new Date().getTime().toString)): JValue)
-          broadcast(msg) // by default a broadcast is to everyone but self
+          println("-----> message received on events " + json.toString)
+          //val msg = json merge (("time" -> (new Date().getTime().toString)): JValue)
+          broadcast(json) // by default a broadcast is to everyone but self
         //  send(msg) // also send to the sender
       }
     }
