@@ -48,8 +48,8 @@ class ChatController extends ScalatraServlet
         case JsonMessage(json) =>
           println("-----> message received on events " + json.toString)
           //val msg = json merge (("time" -> (new Date().getTime().toString)): JValue)
-          // broadcast(json) // by default a broadcast is to everyone but self
-          send(json) // also send to the sender
+          broadcast(json) // by default a broadcast is to everyone but self
+          //send(json) // also send to the sender
       }
     }
   }
@@ -78,8 +78,8 @@ class ChatController extends ScalatraServlet
           println("------ json " + json.toString)
           println("Got message %s from %s".format((json \ "message").extract[String], (json \ "author").extract[String]))
           val msg = json merge (("time" -> (new Date().getTime().toString)): JValue)
-          //broadcast(msg) // by default a broadcast is to everyone but self
-          send(msg) // also send to the sender
+          broadcast(msg) // by default a broadcast is to everyone but self
+          //send(msg) // also send to the sender
       }
     }
   }

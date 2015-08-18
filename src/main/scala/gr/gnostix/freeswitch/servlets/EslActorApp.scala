@@ -3,7 +3,7 @@ package gr.gnostix.freeswitch.servlets
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import akka.util.Timeout
-import gr.gnostix.freeswitch.actors.CallRouter.{GetChannelInfo, GetCallInfo, GetCalls}
+import gr.gnostix.freeswitch.actors.CallRouter._
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.{Accepted, FutureSupport, ScalatraServlet}
@@ -27,11 +27,19 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
 
   // You'll see the output from this in the browser.
   get("/ask") {
-    myActor ? "Do stuff and give me an answer"
+    "Do stuff and give me an answer"
   }
 
   get("/GetCalls"){
     myActor ? GetCalls
+  }
+
+  get("/GetFailedCalls"){
+    myActor ? GetFailedCalls
+  }
+
+  get("/GetTotalFailedCalls"){
+    myActor ? GetTotalFailedCalls
   }
 
   get("/call/:callUuid/channel/:channelUuid"){
@@ -42,11 +50,7 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
     myActor ? GetCallInfo(params("callid"))
   }
 
-  // You'll see the output from this in your terminal.
-  get("/tell") {
-    myActor ! "Hey, you know what?"
-    Accepted()
-  }
+
 
 }
 

@@ -4,6 +4,7 @@ import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
+import org.scalatra.atmosphere.AtmosphereClient
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -28,7 +29,8 @@ class CallActor extends Actor with ActorLogging {
 implicit val timeout = Timeout(1 seconds) // needed for `?` below
 
   var terminatedChannels = 0
-  var callUuid = ""
+  var callUuid: Option[String] = None
+  var endCallChannel: Option[CallEnd] = None
 
   def idle(activeChannels: scala.collection.Map[String, ActorRef]): Receive = {
 
@@ -37,7 +39,14 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
       log info s"======== in call actor $x"
       (activeChannels get uuid) match {
         case None =>
-          callUuid = callUUID
+
+          callUuid match {
+            case Some(a) =>
+              AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.newCallToJson(x))
+
+            case None =>
+              callUuid = Some(callUUID)
+          }
           //val actor = context actorOf ChannelActor.props(x)
           val actor = context.actorOf(Props[ChannelActor], uuid)
           actor ! x
@@ -57,6 +66,13 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
         case None =>
           log warning s"Channel $uuid not found"
         case Some(actor) =>
+
+          endCallChannel match {
+            case Some(x) => AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.endCallToJson(x))
+
+            case None => endCallChannel = Some(x)
+          }
+
           actor ! x
       }
 
@@ -73,7 +89,7 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
       }
 
     case x @ CallRouter.GetCallInfo(callUUID) =>
-      (callUuid == callUUID) match {
+      (callUuid.getOrElse("") == callUUID) match {
         case false => sender ! "Unknown call uuid"
         case true =>
 
@@ -91,6 +107,8 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
 
       if (terminatedChannels >= 2) {
         log info s"this call is terminated "
+        AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.endCallToJson(endCallChannel.get))
+
         context stop self
       }
 

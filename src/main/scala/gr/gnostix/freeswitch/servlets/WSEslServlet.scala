@@ -1,6 +1,7 @@
 package gr.gnostix.freeswitch.servlets
 
 import org.scalatra._
+import org.json4s.{DefaultFormats, Formats}
 import scalate.ScalateSupport
 import org.scalatra.atmosphere._
 import org.scalatra.servlet.AsyncSupport
