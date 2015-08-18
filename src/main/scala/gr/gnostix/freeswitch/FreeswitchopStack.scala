@@ -1,6 +1,7 @@
 package gr.gnostix.freeswitch
 
 import org.scalatra._
+import org.slf4j.LoggerFactory
 import scalate.ScalateSupport
 import org.fusesource.scalate.{ TemplateEngine, Binding }
 import org.fusesource.scalate.layout.DefaultLayoutStrategy
@@ -8,6 +9,8 @@ import javax.servlet.http.HttpServletRequest
 import collection.mutable
 
 trait FreeswitchopStack extends ScalatraServlet with ScalateSupport {
+
+ implicit val logger =  LoggerFactory.getLogger(getClass)
 
   notFound {
     // remove content type in case it was set through an action

@@ -5,11 +5,14 @@ import org.scalatra._
 import javax.servlet.ServletContext
 import _root_.akka.actor.{Props, ActorSystem}
 import org.scalatra.example.atmosphere.ChatController
+import org.slf4j.LoggerFactory
 
 class ScalatraBootstrap extends LifeCycle {
   val system = ActorSystem()
   val myRouter = system.actorOf(Props[CallRouter])
   val myConn = new MyEslConnection(myRouter)
+  val logger =  LoggerFactory.getLogger(getClass)
+
 
   override def init(context: ServletContext) {
     context.mount(new ChatController, "/fs-moni/live/*")

@@ -1,7 +1,7 @@
 package gr.gnostix.freeswitch.actors
 
 import akka.actor.{Actor, ActorLogging}
-import gr.gnostix.freeswitch.actors.CallRouter.{GetTotalFailedCalls, GetFailedCalls}
+import gr.gnostix.freeswitch.actors.CallRouter.{GetFailedCallsByDate, GetTotalFailedCalls, GetFailedCalls}
 import org.scalatra.atmosphere.AtmosphereClient
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -17,7 +17,7 @@ class FailedCallsActor extends Actor with ActorLogging {
   def receive: Receive = {
     case x @ CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
     callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
-    freeSWITCHIPv4, hangupCause) =>
+    freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc) =>
       log info "-------> add an extra failed call"
       failedCalls ::= x
       val fCall = FailedCall("FAILED_CALL", x.fromUser, x.toUser, x.callUUID, x.freeSWITCHIPv4)
@@ -30,6 +30,9 @@ class FailedCallsActor extends Actor with ActorLogging {
     case x @ GetTotalFailedCalls =>
       sender ! failedCalls.size
 
+    case x @ GetFailedCallsByDate(fromDate, toDate) =>
+      sender ! failedCalls.filter(a => a.callerChannelHangupTime.after(fromDate)
+                                                && a.callerChannelHangupTime.before(toDate))
 
       // send a ping message to check the time in the failedCalls Map!!
   }

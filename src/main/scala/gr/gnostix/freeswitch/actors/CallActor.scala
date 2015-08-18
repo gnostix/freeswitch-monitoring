@@ -61,7 +61,7 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
 
     case x @ CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
     callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
-    freeSWITCHIPv4, hangupCause) =>
+    freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc) =>
       (activeChannels get uuid) match {
         case None =>
           log warning s"Channel $uuid not found"

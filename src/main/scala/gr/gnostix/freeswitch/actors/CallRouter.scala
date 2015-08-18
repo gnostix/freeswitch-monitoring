@@ -1,8 +1,12 @@
 package gr.gnostix.freeswitch.actors
 
+import java.sql.Timestamp
+
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
 import org.freeswitch.esl.client.transport.event.EslEvent
+import org.joda.time.{LocalDateTime, DateTime}
+import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import org.json4s.JsonAST.{JObject, JString}
 import org.scalatra.atmosphere.{AtmosphereClient, JsonMessage, TextMessage}
 
@@ -16,7 +20,7 @@ sealed trait EventType {
 }
 
 case class HeartBeat(eventName: String, eventInfo: String, upTime: String, uptimeMsec: Long, sessionCount: Int,
-                     sessionPerSecond: Int, eventDateTimestamp: Long, idleCPU: String, sessionPeakMax: Int,
+                     sessionPerSecond: Int, eventDateTimestamp: Timestamp, idleCPU: String, sessionPeakMax: Int,
                      sessionPeakMaxFiveMin: Int, freeSWITCHHostname: String, freeSWITCHIPv4: String)
  extends EventType
 
@@ -29,14 +33,15 @@ sealed trait CallEventType extends EventType {
 }
 
 case class CallNew(uuid: String, eventName: String, fromUser: String, toUser: String, readCodec: String, writeCodec: String,
-                   fromUserIP: String, callUUID: String, callerChannelCreatedTime: Long,
-                   callerChannelAnsweredTime: Long, freeSWITCHHostname: String, freeSWITCHIPv4: String)
+                   fromUserIP: String, callUUID: String, callerChannelCreatedTime: Option[Timestamp],
+                   callerChannelAnsweredTime: Option[Timestamp], freeSWITCHHostname: String, freeSWITCHIPv4: String)
   extends CallEventType
 
 
 case class CallEnd(uuid: String, eventName: String, fromUser: String, toUser: String, readCodec: String, writeCodec: String,
-                   fromUserIP: String, callUUID: String, callerChannelCreatedTime: Long, callerChannelAnsweredTime: Long,
-                   callerChannelHangupTime: Long, freeSWITCHHostname: String, freeSWITCHIPv4: String, hangupCause: String)
+                   fromUserIP: String, callUUID: String, callerChannelCreatedTime: Option[Timestamp],
+                   callerChannelAnsweredTime: Option[Timestamp], callerChannelHangupTime: Timestamp,
+                   freeSWITCHHostname: String, freeSWITCHIPv4: String, hangupCause: String,  billSec: Int, rtpQualityPerc: Double)
   extends CallEventType
 
 case class FailedCall(eventName: String, fromUser: String, toUser: String, callUUID: String, freeSWITCHIPv4: String)
@@ -61,6 +66,8 @@ object CallRouter {
   case object GetTotalFailedCalls extends RouterRequest
 
   case object GetFailedCalls extends RouterRequest
+
+  case class GetFailedCallsByDate(from: Timestamp, to: Timestamp) extends RouterRequest
 
   case class GetCallsResponse(totalCalls: Int, activeCallsUUID: List[String]) extends RouterResponse
 
@@ -94,6 +101,8 @@ class CallRouter extends Actor with ActorLogging {
 
 
   def getCallEventTypeChannelCall(headers: scala.collection.Map[String, String]): EventType = {
+    //val formatter: DateTimeFormatter = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
+    val formatter = "dd/MM/yyyy HH:mm:ss"
     // Channel-Call-UUID is unique for call but since we have one event for every channel it comes twice
     // Unique-ID is unique per channel. In every call we have two channels
     val uuid = headers get "Unique-ID" getOrElse "_UNKNOWN"
@@ -104,20 +113,35 @@ class CallRouter extends Actor with ActorLogging {
     val writeCodec = headers get "Channel-Write-Codec-Name" getOrElse "_UNKNOWN"
     val fromUserIP = headers get "Caller-Network-Addr" getOrElse "_UNKNOWN"
     val callUUID = headers get "Channel-Call-UUID" getOrElse "_UNKNOWN"
-    val callerChannelCreatedTime = headers get "Caller-Channel-Created-Time" getOrElse "0"
-    val callerChannelAnsweredTime = headers get "Caller-Channel-Answered-Time" getOrElse "0"
     val freeSWITCHHostname = headers get "FreeSWITCH-Hostname" getOrElse "0"
     val freeSWITCHIPv4 = headers get "FreeSWITCH-IPv4" getOrElse "0"
 
+    val callerChannelCreatedTime = headers get "Caller-Channel-Created-Time" getOrElse "0" match {
+      case "0" => None
+      case x => Some(new Timestamp(x.toLong / 1000))
+    }
+
+    val callerChannelAnsweredTime = headers get "Caller-Channel-Answered-Time" getOrElse "0" match {
+      case "0" => None
+      case x => Some(new Timestamp(x.toLong / 1000))
+    }
+
     eventName match {
       case "CHANNEL_ANSWER" => CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
-        callerChannelCreatedTime.toLong, callerChannelAnsweredTime.toLong, freeSWITCHHostname, freeSWITCHIPv4)
+        callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4)
       case "CHANNEL_HANGUP_COMPLETE" =>
         val hangupCause = headers get "Hangup-Cause" getOrElse "_UNKNOWN"
-        val callerChannelHangupTime = headers get "Caller-Channel-Hangup-Time" getOrElse "0"
+        val billSec = headers get "variable_billsec" getOrElse "0"
+        val rtpQualityPerc = headers get "variable_rtp_audio_in_quality_percentage" getOrElse "0"
 
-        CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID, callerChannelCreatedTime.toLong,
-          callerChannelAnsweredTime.toLong, callerChannelHangupTime.toLong, freeSWITCHHostname, freeSWITCHIPv4, hangupCause)
+        val callerChannelHangupTime =  headers get "Caller-Channel-Hangup-Time" getOrElse "0" match {
+          case "0" => new Timestamp(System.currentTimeMillis) // if the call failed this value would be 0 but we need the time that the call failed
+          case x => new Timestamp(x.toLong / 1000)
+        }
+
+        CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID, callerChannelCreatedTime,
+          callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname, freeSWITCHIPv4, hangupCause,
+        billSec.toInt, rtpQualityPerc.toDouble)
 
     }
 
@@ -129,15 +153,20 @@ class CallRouter extends Actor with ActorLogging {
     val upTime = headers get "Up-Time" getOrElse "_UNKNOWN"
     val sessionCount = headers get "Session-Count" getOrElse "0"
     val sessionPerSecond = headers get "Session-Per-Sec" getOrElse "0"
-    val eventDateTimestamp = headers get "Event-Date-timestamp" getOrElse "0"
     val idleCPU = headers get "Idle-CPU" getOrElse "0"
     val sessionPeakMax = headers get "Session-Peak-Max" getOrElse "0"
     val sessionPeakMaxFiveMin = headers get "Session-Peak-FiveMin" getOrElse "0"
     val freeSWITCHHostname = headers get "FreeSWITCH-Hostname" getOrElse "0"
     val freeSWITCHIPv4 = headers get "FreeSWITCH-IPv4" getOrElse "0"
     val uptimeMsec = headers get "Uptime-msec" getOrElse "0"
+
+    val eventDateTimestamp =  headers get "Event-Date-timestamp" getOrElse "0" match {
+      case "0" => new Timestamp(System.currentTimeMillis) // if the call failed this value would be 0 but we need the time that the call failed
+      case x => new Timestamp(x.toLong / 1000)
+    }
+
     HeartBeat("HEARTBEAT", eventInfo, upTime, uptimeMsec.toLong, sessionCount.toInt, sessionPerSecond.toInt,
-      eventDateTimestamp.toLong, idleCPU, sessionPeakMax.toInt,
+      eventDateTimestamp, idleCPU, sessionPeakMax.toInt,
       sessionPeakMaxFiveMin.toInt, freeSWITCHHostname, freeSWITCHIPv4)
   }
 
@@ -200,15 +229,15 @@ class CallRouter extends Actor with ActorLogging {
 
         case x @ CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
         callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
-        freeSWITCHIPv4, hangupCause) if callUUID != "_UNKNOWN" =>
+        freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc) if callUUID != "_UNKNOWN" =>
           log info "-----> " + x.toString
 
           (activeCalls get callUUID) match {
             case None =>
 
               x.callerChannelAnsweredTime match {
-                case 0 => failedCallsActor ! x
-                case _ => log info s"Call $uuid doesn't exist! with answered time " + x.callerChannelAnsweredTime
+                case None => failedCallsActor ! x
+                case Some(a) => log info s"Call $uuid doesn't exist! with answered time " + x.callerChannelAnsweredTime
               }
               log info s"Call $uuid doesn't exist!"
 
@@ -220,7 +249,7 @@ class CallRouter extends Actor with ActorLogging {
 
         case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
         callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
-        freeSWITCHIPv4, hangupCause) =>
+        freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc) =>
           log info s"no uuid $uuid" + x.toString
 
         case x @ HeartBeat(eventType, eventInfo, upTime, sessionCount, sessionPerSecond, eventDateTimestamp, idleCPU,
@@ -246,6 +275,9 @@ class CallRouter extends Actor with ActorLogging {
 
     case x @ GetFailedCalls =>
       log info "--------> ask for failed calls"
+      failedCallsActor forward x
+
+    case x @ GetFailedCallsByDate =>
       failedCallsActor forward x
 
     case x @ GetTotalFailedCalls =>
