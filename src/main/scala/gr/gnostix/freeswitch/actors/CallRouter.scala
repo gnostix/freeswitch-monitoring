@@ -75,6 +75,8 @@ object CallRouter {
 
   case class GetChannelInfo(callUuid: String, channelUuid: String) extends RouterRequest
 
+  case object GetLastHeartBeat extends RouterRequest
+
 
   object Event {
     def apply(event: EslEvent): Event = Event(event.getEventHeaders.asScala)
@@ -97,7 +99,8 @@ class CallRouter extends Actor with ActorLogging {
 
   // create the FailedCallsActor in advance
   val failedCallsActor = context.actorOf(Props[FailedCallsActor], "failedCallsActor")
-
+  // create the HeartBeatActor in advance so we can keep the FS state
+  val heartBeatActor = context.actorOf(Props[HeartBeatActor], "heartBeatActor")
 
 
   def getCallEventTypeChannelCall(headers: scala.collection.Map[String, String]): EventType = {
@@ -255,15 +258,9 @@ class CallRouter extends Actor with ActorLogging {
         case x @ HeartBeat(eventType, eventInfo, upTime, sessionCount, sessionPerSecond, eventDateTimestamp, idleCPU,
         sessionPeakMax, sessionPeakMaxFiveMin, freeSWITCHHostname, freeSWITCHIPv4, uptimeMsec) =>
 
-          AtmosphereClient.broadcast("/fs-moni/live/the-chat",
-            JsonMessage(JObject(List(("author", JString("roulis")),
-            ("message", JString("lalalalalal")))))
-          )
+          heartBeatActor ! x
 
-          //AtmosphereClient.broadcast("/live/events", x)
-          AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.heartbeatToJson(x))
-
-         log info "BEAT " + x.toString()
+          log info "BEAT " + x.toString()
         case x@CallOther(name, uuid) =>
           // log info x.toString
       }
@@ -302,6 +299,9 @@ class CallRouter extends Actor with ActorLogging {
         case Some(actor) =>
           actor forward  x
       }
+
+    case x @ GetLastHeartBeat =>
+      heartBeatActor forward x
 
     case Terminated(actor: ActorRef) =>
       val newMap = activeCalls.filter(_._2 != sender())
