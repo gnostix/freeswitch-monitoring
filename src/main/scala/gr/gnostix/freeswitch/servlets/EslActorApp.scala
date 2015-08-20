@@ -84,7 +84,13 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
     myActor ? GetCallInfo(params("callid"))
   }
 
+  get("/lastHeartbeat"){
+    myActor ? GetLastHeartBeat
+  }
 
+  get("/allHeartbeats"){
+    myActor ? GetAllHeartBeat
+  }
 
 }
 

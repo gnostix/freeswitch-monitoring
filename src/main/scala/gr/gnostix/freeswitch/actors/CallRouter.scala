@@ -63,6 +63,10 @@ object CallRouter {
 
   case object GetCalls extends RouterRequest
 
+  case object GetConcurrentCalls extends RouterRequest
+
+  case class ConcurrentCallsNum(calls: Int) extends RouterRequest
+
   case object GetTotalFailedCalls extends RouterRequest
 
   case object GetFailedCalls extends RouterRequest
@@ -76,6 +80,9 @@ object CallRouter {
   case class GetChannelInfo(callUuid: String, channelUuid: String) extends RouterRequest
 
   case object GetLastHeartBeat extends RouterRequest
+
+  case object GetAllHeartBeat extends RouterRequest
+
 
 
   object Event {
@@ -101,6 +108,9 @@ class CallRouter extends Actor with ActorLogging {
   val failedCallsActor = context.actorOf(Props[FailedCallsActor], "failedCallsActor")
   // create the HeartBeatActor in advance so we can keep the FS state
   val heartBeatActor = context.actorOf(Props[HeartBeatActor], "heartBeatActor")
+  // start the BasicStatsActor actor
+  val basicStatsActor = context.actorOf(Props[BasicStatsActor], "basicStatsActor")
+
 
 
   def getCallEventTypeChannelCall(headers: scala.collection.Map[String, String]): EventType = {
@@ -270,6 +280,10 @@ class CallRouter extends Actor with ActorLogging {
       // channels / 2 (each call has two channels)
       sender() ! GetCallsResponse(calls.size, calls)
 
+    case x @ GetConcurrentCalls =>
+      // log info "call router GetConcurrentCalls received .."
+      sender ! ConcurrentCallsNum(activeCalls.size)
+
     case x @ GetFailedCalls =>
       log info "--------> ask for failed calls"
       failedCallsActor forward x
@@ -301,6 +315,9 @@ class CallRouter extends Actor with ActorLogging {
       }
 
     case x @ GetLastHeartBeat =>
+      heartBeatActor forward x
+
+    case x @ GetAllHeartBeat =>
       heartBeatActor forward x
 
     case Terminated(actor: ActorRef) =>

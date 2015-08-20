@@ -38,17 +38,17 @@ class FailedCallsActor extends Actor with ActorLogging {
                                                 && a.callerChannelHangupTime.before(toDate))
 
     case Tick =>
-      failedCalls = getLastsHeartBeats
+      failedCalls = getLastsFailedCalls
 
   }
 
   context.system.scheduler.schedule(0 milliseconds,
-    1000 milliseconds,
+    120000 milliseconds,
     self,
     Tick)
 
-  def getLastsHeartBeats = {
-    failedCalls.take(100)
+  def getLastsFailedCalls = {
+    failedCalls.take(1000)
   }
 
 }

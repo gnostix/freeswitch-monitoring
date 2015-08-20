@@ -8,8 +8,8 @@ import org.scalatra.example.atmosphere.ChatController
 import org.slf4j.LoggerFactory
 
 class ScalatraBootstrap extends LifeCycle {
-  val system = ActorSystem()
-  val myRouter = system.actorOf(Props[CallRouter])
+  val system = ActorSystem("esl-sys")
+  val myRouter = system.actorOf(Props[CallRouter], "callRouter")
   val myConn = new MyEslConnection(myRouter)
   val logger =  LoggerFactory.getLogger(getClass)
 
