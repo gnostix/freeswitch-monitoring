@@ -92,5 +92,17 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
     myActor ? GetAllHeartBeat
   }
 
+
+  // get basic stats
+
+  get("/stats/GetFailedCallsTimeSeries"){
+    myActor ? GetFailedCallsTimeSeries
+  }
+
+  get("/stats/GetConcurrentCallsTimeSeries"){
+    myActor ? GetConcurrentCallsTimeSeries
+  }
+
+
 }
 

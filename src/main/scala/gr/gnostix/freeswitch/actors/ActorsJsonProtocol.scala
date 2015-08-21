@@ -14,6 +14,9 @@ import org.scalatra.atmosphere.JsonMessage
 object ActorsJsonProtocol {
   implicit val formats = Serialization.formats(NoTypeHints)
 
+  def callsTimeSeriesToJson(callsTimeSeries: BasicStatsCalls): JsonMessage =
+  JsonMessage(Extraction.decompose(callsTimeSeries))
+
   implicit def heartbeatToJson(heartBeat: HeartBeat): JsonMessage =
 //    JsonMessage(parse(write(heartBeat)))
   JsonMessage(Extraction.decompose(heartBeat))

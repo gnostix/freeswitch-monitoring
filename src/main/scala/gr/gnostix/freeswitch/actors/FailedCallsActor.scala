@@ -10,6 +10,7 @@ import scala.concurrent.duration._
  * Created by rebel on 17/8/15.
  */
 
+case class TotalFailedCalls(failedCalls: Int)
 
 class FailedCallsActor extends Actor with ActorLogging {
 
@@ -30,8 +31,8 @@ class FailedCallsActor extends Actor with ActorLogging {
       sender ! failedCalls
 
     case x @ GetTotalFailedCalls =>
-      log info "returning the failed calls size " + failedCalls.size
-      sender ! Map("failedCallsNum" -> failedCalls.size)
+      //log info "returning the failed calls size " + failedCalls.size
+      sender ! TotalFailedCalls(failedCalls.size)
 
     case x @ GetFailedCallsByDate(fromDate, toDate) =>
       sender ! failedCalls.filter(a => a.callerChannelHangupTime.after(fromDate)
@@ -42,13 +43,13 @@ class FailedCallsActor extends Actor with ActorLogging {
 
   }
 
-  context.system.scheduler.schedule(0 milliseconds,
-    120000 milliseconds,
+  context.system.scheduler.schedule(10000 milliseconds,
+    1200000 milliseconds,
     self,
     Tick)
 
   def getLastsFailedCalls = {
-    failedCalls.take(1000)
+    failedCalls.take(5000)
   }
 
 }

@@ -20,6 +20,7 @@ class HeartBeatActor extends Actor with ActorLogging {
     sessionPeakMax, sessionPeakMaxFiveMin, freeSWITCHHostname, freeSWITCHIPv4, uptimeMsec) =>
       heartBeats ::= x
       AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.heartbeatToJson(x))
+      log info "broadcasted HeartBeat to WS"
 
 
     case x @ GetLastHeartBeat =>
@@ -34,8 +35,8 @@ class HeartBeatActor extends Actor with ActorLogging {
 
   }
 
-  context.system.scheduler.schedule(0 milliseconds,
-    120000 milliseconds,
+  context.system.scheduler.schedule(60000 milliseconds,
+    1200000 milliseconds,
     self,
     Tick)
 

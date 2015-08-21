@@ -68,7 +68,7 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
         case Some(actor) =>
 
           endCallChannel match {
-            case Some(x) => AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.endCallToJson(x))
+            case Some(x) => //AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.endCallToJson(x))
 
             case None => endCallChannel = Some(x)
           }
@@ -105,12 +105,15 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
       terminatedChannels += 1
       log info s"call actor TERMINATED " + terminatedChannels
 
-      if (terminatedChannels >= 2) {
+      val updatedActiveChannels = activeChannels.filter(_._2 != sender())
+
+      if ((terminatedChannels >= 2) || (updatedActiveChannels.size == 0) ) {
         log info s"this call is terminated "
         AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.endCallToJson(endCallChannel.get))
 
         context stop self
       }
+      context become idle(updatedActiveChannels)
 
     case x @ _ =>
       log.info("---- call actor - I don't know this channel uuid " + x)

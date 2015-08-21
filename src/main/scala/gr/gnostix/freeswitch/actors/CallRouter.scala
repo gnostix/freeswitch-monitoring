@@ -83,6 +83,10 @@ object CallRouter {
 
   case object GetAllHeartBeat extends RouterRequest
 
+  case object GetFailedCallsTimeSeries extends RouterRequest
+
+  case object GetConcurrentCallsTimeSeries extends RouterRequest
+
 
 
   object Event {
@@ -233,7 +237,7 @@ class CallRouter extends Actor with ActorLogging {
               context become idle(newMap)
             case Some(actor) =>
               actor ! x
-              log info s"Call $uuid already active, sending the second channel .."
+              log info s"Call $callUUID already active, sending the second channel .."
           }
 
         case x@CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
@@ -250,14 +254,14 @@ class CallRouter extends Actor with ActorLogging {
 
               x.callerChannelAnsweredTime match {
                 case None => failedCallsActor ! x
-                case Some(a) => log info s"Call $uuid doesn't exist! with answered time " + x.callerChannelAnsweredTime
+                case Some(a) => log info s"Call $callUUID doesn't exist! with answered time " + x.callerChannelAnsweredTime
               }
-              log info s"Call $uuid doesn't exist!"
+              log info s"Call $callUUID doesn't exist!"
 
             case Some(actor) =>
             //AtmosphereClient.broadcast("/fs-moni/live/events", x)
               actor ! x
-              log info s"Call $uuid already active"
+              log info s"Call $callUUID already active"
           }
 
         case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
@@ -270,7 +274,7 @@ class CallRouter extends Actor with ActorLogging {
 
           heartBeatActor ! x
 
-          log info "BEAT " + x.toString()
+          //log info "BEAT " + x.toString()
         case x@CallOther(name, uuid) =>
           // log info x.toString
       }
@@ -319,6 +323,9 @@ class CallRouter extends Actor with ActorLogging {
 
     case x @ GetAllHeartBeat =>
       heartBeatActor forward x
+
+    case x @ (GetConcurrentCallsTimeSeries | GetFailedCallsTimeSeries) =>
+      basicStatsActor forward x
 
     case Terminated(actor: ActorRef) =>
       val newMap = activeCalls.filter(_._2 != sender())
