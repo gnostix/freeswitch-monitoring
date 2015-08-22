@@ -27,7 +27,7 @@ class BasicStatsActor extends Actor with ActorLogging {
 
   var concurrentCalls: List[ConcurrentCallsTimeSeries] = List()
   var failedCalls: List[FailedCallsTimeSeries] = List()
-
+  var totalOfLastValueFailedCalls = 0
 
   def receive: Receive = {
     case ConcCalls =>
@@ -46,9 +46,12 @@ class BasicStatsActor extends Actor with ActorLogging {
       failedCallsActor ! GetTotalFailedCalls
 
     case x @ TotalFailedCalls(a) =>
+
     // new failed calls = current failed calls minus the previous minute value of the failed calls
-    val y = failedCalls.headOption map (a - _.failedCallsNum) getOrElse a
-    val calls = FailedCallsTimeSeries(new Timestamp(System.currentTimeMillis), y)
+    //val y = failedCalls.headOption map (a - _.failedCallsNum) getOrElse 0
+    //  log info s"Basic stats actor failed calls a: $a and head: ${failedCalls.headOption map(_.failedCallsNum)} and y: $y"
+    val calls = FailedCallsTimeSeries(new Timestamp(System.currentTimeMillis), a - totalOfLastValueFailedCalls)
+    totalOfLastValueFailedCalls = a
     failedCalls ::= calls
     AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.callsTimeSeriesToJson(calls))
 
