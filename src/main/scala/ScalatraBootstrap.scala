@@ -1,5 +1,5 @@
 import gr.gnostix.freeswitch._
-import gr.gnostix.freeswitch.actors.{CallRouter}
+import gr.gnostix.freeswitch.actors.{CentralMessageRouter, EslEventRouter, CallRouter}
 import gr.gnostix.freeswitch.servlets.{WSEslServlet, EslActorApp, CentralServlet}
 import org.scalatra._
 import javax.servlet.ServletContext
@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 
 class ScalatraBootstrap extends LifeCycle {
   val system = ActorSystem("esl-sys")
-  val myRouter = system.actorOf(Props[CallRouter], "callRouter")
+  val myRouter = system.actorOf(Props[CentralMessageRouter], "centralMessageRouter")
   val myConn = new MyEslConnection(myRouter, system)
   val logger =  LoggerFactory.getLogger(getClass)
 

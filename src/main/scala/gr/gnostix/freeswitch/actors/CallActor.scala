@@ -76,7 +76,7 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
           actor ! x
       }
 
-    case x @ CallRouter.GetChannelInfo(callUuid, channeluuid) =>
+    case x @ ActorsProtocol.GetChannelInfo(callUuid, channeluuid) =>
       log info s"-----> Channel $channeluuid  in callActor sender " + sender.toString
       log info s"-----> Channels " + activeChannels.toString()
 
@@ -88,7 +88,7 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
           actor forward x
       }
 
-    case x @ CallRouter.GetCallInfo(callUUID) =>
+    case x @ ActorsProtocol.GetCallInfo(callUUID) =>
       (callUuid.getOrElse("") == callUUID) match {
         case false => sender ! "Unknown call uuid"
         case true =>

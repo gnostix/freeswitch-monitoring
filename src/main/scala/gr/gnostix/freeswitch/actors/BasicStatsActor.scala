@@ -3,7 +3,7 @@ package gr.gnostix.freeswitch.actors
 import java.sql.Timestamp
 
 import akka.actor.{Actor, ActorLogging}
-import gr.gnostix.freeswitch.actors.CallRouter._
+import gr.gnostix.freeswitch.actors.ActorsProtocol._
 import org.scalatra.atmosphere.AtmosphereClient
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -22,8 +22,8 @@ class BasicStatsActor extends Actor with ActorLogging {
   val ConcCalls = "ConcCalls"
   val CurFailedCalls = "CurFailedCalls"
   val Tick = "Tick"
-  val callRouterActor = context.actorSelection("/user/callRouter")
-  val failedCallsActor = context.actorSelection("/user/callRouter/failedCallsActor")
+  val callRouterActor = context.actorSelection("/user/centralMessageRouter/eslEventRouter/callRouter")
+  val failedCallsActor = context.actorSelection("/user/centralMessageRouter/eslEventRouter/callRouter/failedCallsActor")
 
   var concurrentCalls: List[ConcurrentCallsTimeSeries] = List()
   var failedCalls: List[FailedCallsTimeSeries] = List()

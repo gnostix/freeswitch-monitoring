@@ -1,6 +1,7 @@
 package gr.gnostix.freeswitch.actors
 
 import akka.actor._
+import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetChannelInfo, GetCallInfo}
 
 /**
  * Created by rebel on 7/8/15.
@@ -31,12 +32,12 @@ import akka.actor._
         //context.parent ! Terminated
         context stop self
 
-      case CallRouter.GetChannelInfo(callUuid, channeluuid) =>
+      case GetChannelInfo(callUuid, channeluuid) =>
         val response = channelState
         log info s"channel response $response"
         sender ! response
 
-      case x @ CallRouter.GetCallInfo(callUUID) =>
+      case x @ GetCallInfo(callUUID) =>
         log info "channel actor sending his state"
         sender ! channelState.head._2
 

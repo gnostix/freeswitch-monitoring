@@ -1,7 +1,7 @@
 package gr.gnostix.freeswitch.actors
 
 import akka.actor.{Actor, ActorLogging}
-import gr.gnostix.freeswitch.actors.CallRouter.{GetAllHeartBeat, GetLastHeartBeat}
+import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetAllHeartBeat, GetLastHeartBeat}
 import org.scalatra.atmosphere.AtmosphereClient
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -24,7 +24,8 @@ class HeartBeatActor extends Actor with ActorLogging {
 
 
     case x @ GetLastHeartBeat =>
-      sender ! heartBeats.head
+      log info "-----------> ask for last heartbeat"
+      sender ! heartBeats.headOption.getOrElse(None)
 
     case x @ GetAllHeartBeat =>
       sender ! heartBeats

@@ -1,7 +1,7 @@
 package gr.gnostix.freeswitch.actors
 
 import akka.actor.{Actor, ActorLogging}
-import gr.gnostix.freeswitch.actors.CallRouter.{GetFailedCallsByDate, GetTotalFailedCalls, GetFailedCalls}
+import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetFailedCallsByDate, GetTotalFailedCalls, GetFailedCalls}
 import org.scalatra.atmosphere.AtmosphereClient
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._

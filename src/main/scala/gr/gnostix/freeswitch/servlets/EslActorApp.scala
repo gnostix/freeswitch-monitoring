@@ -7,7 +7,7 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import akka.util.Timeout
 import gr.gnostix.freeswitch.FreeswitchopStack
-import gr.gnostix.freeswitch.actors.CallRouter._
+import gr.gnostix.freeswitch.actors.ActorsProtocol._
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.json4s.{DefaultFormats, Formats}
