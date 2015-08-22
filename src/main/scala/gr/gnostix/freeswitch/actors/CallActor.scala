@@ -61,7 +61,7 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
 
     case x @ CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
     callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
-    freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc) =>
+    freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) =>
       (activeChannels get uuid) match {
         case None =>
           log warning s"Channel $uuid not found"
@@ -93,10 +93,18 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
         case false => sender ! "Unknown call uuid"
         case true =>
 
-          val all: Future[List[Any]] = for {
-            chA <- (activeChannels.head._2 ask x)
-            chB <- (activeChannels.tail.head._2 ask x)
-          } yield (List(chA, chB))
+          val all: Future[List[Any]] = activeChannels.size match{
+            case 2 => for {
+              chA <- (activeChannels.head._2 ask x)
+              chB <- (activeChannels.tail.head._2 ask x)
+            } yield (List(chA, chB))
+
+            case 1 => for {
+              chA <- (activeChannels.head._2 ask x)
+            } yield (List(chA))
+
+          }
+
           sender ! all
       }
 

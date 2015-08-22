@@ -41,7 +41,8 @@ case class CallNew(uuid: String, eventName: String, fromUser: String, toUser: St
 case class CallEnd(uuid: String, eventName: String, fromUser: String, toUser: String, readCodec: String, writeCodec: String,
                    fromUserIP: String, callUUID: String, callerChannelCreatedTime: Option[Timestamp],
                    callerChannelAnsweredTime: Option[Timestamp], callerChannelHangupTime: Timestamp,
-                   freeSWITCHHostname: String, freeSWITCHIPv4: String, hangupCause: String,  billSec: Int, rtpQualityPerc: Double)
+                   freeSWITCHHostname: String, freeSWITCHIPv4: String, hangupCause: String,  billSec: Int,
+                   rtpQualityPerc: Double, otherLegUniqueId: String)
   extends CallEventType
 
 case class FailedCall(eventName: String, fromUser: String, toUser: String, callUUID: String, freeSWITCHIPv4: String)
@@ -129,7 +130,6 @@ class CallRouter extends Actor with ActorLogging {
     val readCodec = headers get "Channel-Read-Codec-Name" getOrElse "_UNKNOWN"
     val writeCodec = headers get "Channel-Write-Codec-Name" getOrElse "_UNKNOWN"
     val fromUserIP = headers get "Caller-Network-Addr" getOrElse "_UNKNOWN"
-    val callUUID = headers get "Channel-Call-UUID" getOrElse "_UNKNOWN"
     val freeSWITCHHostname = headers get "FreeSWITCH-Hostname" getOrElse "0"
     val freeSWITCHIPv4 = headers get "FreeSWITCH-IPv4" getOrElse "0"
 
@@ -144,9 +144,15 @@ class CallRouter extends Actor with ActorLogging {
     }
 
     eventName match {
-      case "CHANNEL_ANSWER" => CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
+      case "CHANNEL_ANSWER" =>
+        val callUUID = headers get "Channel-Call-UUID" getOrElse "_UNKNOWN"
+
+        CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
         callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4)
+
       case "CHANNEL_HANGUP_COMPLETE" =>
+        val callUUID = headers get "Channel-Call-UUID" getOrElse "_UNKNOWN"
+        val otherLegUniqueId = headers get "Other-Leg-Unique-ID" getOrElse "_UNKNOWN"
         val hangupCause = headers get "Hangup-Cause" getOrElse "_UNKNOWN"
         val billSec = headers get "variable_billsec" getOrElse "0"
         val rtpQualityPerc = headers get "variable_rtp_audio_in_quality_percentage" getOrElse "0"
@@ -158,7 +164,7 @@ class CallRouter extends Actor with ActorLogging {
 
         CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID, callerChannelCreatedTime,
           callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname, freeSWITCHIPv4, hangupCause,
-        billSec.toInt, rtpQualityPerc.toDouble)
+        billSec.toInt, rtpQualityPerc.toDouble, otherLegUniqueId)
 
     }
 
@@ -246,17 +252,25 @@ class CallRouter extends Actor with ActorLogging {
 
         case x @ CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
         callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
-        freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc) if callUUID != "_UNKNOWN" =>
+        freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) if callUUID != "_UNKNOWN" =>
           log info "-----> " + x.toString
 
           (activeCalls get callUUID) match {
             case None =>
 
-              x.callerChannelAnsweredTime match {
-                case None => failedCallsActor ! x
-                case Some(a) => log info s"Call $callUUID doesn't exist! with answered time " + x.callerChannelAnsweredTime
+              (activeCalls get otherLegUniqueId) match {
+                case None =>
+                  x.callerChannelAnsweredTime match {
+                    case None => failedCallsActor ! x
+                    case Some(a) => log info s"Call $callUUID doesn't exist! with answered time " + a
+                  }
+                  log info s"Call $callUUID doesn't exist!"
+
+                case Some(actor) =>
+                  actor ! x
+                  log info s"Call otherLegUniqueId $otherLegUniqueId already active"
+
               }
-              log info s"Call $callUUID doesn't exist!"
 
             case Some(actor) =>
             //AtmosphereClient.broadcast("/fs-moni/live/events", x)
@@ -266,7 +280,7 @@ class CallRouter extends Actor with ActorLogging {
 
         case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
         callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
-        freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc) =>
+        freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) =>
           log info s"no uuid $uuid" + x.toString
 
         case x @ HeartBeat(eventType, eventInfo, upTime, sessionCount, sessionPerSecond, eventDateTimestamp, idleCPU,

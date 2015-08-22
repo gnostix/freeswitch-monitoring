@@ -66,12 +66,12 @@ class BasicStatsActor extends Actor with ActorLogging {
     case x => log info "basic stats actor: I don't know this message "+ x.toString
   }
 
-  context.system.scheduler.schedule(60000 milliseconds,
+  context.system.scheduler.schedule(10000 milliseconds,
     60000 milliseconds,
     self,
     ConcCalls)
 
-  context.system.scheduler.schedule(60000 milliseconds,
+  context.system.scheduler.schedule(10000 milliseconds,
     60000 milliseconds,
     self,
     CurFailedCalls)

@@ -1,6 +1,7 @@
 package gr.gnostix.freeswitch;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
 import org.freeswitch.esl.client.inbound.Client;
 import org.freeswitch.esl.client.inbound.InboundConnectionFailure;
 
@@ -11,10 +12,10 @@ public class MyEslConnection {
 
     private Client conn = null;
 
-    public MyEslConnection(ActorRef callRouter) {
+    public MyEslConnection(ActorRef callRouter, ActorSystem system) {
         conn = new Client();
         try {
-            conn.connect("localhost", 18021, "ClueCon", 60);
+            conn.connect("localhost", 28021, "ClueCon", 60);
 //            conn.connect("192.168.10.128", 8021, "ClueCon", 60);
 //            conn.connect("fs-instance.com", 8021, "ClueCon", 60);
 
@@ -23,7 +24,10 @@ public class MyEslConnection {
             conn.setEventSubscriptions( "plain", "all" );
             conn.addEventListener(new MyEslEventListener(callRouter));
 
+            // on failure catch the exception and don't start the CallRouter!!!
         } catch (InboundConnectionFailure e) {
+            System.out.println("------- ESL connection failed. Actor System is shutting down !!");
+            system.shutdown();
             e.printStackTrace();
         }
     }

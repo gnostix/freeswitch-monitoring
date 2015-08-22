@@ -35,7 +35,7 @@ class HeartBeatActor extends Actor with ActorLogging {
 
   }
 
-  context.system.scheduler.schedule(60000 milliseconds,
+  context.system.scheduler.schedule(10000 milliseconds,
     1200000 milliseconds,
     self,
     Tick)

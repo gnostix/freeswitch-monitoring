@@ -26,7 +26,7 @@ import akka.actor._
 
       case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
       callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
-      freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc) =>
+      freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) =>
         //context.parent ! " tell that this actor channel is terminating so the parent can terminate to"
         //context.parent ! Terminated
         context stop self

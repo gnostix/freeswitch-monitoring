@@ -20,7 +20,7 @@ class FailedCallsActor extends Actor with ActorLogging {
   def receive: Receive = {
     case x @ CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
     callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
-    freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc) =>
+    freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) =>
       log info "-------> add an extra failed call"
       failedCalls ::= x
       val fCall = FailedCall("FAILED_CALL", x.fromUser, x.toUser, x.callUUID, x.freeSWITCHIPv4)

@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 class ScalatraBootstrap extends LifeCycle {
   val system = ActorSystem("esl-sys")
   val myRouter = system.actorOf(Props[CallRouter], "callRouter")
-  val myConn = new MyEslConnection(myRouter)
+  val myConn = new MyEslConnection(myRouter, system)
   val logger =  LoggerFactory.getLogger(getClass)
 
 
