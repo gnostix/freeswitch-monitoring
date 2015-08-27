@@ -5,6 +5,7 @@ import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetAllHeartBeat, GetLastHear
 import org.scalatra.atmosphere.AtmosphereClient
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.postfixOps
 
 /**
  * Created by rebel on 19/8/15.

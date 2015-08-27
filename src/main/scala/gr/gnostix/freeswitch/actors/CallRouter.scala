@@ -2,6 +2,7 @@ package gr.gnostix.freeswitch.actors
 
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
+import gr.gnostix.freeswitch.actors.ActorsProtocol.CompletedCall
 
 
 class CallRouter extends Actor with ActorLogging {
@@ -16,6 +17,8 @@ class CallRouter extends Actor with ActorLogging {
   // create the FailedCallsActor in advance
   val failedCallsActor = context.actorOf(Props[FailedCallsActor], "failedCallsActor")
 
+  // get reference of CompletedCallsActor
+  val completedCallsActor = context.actorSelection("/user/centralMessageRouter/completedCallsActor")
 
 
   def idle(activeCalls: scala.collection.Map[String, ActorRef]): Receive = {
@@ -118,9 +121,21 @@ class CallRouter extends Actor with ActorLogging {
           actor forward x
       }
 
-    case Terminated(actor: ActorRef) =>
+    case CallTerminated =>
+      val completedCall = activeCalls.filter(_._2 == sender())
+      completedCallsActor ! CompletedCall(completedCall.head._1, completedCall.head._2)
+
       val newMap = activeCalls.filter(_._2 != sender())
       context become idle(newMap)
+
+    /*
+        case Terminated(actor: ActorRef) =>
+          val completedCall = activeCalls.filter(_._2 == sender())
+          completedCallsActor ! completedCall
+
+          val newMap = activeCalls.filter(_._2 != sender())
+          context become idle(newMap)
+    */
 
     case _ =>
       log.info("---- I don't know this event")

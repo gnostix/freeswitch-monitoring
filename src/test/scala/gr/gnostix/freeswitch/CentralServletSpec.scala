@@ -14,4 +14,5 @@ class CentralServletSpec extends ScalatraSpec { def is =
   def root200 = get("/") {
     status must_== 200
   }
+
 }

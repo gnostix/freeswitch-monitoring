@@ -14,19 +14,33 @@ class CentralMessageRouter extends Actor with ActorLogging {
       case _ => Restart
     }
   // create the HeartBeatActor in advance so we can keep the FS state
-  val eslEventRouter = context.actorOf(Props[EslEventRouter], "eslEventRouter")
+ // val eslEventRouter = context.actorOf(Props[EslEventRouter], "eslEventRouter")
   // start the BasicStatsActor actor
   val basicStatsActor = context.actorOf(Props[BasicStatsActor], "basicStatsActor")
 
-  val callRouterActor = context.actorSelection("/user/centralMessageRouter/eslEventRouter/callRouter")
-  //val basicStatsActor = context.actorSelection("/user/centralMessageRouter/eslEventRouter/callRouter/basicStatsActor")
+
+  // start the CompletedCallsActor
+  val completedCallsActor = context.actorOf(Props[CompletedCallsActor], "completedCallsActor")
+
+  // start the generic ESL connection Actor
+  // create the HeartBeatActor in advance so we can keep the FS state
+  val heartBeatActor = context.actorOf(Props[HeartBeatActor], "heartBeatActor")
+  val callRouterActor = context.actorOf(Props[CallRouter], "callRouter")
+  val eslConnectionDispatcherActor = context.actorOf(Props[EslConnectionDispatcherActor], "eslConnectionDispatcherActor")
+
+  // start the first connection
+  eslConnectionDispatcherActor ! EslConnectionData("localhost", 8021, "ClueCon")
+//  eslConnectionDispatcherActor ! EslConnectionData("192.168.43.128", 8021, "ClueCon")
 
   def receive: Receive = {
-    case x @ Event(headers) =>
-      eslEventRouter ! x
+   // case x @ Event(headers) =>
+   //   eslEventRouter ! x
+
+    case x @ GetCompletedCalls =>
+      completedCallsActor forward x
 
     case x @ (GetLastHeartBeat | GetAllHeartBeat) =>
-      eslEventRouter forward x
+      heartBeatActor forward x
 
     case x @ (GetCalls | GetConcurrentCalls | GetFailedCalls | GetFailedCallsByDate |
               GetTotalFailedCalls  )=>

@@ -1,6 +1,8 @@
 package gr.gnostix.freeswitch.actors
 
 import java.sql.Timestamp
+import akka.actor.ActorRef
+
 import scala.collection.JavaConverters._
 
 import org.freeswitch.esl.client.transport.event.EslEvent
@@ -21,6 +23,8 @@ object ActorsProtocol {
   case class Event(headers: scala.collection.Map[String, String]) extends RouterRequest
 
   case object GetCalls extends RouterRequest
+
+  case object GetCompletedCalls extends RouterRequest
 
   case object GetConcurrentCalls extends RouterRequest
 
@@ -46,7 +50,15 @@ object ActorsProtocol {
 
   case object GetConcurrentCallsTimeSeries extends RouterRequest
 
+  case object GetCompletedCallMinutes extends RouterRequest
 
+  case class EslConnectionData(ip: String, port: Int, password: String) extends RouterRequest
+
+  case class ShutdownEslConnection(ip: String) extends RouterRequest
+
+  case class CompletedCall(uuid: String, callActor: ActorRef) extends RouterProtocol
+
+  case object CallTerminated extends RouterProtocol
 
   object Event {
     def apply(event: EslEvent): Event = Event(event.getEventHeaders.asScala)

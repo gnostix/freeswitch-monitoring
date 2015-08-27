@@ -7,6 +7,7 @@ import gr.gnostix.freeswitch.actors.ActorsProtocol._
 import org.scalatra.atmosphere.AtmosphereClient
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.postfixOps
 
 /**
  * Created by rebel on 17/8/15.
@@ -22,8 +23,8 @@ class BasicStatsActor extends Actor with ActorLogging {
   val ConcCalls = "ConcCalls"
   val CurFailedCalls = "CurFailedCalls"
   val Tick = "Tick"
-  val callRouterActor = context.actorSelection("/user/centralMessageRouter/eslEventRouter/callRouter")
-  val failedCallsActor = context.actorSelection("/user/centralMessageRouter/eslEventRouter/callRouter/failedCallsActor")
+  val callRouterActor = context.actorSelection("/user/centralMessageRouter/callRouter")
+  val failedCallsActor = context.actorSelection("/user/centralMessageRouter/callRouter/failedCallsActor")
 
   var concurrentCalls: List[ConcurrentCallsTimeSeries] = List()
   var failedCalls: List[FailedCallsTimeSeries] = List()

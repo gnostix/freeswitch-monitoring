@@ -13,12 +13,12 @@ class EslEventRouter extends Actor with ActorLogging {
 
 
   override val supervisorStrategy =
-    OneForOneStrategy() {
+    OneForOneStrategy() { //?????????????? do I need this ?
       case _ => Restart
     }
-  // create the HeartBeatActor in advance so we can keep the FS state
-  val heartBeatActor = context.actorOf(Props[HeartBeatActor], "heartBeatActor")
-  val callRouterActor = context.actorOf(Props[CallRouter], "callRouter")
+
+  val callRouterActor = context.actorSelection("/user/centralMessageRouter/callRouter")
+  val heartBeatActor = context.actorSelection("/user/centralMessageRouter/heartBeatActor")
 
 
   def receive: Receive = {

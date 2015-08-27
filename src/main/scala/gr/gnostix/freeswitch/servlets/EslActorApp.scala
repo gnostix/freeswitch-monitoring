@@ -1,7 +1,6 @@
 package gr.gnostix.freeswitch.servlets
 
 import java.sql.Timestamp
-import java.util.Date
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
@@ -9,13 +8,13 @@ import akka.util.Timeout
 import gr.gnostix.freeswitch.FreeswitchopStack
 import gr.gnostix.freeswitch.actors.ActorsProtocol._
 import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json.JacksonJsonSupport
-import org.scalatra.{CorsSupport, Accepted, FutureSupport, ScalatraServlet}
+import org.scalatra.{CorsSupport, FutureSupport, ScalatraServlet}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 case class Koko(date: DateTime)
 
@@ -31,6 +30,7 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
   // the JValueResult trait.
   protected implicit val jsonFormats: Formats = DefaultFormats
 
+  // root path /actors/*
 
   before() {
     contentType = formats("json")
@@ -51,6 +51,10 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
 
   get("/GetCalls"){
     myActor ? GetCalls
+  }
+
+  get("/GetCompletedCalls"){
+    myActor ? GetCompletedCalls
   }
 
   get("/GetFailedCalls"){

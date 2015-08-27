@@ -1,7 +1,7 @@
 package gr.gnostix.freeswitch.actors
 
 import akka.actor._
-import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetChannelInfo, GetCallInfo}
+import gr.gnostix.freeswitch.actors.ActorsProtocol.{CallTerminated, GetChannelInfo, GetCallInfo}
 
 /**
  * Created by rebel on 7/8/15.
@@ -28,9 +28,9 @@ import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetChannelInfo, GetCallInfo}
       case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
       callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
       freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) =>
-        //context.parent ! " tell that this actor channel is terminating so the parent can terminate to"
-        //context.parent ! Terminated
-        context stop self
+        //context stop self
+        // send message to parrent tha the channel is terminated
+        context.parent ! CallTerminated
 
       case GetChannelInfo(callUuid, channeluuid) =>
         val response = channelState

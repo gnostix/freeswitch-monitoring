@@ -4,7 +4,7 @@ import org.json4s.{Extraction, NoTypeHints}
 import org.json4s.jackson.Serialization
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization.{read, write}
-
+import scala.language.implicitConversions
 import org.scalatra.atmosphere.JsonMessage
 
 
@@ -18,18 +18,16 @@ object ActorsJsonProtocol {
   JsonMessage(Extraction.decompose(callsTimeSeries))
 
   implicit def heartbeatToJson(heartBeat: HeartBeat): JsonMessage =
-//    JsonMessage(parse(write(heartBeat)))
   JsonMessage(Extraction.decompose(heartBeat))
 
   implicit def newCallToJson(newCall: CallNew): JsonMessage =
-  //  JsonMessage(parse(write(newCall)))
   JsonMessage(Extraction.decompose(newCall))
 
   implicit def endCallToJson(endCall: CallEnd): JsonMessage =
   //  JsonMessage(parse(write(endCall)))
   JsonMessage(Extraction.decompose(endCall))
 
-  def failedCallToJson(failedCall: FailedCall): JsonMessage =
+  implicit def failedCallToJson(failedCall: FailedCall): JsonMessage =
     JsonMessage(Extraction.decompose(failedCall))
 
   implicit def heartbeatToText(heartBeat: HeartBeat): String =
