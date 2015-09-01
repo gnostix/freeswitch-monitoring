@@ -1,9 +1,9 @@
-import gr.gnostix.freeswitch._
-import gr.gnostix.freeswitch.actors.{CentralMessageRouter, EslEventRouter, CallRouter}
-import gr.gnostix.freeswitch.servlets.{WSEslServlet, EslActorApp, CentralServlet}
-import org.scalatra._
 import javax.servlet.ServletContext
-import _root_.akka.actor.{Props, ActorSystem}
+
+import _root_.akka.actor.{ActorSystem, Props}
+import gr.gnostix.freeswitch.actors.CentralMessageRouter
+import gr.gnostix.freeswitch.servlets.{CentralServlet, EslActorApp}
+import org.scalatra._
 import org.scalatra.example.atmosphere.ChatController
 import org.slf4j.LoggerFactory
 

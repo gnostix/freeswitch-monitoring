@@ -4,7 +4,7 @@ import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
-import gr.gnostix.freeswitch.actors.ActorsProtocol.CallTerminated
+import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetACDLastFor60Seconds, CallTerminated}
 import org.scalatra.atmosphere.AtmosphereClient
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -40,7 +40,7 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
       log info s"======== in call actor $x"
       (activeChannels get uuid) match {
         case None =>
-
+/*
           callUuid match {
             case Some(a) =>
               AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.newCallToJson(x))
@@ -48,6 +48,7 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
             case None =>
               callUuid = Some(callUUID)
           }
+          */
           //val actor = context actorOf ChannelActor.props(x)
           val actor = context.actorOf(Props[ChannelActor], uuid)
           actor ! x
@@ -109,17 +110,25 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
           sender ! all
       }
 
+    case x @ GetACDLastFor60Seconds =>
+      log info s"--------> CallActor GetACDLastFor60Seconds: $x"
+      endCallChannel.headOption match {
+        case Some(a) =>
+          log info s"--------> CallActor on CompletedCalls: $a"
+          sender ! a.billSec
+        case None => log warning "-----> ignore GetACDLastFor60Seconds.. channel empty!!"
+      }
 
-    case CallTerminated =>
+    case CallTerminated(callEnd) =>
       terminatedChannels += 1
       log info s"call actor channel is terminated " + terminatedChannels
       val updatedActiveChannels = activeChannels.filter(_._2 != sender())
 
       if ((terminatedChannels >= 2) || (updatedActiveChannels.size == 0) ) {
         log info s"this call is terminated "
-        context.parent ! CallTerminated
+        context.parent ! CallTerminated(callEnd)
 
-        AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.endCallToJson(endCallChannel.get))
+        //AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.endCallToJson(endCallChannel.get))
       }
 
 

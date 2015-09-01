@@ -1,5 +1,6 @@
 package gr.gnostix.freeswitch.actors
 
+import gr.gnostix.freeswitch.actors.ActorsProtocol.RouterProtocol
 import org.json4s.{Extraction, NoTypeHints}
 import org.json4s.jackson.Serialization
 import org.json4s.jackson.JsonMethods._
@@ -13,6 +14,9 @@ import org.scalatra.atmosphere.JsonMessage
  */
 object ActorsJsonProtocol {
   implicit val formats = Serialization.formats(NoTypeHints)
+
+  def caseClassToJsonMessage(message: RouterProtocol): JsonMessage =
+    JsonMessage(Extraction.decompose(message))
 
   def callsTimeSeriesToJson(callsTimeSeries: BasicStatsCalls): JsonMessage =
   JsonMessage(Extraction.decompose(callsTimeSeries))

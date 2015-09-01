@@ -5,7 +5,7 @@ import akka.actor._
 import gr.gnostix.freeswitch.actors.ActorsProtocol.CompletedCall
 
 
-class CallRouter extends Actor with ActorLogging {
+class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) extends Actor with ActorLogging {
 
   import gr.gnostix.freeswitch.actors.ActorsProtocol._
 
@@ -18,7 +18,7 @@ class CallRouter extends Actor with ActorLogging {
   val failedCallsActor = context.actorOf(Props[FailedCallsActor], "failedCallsActor")
 
   // get reference of CompletedCallsActor
-  val completedCallsActor = context.actorSelection("/user/centralMessageRouter/completedCallsActor")
+  //val completedCallsActor = context.actorSelection("/user/centralMessageRouter/completedCallsActor")
 
 
   def idle(activeCalls: scala.collection.Map[String, ActorRef]): Receive = {
@@ -30,6 +30,7 @@ class CallRouter extends Actor with ActorLogging {
 
       (activeCalls get callUUID) match {
         case None =>
+          wsLiveEventsActor ! ActorsJsonProtocol.newCallToJson(x)
 
           val actor = context.actorOf(Props[CallActor], callUUID)
           actor ! x
@@ -121,9 +122,11 @@ class CallRouter extends Actor with ActorLogging {
           actor forward x
       }
 
-    case CallTerminated =>
+    case CallTerminated(callEnd) =>
       val completedCall = activeCalls.filter(_._2 == sender())
       completedCallsActor ! CompletedCall(completedCall.head._1, completedCall.head._2)
+
+      wsLiveEventsActor ! ActorsJsonProtocol.endCallToJson(callEnd)
 
       val newMap = activeCalls.filter(_._2 != sender())
       context become idle(newMap)

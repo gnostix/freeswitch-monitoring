@@ -12,7 +12,7 @@ import scala.language.postfixOps
 /**
  * Created by rebel on 24/8/15.
  */
-class TestBasicStatsActor
+class TestFailedCallsActor
 extends TestKit(ActorSystem("TestKitUsageSpec"))
 with DefaultTimeout with ImplicitSender
 with WordSpecLike with Matchers with BeforeAndAfterAll {

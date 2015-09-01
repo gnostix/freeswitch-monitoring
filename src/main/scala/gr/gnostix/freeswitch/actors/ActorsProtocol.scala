@@ -50,6 +50,8 @@ object ActorsProtocol {
 
   case object GetConcurrentCallsTimeSeries extends RouterRequest
 
+  case object GetBasicAcdTimeSeries extends RouterRequest
+
   case object GetCompletedCallMinutes extends RouterRequest
 
   case class EslConnectionData(ip: String, port: Int, password: String) extends RouterRequest
@@ -58,7 +60,11 @@ object ActorsProtocol {
 
   case class CompletedCall(uuid: String, callActor: ActorRef) extends RouterProtocol
 
-  case object CallTerminated extends RouterProtocol
+  case class CallTerminated(callEnd: CallEnd) extends RouterProtocol
+
+  case object GetACDLastFor60Seconds extends RouterRequest
+
+  case class AcdData(acd: Double) extends RouterResponse
 
   object Event {
     def apply(event: EslEvent): Event = Event(event.getEventHeaders.asScala)

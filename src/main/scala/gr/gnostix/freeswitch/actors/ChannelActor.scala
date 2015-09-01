@@ -30,7 +30,7 @@ import gr.gnostix.freeswitch.actors.ActorsProtocol.{CallTerminated, GetChannelIn
       freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) =>
         //context stop self
         // send message to parrent tha the channel is terminated
-        context.parent ! CallTerminated
+        context.parent ! CallTerminated(x)
 
       case GetChannelInfo(callUuid, channeluuid) =>
         val response = channelState

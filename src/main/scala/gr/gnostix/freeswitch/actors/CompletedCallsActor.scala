@@ -1,12 +1,13 @@
 package gr.gnostix.freeswitch.actors
 
 import akka.actor.SupervisorStrategy.Restart
-import akka.actor.{OneForOneStrategy, ActorRef, Actor, ActorLogging}
-import scala.collection.Map
-import scala.collection.immutable.Map
+import akka.actor.{Actor, ActorLogging, ActorRef, OneForOneStrategy}
+import akka.pattern.{ask, pipe}
+import akka.util.Timeout
+
+import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * Created by rebel on 27/8/15.
@@ -14,8 +15,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class CompletedCallsActor extends Actor with ActorLogging {
 
   import gr.gnostix.freeswitch.actors.ActorsProtocol._
+  import context.dispatcher
 
   val Tick = "tick"
+  implicit val timeout = Timeout(1 seconds) // needed for `?` below
 
   override val supervisorStrategy =
     OneForOneStrategy() {
@@ -23,19 +26,31 @@ class CompletedCallsActor extends Actor with ActorLogging {
     }
 
   def idle(completedCalls: scala.collection.Map[String, ActorRef]): Receive = {
-    case CompletedCall(uuid,callActor) =>
-      val newMap = completedCalls  updated(uuid, callActor)
+    case CompletedCall(uuid, callActor) =>
+      val newMap = completedCalls updated(uuid, callActor)
       log info s"-----> new call coming on Completed Calls Actor $newMap"
       context become idle(newMap)
 
-    case x @ GetCompletedCalls =>
+    case x@GetACDLastFor60Seconds =>
+      completedCalls.isEmpty match {
+        case true =>
+          log info s"Completed calls Actor GetACDLastFor60Seconds | NO completedCalls: " + completedCalls
+          sender ! List()
+        case false =>
+          val f: List[Future[Int]] = completedCalls.map(x => (x._2 ? GetACDLastFor60Seconds).mapTo[Int]).toList
+          log info s"Completed calls Actor GetACDLastFor60Seconds , asking all call actors" + Future.sequence(f)
+          Future.sequence(f) pipeTo sender
+      }
+    // sender ! 100
+
+    case x@GetCompletedCalls =>
       val calls = completedCalls.keys.toList
-      //log info s"======== $calls"
+      log info s"CompletedCallsActor | GetCompletedCalls: $calls"
       // channels / 2 (each call has two channels)
       sender() ! GetCallsResponse(calls.size, calls)
 
-    case x @ GetCompletedCallMinutes =>
-      // ask all callActors about the call minutes of each call and sum them and send them back
+    case x@GetCompletedCallMinutes =>
+    // ask all callActors about the call minutes of each call and sum them and send them back
 
     case x@GetCallInfo(callUuid) =>
       (completedCalls get callUuid) match {
