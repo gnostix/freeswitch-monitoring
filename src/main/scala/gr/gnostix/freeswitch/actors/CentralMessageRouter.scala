@@ -14,11 +14,11 @@ class CentralMessageRouter extends Actor with ActorLogging {
       case _ => Restart
     }
 
-  // start the CompletedCallsActor
-  val completedCallsActor = context.actorOf(Props[CompletedCallsActor], "completedCallsActor")
-  val heartBeatActor = context.actorOf(Props[HeartBeatActor], "heartBeatActor")
-  val eslConnectionDispatcherActor = context.actorOf(Props[EslConnectionDispatcherActor], "eslConnectionDispatcherActor")
+  // first we should start the WS actor, otherwise we get exception!!
   val wsLiveEventsActor = context.actorOf(Props[WSLiveEventsActor], "wsLiveEventsActor")
+  val completedCallsActor = context.actorOf(Props[CompletedCallsActor], "completedCallsActor")
+  val heartBeatActor = context.actorOf(Props(new HeartBeatActor(wsLiveEventsActor)), "heartBeatActor")
+  val eslConnectionDispatcherActor = context.actorOf(Props[EslConnectionDispatcherActor], "eslConnectionDispatcherActor")
   val callRouterActor = context.actorOf(Props(new CallRouter(wsLiveEventsActor, completedCallsActor)), "callRouter")
   val basicStatsActor = context.actorOf(Props(new BasicStatsActor(callRouterActor, completedCallsActor, wsLiveEventsActor)), "basicStatsActor")
 
@@ -26,12 +26,15 @@ class CentralMessageRouter extends Actor with ActorLogging {
   // eslConnectionDispatcherActor ! EslConnectionData("localhost", 8021, "ClueCon")
 //  eslConnectionDispatcherActor ! EslConnectionData("192.168.43.128", 8021, "ClueCon")
 
+  eslConnectionDispatcherActor ! EslConnectionData("localhost", 8021, "ClueCon")
+
   def receive: Receive = {
    // case x @ Event(headers) =>
    //   eslEventRouter ! x
 
-    case x @ EslConnectionData =>
-      eslConnectionDispatcherActor ! EslConnectionData("localhost", 8021, "ClueCon")
+    case x @ EslConnectionData(ip, port, password) =>
+      //eslConnectionDispatcherActor ! EslConnectionData("localhost", 8021, "ClueCon")
+      eslConnectionDispatcherActor forward x
 
     case x @ GetCompletedCalls =>
       completedCallsActor forward x
@@ -44,7 +47,8 @@ class CentralMessageRouter extends Actor with ActorLogging {
       // api calls asking for data
       callRouterActor forward x
 
-    case x@(GetConcurrentCallsTimeSeries | GetFailedCallsTimeSeries) =>
+    case x@(GetConcurrentCallsTimeSeries | GetFailedCallsTimeSeries
+      | GetBasicAcdTimeSeries) =>
       // api calls asking for data
     basicStatsActor forward x
 

@@ -210,16 +210,81 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
               case None => acd = 10
             }
 
-          case x @ List() => acd = 30
+          case x@List() => acd = 30
 
           case _ => acd = 20
         }
-// first call billsec is 180 and second is 120 so ACD is (180+120)/2=150
-        acd should be (150)
+        // first call billsec is 180 and second is 120 so ACD is (180+120)/2=150
+        acd should be(150)
       }
     }
 
   }
 
+  // failed call actor tests
 
+  "this test should" should {
+    " return the list of Calls " in {
+      within(5000 millis) {
+        callRouterActor ! GetFailedCalls
+        expectMsg(List())
+      }
+    }
+  }
+
+
+  "this is  for number of failed calls" should {
+    " return an Int of calls " in {
+      within(5000 millis) {
+        callRouterActor ! GetTotalFailedCalls
+        expectMsg(TotalFailedCalls(0))
+      }
+    }
+  }
+
+  val endChannelFailedCall = CallEnd("the-uuid-channel-aa-154545", "CHANNEL_ANSWER", "5001", "5002", "GSM", "GSM",
+    "192.168.100.101", "call-uuid-9898988", None,
+    None, new Timestamp(System.currentTimeMillis()),
+    "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 120, 100, "the-uuid-channel-a-2767676")
+
+  "this test should" should {
+    " return one item list of FailedCalls " in {
+      within(60000 millis) {
+
+        var failedCallsNum = 0
+        callRouterActor ! endChannelFailedCall
+        expectNoMsg(FiniteDuration(1, "seconds"))
+
+        callRouterActor ! GetFailedCalls
+        expectMsgPF() {
+          case x@List(CallEnd(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)) => failedCallsNum = x.size
+          case _ =>
+        }
+        failedCallsNum should be(1)
+
+      }
+    }
+    //        case x@GetTotalFailedCalls =>
+    //          failedCallsActor forward x
+
+  }
+
+  "this test should" should {
+    " return total FailedCalls " in {
+      within(60000 millis) {
+
+        var failedCallsNum = 0
+        callRouterActor ! endChannelFailedCall
+        expectNoMsg(FiniteDuration(1, "seconds"))
+
+        callRouterActor ! GetTotalFailedCalls
+        expectMsgPF() {
+          case x@TotalFailedCalls(a) => failedCallsNum = a
+          case _ =>
+        }
+        failedCallsNum should be(2) // since is the second failed call we are pushing..
+
+      }
+    }
+  }
 }

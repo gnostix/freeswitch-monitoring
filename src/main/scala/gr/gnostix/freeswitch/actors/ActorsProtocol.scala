@@ -74,3 +74,11 @@ object ActorsProtocol {
 
   def mkEvent(event: EslEvent): Event = Event(event)
 }
+
+object ServletProtocol {
+  sealed trait ApiProtocol
+  sealed trait ApiRequest extends ApiProtocol
+  sealed trait ApiResponse extends ApiProtocol
+
+  case class ApiReply(message: String) extends  ApiResponse
+}

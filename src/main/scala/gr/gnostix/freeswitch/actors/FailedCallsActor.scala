@@ -1,6 +1,6 @@
 package gr.gnostix.freeswitch.actors
 
-import akka.actor.{Actor, ActorLogging}
+import akka.actor.{ActorRef, Actor, ActorLogging}
 import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetFailedCallsByDate, GetTotalFailedCalls, GetFailedCalls}
 import org.scalatra.atmosphere.AtmosphereClient
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -13,7 +13,7 @@ import scala.language.postfixOps
 
 case class TotalFailedCalls(failedCalls: Int)
 
-class FailedCallsActor extends Actor with ActorLogging {
+class FailedCallsActor(wsLiveEventsActor: ActorRef) extends Actor with ActorLogging {
 
   var failedCalls: List[CallEnd] = List()
   val Tick = "tick"
@@ -25,7 +25,8 @@ class FailedCallsActor extends Actor with ActorLogging {
       log info "-------> add an extra failed call"
       failedCalls ::= x
       val fCall = FailedCall("FAILED_CALL", x.fromUser, x.toUser, x.callUUID, x.freeSWITCHIPv4)
-      AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.failedCallToJson(fCall))
+      wsLiveEventsActor ! ActorsJsonProtocol.failedCallToJson(fCall)
+      //AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.failedCallToJson(fCall))
 
     case x @ GetFailedCalls =>
       log info "returning the failed calls " + failedCalls

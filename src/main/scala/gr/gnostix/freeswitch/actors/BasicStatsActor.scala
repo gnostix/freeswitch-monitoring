@@ -82,7 +82,7 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
       basicAcd = getRetentionedAcd
 
     case ACD =>
-      log info s"-------> basicStats ACD asking for  ACDTimeSeries .."
+      //log info s"-------> basicStats ACD asking for  ACDTimeSeries .."
       val response: Future[List[Int]] = (completedCallsActor ? GetACDLastFor60Seconds).mapTo[List[Int]]
       response.onComplete {
         case Success(a) =>  a match {

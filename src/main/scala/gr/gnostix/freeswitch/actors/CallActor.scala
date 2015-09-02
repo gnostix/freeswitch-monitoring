@@ -111,10 +111,10 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
       }
 
     case x @ GetACDLastFor60Seconds =>
-      log info s"--------> CallActor GetACDLastFor60Seconds: $x"
+      //log info s"--------> CallActor GetACDLastFor60Seconds: $x"
       endCallChannel.headOption match {
         case Some(a) =>
-          log info s"--------> CallActor on CompletedCalls: $a"
+          //log info s"--------> CallActor on CompletedCalls: $a"
           sender ! a.billSec
         case None => log warning "-----> ignore GetACDLastFor60Seconds.. channel empty!!"
       }

@@ -23,7 +23,7 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
   extends ScalatraServlet with FutureSupport with JacksonJsonSupport with CorsSupport with FreeswitchopStack
 {
 
-  implicit val timeout = new Timeout(2 seconds)
+  implicit val timeout = new Timeout(10 seconds)
   protected implicit def executor: ExecutionContext = system.dispatcher
 
   // Sets up automatic case class to JSON output serialization, required by
@@ -47,6 +47,11 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
   // You'll see the output from this in the browser.
   get("/ask") {
     "Do stuff and give me an answer"
+  }
+
+  post("/EslConnectionData"){
+    val eslConnectionData = parsedBody.extract[EslConnectionData]
+    myActor ? eslConnectionData
   }
 
   get("/GetCalls"){
@@ -107,6 +112,9 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
     myActor ? GetConcurrentCallsTimeSeries
   }
 
+  get("/stats/GetBasicAcdTimeSeries"){
+    myActor ask GetBasicAcdTimeSeries
+  }
 
 }
 

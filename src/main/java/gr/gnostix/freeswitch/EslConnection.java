@@ -25,17 +25,19 @@ public class EslConnection {
 
     public boolean connectEsl() {
         try {
-            conn.connect(ip, 8021, password, 60);
+            conn.connect(ip, 8021, password, 10);
 
-            if (conn.canSend() == true) System.out.println("connected");
-            //conn.setEventSubscriptions( "plain", "CHANNEL_HANGUP_COMPLETE CHANNEL_CALLSTATE  CHANNEL_CREATE CHANNEL_EXECUTE CHANNEL_EXECUTE_COMPLETE CHANNEL_DESTROY" );
-            conn.setEventSubscriptions("plain", "all");
-            conn.addEventListener(new MyEslEventListener(eslMessageRouter));
+            if (conn.canSend() == true)
+            {
+                System.out.println("conn.canSend() connected");
+                conn.setEventSubscriptions("plain", "all");
+                conn.addEventListener(new MyEslEventListener(eslMessageRouter));
+            }
             return true;
-
+            //conn.setEventSubscriptions( "plain", "CHANNEL_HANGUP_COMPLETE CHANNEL_CALLSTATE  CHANNEL_CREATE CHANNEL_EXECUTE CHANNEL_EXECUTE_COMPLETE CHANNEL_DESTROY" );
         } catch (InboundConnectionFailure e) {
             System.out.println("------- ESL connection failed. !!");
-            e.printStackTrace();
+            //e.printStackTrace();
             return false;
         }
     }
@@ -43,7 +45,7 @@ public class EslConnection {
     public boolean checkConnection(){
         boolean status = false;
         if (conn.canSend() == true) {
-            System.out.println("connected");
+            //System.out.println("connected");
             status = true;
         } else {
             status = connectEsl();

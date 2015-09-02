@@ -21,7 +21,7 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
     TestKit.shutdownActorSystem(system)
   }
 
-  val failedCallsActor = system.actorOf(Props(classOf[FailedCallsActor]))
+ /* val failedCallsActor = system.actorOf(Props(classOf[FailedCallsActor]))
 
   "this test should" should {
     " return the list of Calls " in {
@@ -40,6 +40,6 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
         expectMsg(TotalFailedCalls(0))
       }
     }
-  }
+  }*/
 }
 

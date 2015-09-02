@@ -15,7 +15,7 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
     }
 
   // create the FailedCallsActor in advance
-  val failedCallsActor = context.actorOf(Props[FailedCallsActor], "failedCallsActor")
+  val failedCallsActor = context.actorOf(Props(new FailedCallsActor(wsLiveEventsActor)), "failedCallsActor")
 
   // get reference of CompletedCallsActor
   //val completedCallsActor = context.actorSelection("/user/centralMessageRouter/completedCallsActor")

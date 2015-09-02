@@ -13,7 +13,7 @@ class WSLiveEventsActor extends Actor with ActorLogging {
   def receive: Receive = {
 
     case x: OutboundMessage =>
-      //AtmosphereClient.broadcast("/fs-moni/live/events", x)
+      AtmosphereClient.broadcast("/fs-moni/live/events", x)
 
     case _ => log warning "WSLiveEventsActor | Unknown Message .."
   }
