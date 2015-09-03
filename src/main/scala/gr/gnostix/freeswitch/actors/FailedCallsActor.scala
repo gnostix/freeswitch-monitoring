@@ -24,6 +24,7 @@ class FailedCallsActor(wsLiveEventsActor: ActorRef) extends Actor with ActorLogg
     freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) =>
       log info "-------> add an extra failed call"
       failedCalls ::= x
+      //failedCalls = failedCalls.sortWith { (leftE, rightE) => leftE.callerChannelHangupTime.before(rightE.callerChannelHangupTime) }
       val fCall = FailedCall("FAILED_CALL", x.fromUser, x.toUser, x.callUUID, x.freeSWITCHIPv4)
       wsLiveEventsActor ! ActorsJsonProtocol.failedCallToJson(fCall)
       //AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.failedCallToJson(fCall))

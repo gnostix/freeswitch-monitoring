@@ -25,7 +25,8 @@ case class FailedCallsTimeSeries(dateTime: Timestamp, failedCallsNum: Int) exten
 
 case class ACDTimeSeries(dateTime: Timestamp, acd: Int) extends BasicStatsCalls
 
-case class BasicStatsTimeSeries(dateTime: Timestamp, concCallsNum: Int, failedCallsNum: Int, acd: Double, asr: Double, rtpQualityAvg: Double) extends BasicStatsCalls
+case class BasicStatsTimeSeries(eventName: String, dateTime: Timestamp, concCallsNum: Int, failedCallsNum: Int,
+                                acd: Double, asr: Double, rtpQualityAvg: Double) extends BasicStatsCalls
 
 case class CustomStatsPerCustomerTimeSeries(dateTime: Timestamp, concCallsNum: Int, failedCallsNum: Int, acd: Int, asr: Double,
                                             rtpQualityAvg: Double, ip: List[String], cliPrefixRegEx: Option[List[String]])
@@ -38,15 +39,15 @@ sealed trait CustomJobs
 case class StatsPerCustomer(ip: List[String], cliPrefixRegEx: Option[List[String]]) extends CustomJobs
 
 
-
 class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, wsLiveEventsActor: ActorRef)
   extends Actor with ActorLogging {
 
   implicit val timeout = Timeout(1 seconds)
 
+  val BASIC_STATS = "BASIC_STATS"
   val BasicStatsTick = "BasicStatsTick"
   val Tick = "Tick"
-
+  var lastBasicStatsTickTime = new Timestamp(System.currentTimeMillis)
   var basicStats: List[BasicStatsTimeSeries] = List()
   var customStatsPerCust: List[CustomStatsPerCustomerTimeSeries] = List()
   var customJobs: List[StatsPerCustomer] = List()
@@ -56,7 +57,8 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
     case BasicStatsTick =>
       val conCallsT: Future[ConcurrentCallsNum] = (callRouterActor ? GetConcurrentCalls).mapTo[ConcurrentCallsNum]
       val failedCallsT: Future[TotalFailedCalls] = (callRouterActor ? GetTotalFailedCalls).mapTo[TotalFailedCalls]
-      val completedCallsStatsT: Future[List[CompletedCallStats]] = (completedCallsActor ? GetACDAndRTPForLast60Seconds).mapTo[List[CompletedCallStats]]
+      val completedCallsStatsT: Future[List[CompletedCallStats]] =
+        (completedCallsActor ? GetACDAndRTPByTime(lastBasicStatsTickTime)).mapTo[List[CompletedCallStats]]
 
       // acd = sum of minutes devided by the number of calls
       // asr = the % of devide the successfully completed calls by the total number of calls and then multiply by 100
@@ -64,21 +66,38 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
         r1 <- conCallsT
         r2 <- failedCallsT
         r3 <- completedCallsStatsT
-      } yield{
-          //log info s"---------> the asr data completed Calls: ${r3.size} failed calls: ${r2.failedCalls}"
-          BasicStatsTimeSeries(new Timestamp(System.currentTimeMillis), r1.calls, r2.failedCalls,
-          if (!r3.isEmpty) (r3.map(x => x.acd).sum / r3.size).toDouble else 0,
-          if (!r3.isEmpty) (r3.size).toDouble / (r3.size + r2.failedCalls) * 100 else 0,
-          if (!r3.isEmpty) (r3.map(x => x.rtpQuality).sum / r3.size).toDouble else 0)}
+      } yield {
+          r3.isEmpty match {
+            case true =>
+              log info s"------> response from BasicStatsTick failed calls ${r2.failedCalls} - totalOfLastValueFailedCalls ${totalOfLastValueFailedCalls}"
+              (BasicStatsTimeSeries(BASIC_STATS, lastBasicStatsTickTime, r1.calls, r2.failedCalls - totalOfLastValueFailedCalls, 0, 0, 0),r2.failedCalls)
+            case false => {
+              log info s"------> response from BasicStatsTick failed calls ${r2.failedCalls} - totalOfLastValueFailedCalls ${totalOfLastValueFailedCalls}"
+              val r3Sorted = r3.sortWith { (leftE, rightE) => leftE.callerChannelHangupTime.before(rightE.callerChannelHangupTime) }
+              lastBasicStatsTickTime = r3Sorted.head.callerChannelHangupTime
+              val asr = r3Sorted.size.toDouble / (r3Sorted.size + r2.failedCalls) * 100
+              val acd = r3Sorted.map(x => x.acd).sum / r3Sorted.size
+              val rtpQ = r3Sorted.map(x => x.rtpQuality).sum / r3Sorted.size.toDouble
+
+              (BasicStatsTimeSeries(BASIC_STATS, lastBasicStatsTickTime, r1.calls, r2.failedCalls - totalOfLastValueFailedCalls, acd, asr, rtpQ),r2.failedCalls)
+            }
+
+          }
+
+        }
+      //log info s"---------> the asr data completed Calls: ${r3.size} failed calls: ${r2.failedCalls}"
+
       response.onComplete {
         case Success(x) =>
           log info "------> response from BasicStatsTick"
-          wsLiveEventsActor ! ActorsJsonProtocol.caseClassToJsonMessage(x)
-          basicStats ::= x
+          wsLiveEventsActor ! ActorsJsonProtocol.caseClassToJsonMessage(x._1)
+          basicStats ::= x._1
+          totalOfLastValueFailedCalls = x._2
+
         case Failure(e) => log warning "BasicStatsTick failed in response"
       }
 
-    case x @ StatsPerCustomer(_,_) =>
+    case x@StatsPerCustomer(_, _) =>
       customJobs ::= x
 
     case Tick =>

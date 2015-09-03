@@ -1,10 +1,12 @@
 package gr.gnostix.freeswitch.actors
 
+import java.sql.Timestamp
+
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
-import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetACDAndRTPForLast60Seconds, CallTerminated}
+import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetACDAndRTPByTime, GetACDAndRTP, CallTerminated}
 import org.scalatra.atmosphere.AtmosphereClient
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -19,7 +21,7 @@ import scala.concurrent.Future
   def props(channelA: CallNew): Props = Props(new CallActor(channelA))
 }*/
 
-case class CompletedCallStats(acd: Int, rtpQuality: Double)
+case class CompletedCallStats(acd: Int, rtpQuality: Double, callerChannelHangupTime: Timestamp)
 
 class CallActor extends Actor with ActorLogging {
 
@@ -29,7 +31,7 @@ class CallActor extends Actor with ActorLogging {
       case _ => Restart
     }
 
-implicit val timeout = Timeout(1 seconds) // needed for `?` below
+  implicit val timeout = Timeout(1 seconds) // needed for `?` below
 
   var terminatedChannels = 0
   var callUuid: Option[String] = None
@@ -37,20 +39,20 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
 
   def idle(activeChannels: scala.collection.Map[String, ActorRef]): Receive = {
 
-    case x @ CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
+    case x@CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
     callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4) =>
       log info s"======== in call actor $x"
       (activeChannels get uuid) match {
         case None =>
-/*
-          callUuid match {
-            case Some(a) =>
-              AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.newCallToJson(x))
+          /*
+                    callUuid match {
+                      case Some(a) =>
+                        AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.newCallToJson(x))
 
-            case None =>
-              callUuid = Some(callUUID)
-          }
-          */
+                      case None =>
+                        callUuid = Some(callUUID)
+                    }
+                    */
           //val actor = context actorOf ChannelActor.props(x)
           val actor = context.actorOf(Props[ChannelActor], uuid)
           actor ! x
@@ -63,7 +65,7 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
           log warning s"We have this Channel $uuid"
       }
 
-    case x @ CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
+    case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
     callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
     freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) =>
       (activeChannels get uuid) match {
@@ -80,7 +82,7 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
           actor ! x
       }
 
-    case x @ ActorsProtocol.GetChannelInfo(callUuid, channeluuid) =>
+    case x@ActorsProtocol.GetChannelInfo(callUuid, channeluuid) =>
       log info s"-----> Channel $channeluuid  in callActor sender " + sender.toString
       log info s"-----> Channels " + activeChannels.toString()
 
@@ -92,12 +94,12 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
           actor forward x
       }
 
-    case x @ ActorsProtocol.GetCallInfo(callUUID) =>
+    case x@ActorsProtocol.GetCallInfo(callUUID) =>
       (callUuid.getOrElse("") == callUUID) match {
         case false => sender ! "Unknown call uuid"
         case true =>
 
-          val all: Future[List[Any]] = activeChannels.size match{
+          val all: Future[List[Any]] = activeChannels.size match {
             case 2 => for {
               chA <- (activeChannels.head._2 ask x)
               chB <- (activeChannels.tail.head._2 ask x)
@@ -111,13 +113,26 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
 
           sender ! all
       }
+/*
 
-    case x @ GetACDAndRTPForLast60Seconds =>
+    case x@GetACDAndRTPByTime(lastCheck) =>
+      endCallChannel.headOption match {
+        case Some(a) =>
+          //log info s"--------> CallActor on CompletedCalls: $a"
+          a.callerChannelHangupTime.after(lastCheck) match  {
+            case true =>  sender ! CompletedCallStats(a.billSec, a.rtpQualityPerc)
+          }
+        case None => log warning "-----> ignore GetACDLastFor60Seconds.. channel empty!!"
+      }
+
+*/
+
+    case x@GetACDAndRTP =>
       //log info s"--------> CallActor GetACDLastFor60Seconds: $x"
       endCallChannel.headOption match {
         case Some(a) =>
           //log info s"--------> CallActor on CompletedCalls: $a"
-          sender ! CompletedCallStats(a.billSec, a.rtpQualityPerc)
+          sender ! CompletedCallStats(a.billSec, a.rtpQualityPerc, a.callerChannelHangupTime)
         case None => log warning "-----> ignore GetACDLastFor60Seconds.. channel empty!!"
       }
 
@@ -126,7 +141,7 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
       log info s"call actor channel is terminated " + terminatedChannels
       val updatedActiveChannels = activeChannels.filter(_._2 != sender())
 
-      if ((terminatedChannels >= 2) || (updatedActiveChannels.size == 0) ) {
+      if ((terminatedChannels >= 2) || (updatedActiveChannels.size == 0)) {
         log info s"this call is terminated "
         context.parent ! CallTerminated(callEnd)
 
@@ -148,7 +163,7 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
           }
           context become idle(updatedActiveChannels)*/
 
-    case x @ _ =>
+    case x@_ =>
       log.info("---- call actor - I don't know this channel uuid " + x)
   }
 

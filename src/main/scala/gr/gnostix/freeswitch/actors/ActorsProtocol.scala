@@ -60,11 +60,13 @@ object ActorsProtocol {
 
   case class ShutdownEslConnection(ip: String) extends RouterRequest
 
-  case class CompletedCall(uuid: String, callActor: ActorRef) extends RouterProtocol
+  case class CompletedCall(uuid: String, hangupTime: Timestamp, callActor: ActorRef) extends RouterProtocol
 
   case class CallTerminated(callEnd: CallEnd) extends RouterProtocol
 
-  case object GetACDAndRTPForLast60Seconds extends RouterRequest
+  case object GetACDAndRTP extends RouterRequest
+
+  case class GetACDAndRTPByTime(lastCheck: Timestamp) extends RouterRequest
 
   case class AcdData(acd: Double) extends RouterResponse
 

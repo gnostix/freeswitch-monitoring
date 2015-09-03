@@ -124,7 +124,7 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
 
     case CallTerminated(callEnd) =>
       val completedCall = activeCalls.filter(_._2 == sender())
-      completedCallsActor ! CompletedCall(completedCall.head._1, completedCall.head._2)
+      completedCallsActor ! CompletedCall(completedCall.head._1, callEnd.callerChannelHangupTime, completedCall.head._2)
 
       wsLiveEventsActor ! ActorsJsonProtocol.endCallToJson(callEnd)
 
