@@ -2,14 +2,14 @@ package gr.gnostix.freeswitch.actors
 
 import java.sql.Timestamp
 
-import akka.actor.{ActorLogging, Actor, Props, ActorSystem}
-import akka.testkit.{TestActorRef, ImplicitSender, DefaultTimeout, TestKit}
-import akka.util.Timeout
+import akka.actor.ActorSystem
+import akka.testkit.{DefaultTimeout, ImplicitSender, TestActorRef, TestKit}
 import gr.gnostix.freeswitch.actors.ActorsProtocol._
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
-import org.scalatra.atmosphere.{AtmosphereClient, OutboundMessage}
+
 import scala.concurrent.duration._
 import scala.language.postfixOps
+
 
 /**
  * Created by rebel on 29/8/15.
@@ -54,65 +54,30 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
     }
   }
 
-
   "this test should" should {
     " return an empty list of Concurrent Calls " in {
       within(100 millis) {
-        basicStatsActor ! GetConcurrentCallsTimeSeries
-        expectMsg(List())
-      }
-    }
-  }
-
-  "this test should" should {
-    " return an empty list of FailedCalls " in {
-      within(100 millis) {
-        basicStatsActor ! GetFailedCallsTimeSeries
-        expectMsg(List())
-      }
-    }
-  }
-
-  "this test should" should {
-    " return an empty list of BasicACD " in {
-      within(100 millis) {
-        basicStatsActor ! GetBasicAcdTimeSeries
+        basicStatsActor ! GetBasicStatsTimeSeries
         expectMsg(List())
       }
     }
   }
 
 
-
   "this test should" should {
-    " return a  list of size 1 with Concurrent Calls " in {
+    " return a  list of size 1 with BasicStats " in {
       within(30000 millis) {
         Thread.sleep(12000)
-        basicStatsActor ! GetConcurrentCallsTimeSeries
+        var basicStatsSize = 0
+        basicStatsActor ! GetBasicStatsTimeSeries
         expectMsgPF() {
-          case x@List(ConcurrentCallsTimeSeries(_, _)) => if (x.size == 2) true else false
+          case x@List(BasicStatsTimeSeries(_, _, _, _, _, _)) => basicStatsSize = x.size
           case _ => false
         }
-        //expectMsg(List(ConcurrentCallsTimeSeries(_, _)))
+        basicStatsSize should be(1)
       }
     }
   }
-
-  "this test should" should {
-    " return a list of  size 1 with FailedCalls " in {
-      within(30000 millis) {
-        Thread.sleep(12000)
-        var calls = 0
-        basicStatsActor ! GetFailedCallsTimeSeries
-        expectMsgPF() {
-          case x@List(FailedCallsTimeSeries(_, _)) => calls = x.size
-          case _ => calls = 0
-        }
-        calls should be(1)
-      }
-    }
-  }
-
 
   val newChannelDiffCallIdA1 = CallNew("the-uuid-channel-a-1", "CHANNEL_ANSWER", "5003", "5004", "GSM", "GSM",
     "192.168.100.101", "the-uuid-channel-a-1", Some(new Timestamp(System.currentTimeMillis())),
@@ -182,9 +147,9 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
     "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 120, 100, "the-uuid-channel-a-1")
 
   "this test should" should {
-    " return one item list of BasicACD time series " in {
+    " return acd = 150 " in {
       within(60000 millis) {
-        var acd = 0
+        var acd = 0d
 
         callRouterActor ! newChannelSameCallIDA1
         expectNoMsg(FiniteDuration(1, "seconds"))
@@ -198,21 +163,20 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
         //Thread.sleep(12000)
 
         // trigger the actor to get acd data
-        val ACD = "acd"
-        basicStatsActor ! ACD
+        val BasicStatsTick = "BasicStatsTick"
+        basicStatsActor ! BasicStatsTick
         expectNoMsg(FiniteDuration(1, "seconds"))
 
-        basicStatsActor ! GetBasicAcdTimeSeries
+        basicStatsActor ! GetBasicStatsTimeSeries
         expectMsgPF() {
-          case x@List(ACDTimeSeries(_, _)) =>
+          case x@List(BasicStatsTimeSeries(_, _, _, _, _, _)) =>
             x.headOption match {
-              case Some(a) => acd = a.asInstanceOf[ACDTimeSeries].acd
+              case Some(a) => acd = a.asInstanceOf[BasicStatsTimeSeries].acd
               case None => acd = 10
             }
 
-          case x@List() => acd = 30
-
-          case _ => acd = 20
+          case x =>
+            acd = -20
         }
         // first call billsec is 180 and second is 120 so ACD is (180+120)/2=150
         acd should be(150)
@@ -264,10 +228,8 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
 
       }
     }
-    //        case x@GetTotalFailedCalls =>
-    //          failedCallsActor forward x
-
   }
+
 
   "this test should" should {
     " return total FailedCalls " in {
@@ -287,4 +249,48 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
       }
     }
   }
+
+  val endChannelFailedCall2 = CallEnd("the-uuid-channel-aa-00000000", "CHANNEL_ANSWER", "5001", "5002", "GSM", "GSM",
+    "192.168.100.101", "call-uuid-9898988", None,
+    None, new Timestamp(System.currentTimeMillis()),
+    "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 120, 100, "the-uuid-channel-a-2767676")
+
+  "this test should" should {
+    " return the correct asr 40 " +
+      "since we have so far 4 total calls and 2 successfull calls asr= 2 / 5 * 100 " in {
+      within(60000 millis) {
+
+        var asr = 0d
+        callRouterActor ! endChannelFailedCall
+        expectNoMsg(FiniteDuration(100, "milliseconds"))
+
+        // trigger the actor to get acd data
+        val BasicStatsTick = "BasicStatsTick"
+        basicStatsActor ! BasicStatsTick
+        expectNoMsg(FiniteDuration(100, "milliseconds"))
+
+        basicStatsActor ! GetBasicStatsTimeSeries
+
+        expectMsgPF() {
+          case x@List(BasicStatsTimeSeries(_, _, _, _, _, _)) =>
+            x headOption match {
+              case Some(a) => asr = a.asInstanceOf[BasicStatsTimeSeries].asr
+              case None => asr = -10
+            }
+
+          case x =>
+            println("-----------------> basicStats List: " + x)
+            asr = -20
+          /*            x.asInstanceOf[List[BasicStatsTimeSeries]] headOption match {
+                        case Some(a) => asr = a.asInstanceOf[BasicStatsTimeSeries].asr
+                        case None => asr = -10
+                      }*/
+        }
+
+        asr should be(40) // since we have so far 4 total calls and 2 successfull calls asr= 2 / 5 * 100
+      }
+    }
+  }
+
+
 }

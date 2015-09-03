@@ -1,6 +1,6 @@
 package gr.gnostix.freeswitch.actors
 
-import akka.actor.{Terminated, Props, Actor, ActorLogging}
+import akka.actor._
 import gr.gnostix.freeswitch.actors.ServletProtocol.ApiReply
 import gr.gnostix.freeswitch.{EslConnection}
 import gr.gnostix.freeswitch.actors.ActorsProtocol.{ShutdownEslConnection, EslConnectionData}
@@ -11,7 +11,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /**
  * Created by rebel on 27/8/15.
  */
-class EslConnectionDispatcherActor extends Actor with ActorLogging {
+class EslConnectionDispatcherActor(wSLiveEventsActor: ActorRef) extends Actor with ActorLogging {
 
   val Tick = "tick"
   var actorConnections: scala.collection.Map[String, EslConnection] = Map()
@@ -24,18 +24,23 @@ class EslConnectionDispatcherActor extends Actor with ActorLogging {
           val eslEventRouter = context.actorOf(Props[EslEventRouter], x.ip)
           val eslConn = new EslConnection(eslEventRouter, x.ip, x.port, x.password)
 
-          eslConn.connectEsl() match {
+          val connStatus = eslConn.connectEsl()
+          connStatus.isConnected match {
             case true =>
               log info "----> connection succeded "
-              sender ! ApiReply("Connection Ok")
+              val resp = ApiReply(s"Connection Ok")
+              wSLiveEventsActor ! ActorsJsonProtocol.caseClassToJsonMessage(resp)
+              sender ! resp
 
               val newMap = connections updated(ip, eslConn)
               actorConnections = newMap
               context become idle(newMap)
             case false =>
               log info "Connection failed for ip " + x.ip
-              context stop eslEventRouter
-              sender ! ApiReply("Connection Failed")
+              val resp = ApiReply(connStatus.getMessage)
+                context stop eslEventRouter
+              wSLiveEventsActor ! ActorsJsonProtocol.caseClassToJsonMessage(resp)
+              sender ! resp
           }
 
         case Some(actor) =>
@@ -57,9 +62,11 @@ class EslConnectionDispatcherActor extends Actor with ActorLogging {
 
     case Tick =>
       connections.map{
-        case (x,y) => y.checkConnection() match {
-          case true => "all good"
-          case false => log warning(s"---> EslConnectionDispatcherActor | the connection with ip $x is down!!")
+        case (a,y) => y.checkConnection() match {
+          case x if x.isConnected => "all good"
+          case x if !x.isConnected =>
+            sender ! ApiReply(x.getMessage)
+            log warning(s"---> EslConnectionDispatcherActor | the connection with ip $a is down!!")
         }
         case _ => log info "---> EslConnectionDispatcherActor | empty connections Map"
       }

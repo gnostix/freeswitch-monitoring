@@ -23,7 +23,7 @@ public class EslConnection {
         this.password = password;
     }
 
-    public boolean connectEsl() {
+    public ConectionStatus connectEsl() {
         try {
             conn.connect(ip, 8021, password, 10);
 
@@ -33,20 +33,20 @@ public class EslConnection {
                 conn.setEventSubscriptions("plain", "all");
                 conn.addEventListener(new MyEslEventListener(eslMessageRouter));
             }
-            return true;
+            return new ConectionStatus(true, "all good");
             //conn.setEventSubscriptions( "plain", "CHANNEL_HANGUP_COMPLETE CHANNEL_CALLSTATE  CHANNEL_CREATE CHANNEL_EXECUTE CHANNEL_EXECUTE_COMPLETE CHANNEL_DESTROY" );
         } catch (InboundConnectionFailure e) {
-            System.out.println("------- ESL connection failed. !!");
+            System.out.println("------- ESL connection failed. !! " + e.getMessage());
             //e.printStackTrace();
-            return false;
+            return new ConectionStatus(false, e.getMessage());
         }
     }
 
-    public boolean checkConnection(){
-        boolean status = false;
+    public ConectionStatus checkConnection(){
+        ConectionStatus status;
         if (conn.canSend() == true) {
             //System.out.println("connected");
-            status = true;
+            status = new ConectionStatus(true, "all good");
         } else {
             status = connectEsl();
         }

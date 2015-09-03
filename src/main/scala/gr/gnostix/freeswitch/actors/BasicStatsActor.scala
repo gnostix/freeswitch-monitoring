@@ -25,84 +25,67 @@ case class FailedCallsTimeSeries(dateTime: Timestamp, failedCallsNum: Int) exten
 
 case class ACDTimeSeries(dateTime: Timestamp, acd: Int) extends BasicStatsCalls
 
+case class BasicStatsTimeSeries(dateTime: Timestamp, concCallsNum: Int, failedCallsNum: Int, acd: Double, asr: Double, rtpQualityAvg: Double) extends BasicStatsCalls
+
+case class CustomStatsPerCustomerTimeSeries(dateTime: Timestamp, concCallsNum: Int, failedCallsNum: Int, acd: Int, asr: Double,
+                                            rtpQualityAvg: Double, ip: List[String], cliPrefixRegEx: Option[List[String]])
+
+
+sealed trait CustomJobs
+
+//object CustomJob extends CustomJobs
+
+case class StatsPerCustomer(ip: List[String], cliPrefixRegEx: Option[List[String]]) extends CustomJobs
+
+
 
 class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, wsLiveEventsActor: ActorRef)
   extends Actor with ActorLogging {
 
   implicit val timeout = Timeout(1 seconds)
 
-  val ConcCalls = "ConcCalls"
-  val CurFailedCalls = "CurFailedCalls"
+  val BasicStatsTick = "BasicStatsTick"
   val Tick = "Tick"
-  val ACD = "acd"
 
-  /*
-   val callRouterActor = context.actorSelection("/user/centralMessageRouter/callRouter")
-   val completedCallsActor = context.actorSelection("/user/centralMessageRouter/completedCallsActor")
-   val failedCallsActor = context.actorSelection("/user/centralMessageRouter/callRouter/failedCallsActor")
- */
-  var concurrentCalls: List[ConcurrentCallsTimeSeries] = List()
-  var failedCalls: List[FailedCallsTimeSeries] = List()
-  var basicAcd: List[ACDTimeSeries] = List()
+  var basicStats: List[BasicStatsTimeSeries] = List()
+  var customStatsPerCust: List[CustomStatsPerCustomerTimeSeries] = List()
+  var customJobs: List[StatsPerCustomer] = List()
   var totalOfLastValueFailedCalls = 0
 
   def receive: Receive = {
-    case ConcCalls =>
-      //log info "ConcCalls tick ..."
-      //context.parent ! GetConcurrentCalls
-      callRouterActor ! GetConcurrentCalls
+    case BasicStatsTick =>
+      val conCallsT: Future[ConcurrentCallsNum] = (callRouterActor ? GetConcurrentCalls).mapTo[ConcurrentCallsNum]
+      val failedCallsT: Future[TotalFailedCalls] = (callRouterActor ? GetTotalFailedCalls).mapTo[TotalFailedCalls]
+      val completedCallsStatsT: Future[List[CompletedCallStats]] = (completedCallsActor ? GetACDAndRTPForLast60Seconds).mapTo[List[CompletedCallStats]]
 
-    case ConcurrentCallsNum(a) =>
-      val calls = ConcurrentCallsTimeSeries(new Timestamp(System.currentTimeMillis), a)
-      concurrentCalls ::= calls
-      wsLiveEventsActor ! ActorsJsonProtocol.callsTimeSeriesToJson(calls)
-      //AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.callsTimeSeriesToJson(calls))
-
-    //log info "concurrent calls list " + concurrentCalls.toString()
-
-    case CurFailedCalls =>
-      //failedCallsActor ! GetTotalFailedCalls
-      callRouterActor ! GetTotalFailedCalls
-
-    case x@TotalFailedCalls(a) =>
-
-      // new failed calls = current failed calls minus the previous minute value of the failed calls
-      //val y = failedCalls.headOption map (a - _.failedCallsNum) getOrElse 0
-      //  log info s"Basic stats actor failed calls a: $a and head: ${failedCalls.headOption map(_.failedCallsNum)} and y: $y"
-      val calls = FailedCallsTimeSeries(new Timestamp(System.currentTimeMillis), a - totalOfLastValueFailedCalls)
-      totalOfLastValueFailedCalls = a
-      failedCalls ::= calls
-      wsLiveEventsActor ! ActorsJsonProtocol.callsTimeSeriesToJson(calls)
-    //AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.callsTimeSeriesToJson(calls))
-
-
-    case Tick =>
-      concurrentCalls = getRetentionedConcCalls
-      failedCalls = getRetentionedFailedCalls
-      basicAcd = getRetentionedAcd
-
-    case ACD =>
-      //log info s"-------> basicStats ACD asking for  ACDTimeSeries .."
-      val response: Future[List[Int]] = (completedCallsActor ? GetACDLastFor60Seconds).mapTo[List[Int]]
+      // acd = sum of minutes devided by the number of calls
+      // asr = the % of devide the successfully completed calls by the total number of calls and then multiply by 100
+      val response = for {
+        r1 <- conCallsT
+        r2 <- failedCallsT
+        r3 <- completedCallsStatsT
+      } yield{
+          //log info s"---------> the asr data completed Calls: ${r3.size} failed calls: ${r2.failedCalls}"
+          BasicStatsTimeSeries(new Timestamp(System.currentTimeMillis), r1.calls, r2.failedCalls,
+          if (!r3.isEmpty) (r3.map(x => x.acd).sum / r3.size).toDouble else 0,
+          if (!r3.isEmpty) (r3.size).toDouble / (r3.size + r2.failedCalls) * 100 else 0,
+          if (!r3.isEmpty) (r3.map(x => x.rtpQuality).sum / r3.size).toDouble else 0)}
       response.onComplete {
-        case Success(a) =>  a match {
-          case a @ List() => log warning "------> empty list of acd - reply from completed calls actor"
-          case a @ x::_  =>
-            log info s"-------> list of ACD ints $a"
-            basicAcd ::= ACDTimeSeries(new Timestamp(System.currentTimeMillis), a.sum / a.size)
-        }
-
-        case Failure(e) => log info s"-------> BasicStatsActor | ACD response: $e"
+        case Success(x) =>
+          log info "------> response from BasicStatsTick"
+          wsLiveEventsActor ! ActorsJsonProtocol.caseClassToJsonMessage(x)
+          basicStats ::= x
+        case Failure(e) => log warning "BasicStatsTick failed in response"
       }
 
-    case x@GetFailedCallsTimeSeries =>
-      sender ! failedCalls
+    case x @ StatsPerCustomer(_,_) =>
+      customJobs ::= x
 
-    case x@GetConcurrentCallsTimeSeries =>
-      sender ! concurrentCalls
+    case Tick =>
+      basicStats = getRetentionedBasicStats
 
-    case x@GetBasicAcdTimeSeries =>
-      sender ! basicAcd
+    case x@GetBasicStatsTimeSeries =>
+      sender ! basicStats
 
     case x => log info "basic stats actor: I don't know this message " + x.toString
   }
@@ -110,30 +93,11 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
   context.system.scheduler.schedule(10000 milliseconds,
     60000 milliseconds,
     self,
-    ConcCalls)
+    BasicStatsTick)
 
-  context.system.scheduler.schedule(10000 milliseconds,
-    60000 milliseconds,
-    self,
-    CurFailedCalls)
 
-  def getRetentionedFailedCalls = {
+  def getRetentionedBasicStats = {
     // minutes of week 10080 so the entries for one week are also 10080
-    failedCalls.take(10080)
-  }
-
-  def getRetentionedConcCalls = {
-    // minutes of week 10080 so the entries for one week are also 10080
-    concurrentCalls.take(10080)
-  }
-
-  context.system.scheduler.schedule(10000 milliseconds,
-    60000 milliseconds,
-    self,
-    ACD)
-
-  def getRetentionedAcd = {
-    // minutes of week 10080 so the entries for one week are also 10080
-    basicAcd.take(10080)
+    basicStats.take(10080)
   }
 }

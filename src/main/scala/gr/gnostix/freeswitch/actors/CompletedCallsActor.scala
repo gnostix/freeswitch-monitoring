@@ -31,14 +31,14 @@ class CompletedCallsActor extends Actor with ActorLogging {
       log info s"-----> new call coming on Completed Calls Actor $newMap"
       context become idle(newMap)
 
-    case x@GetACDLastFor60Seconds =>
+    case x@GetACDAndRTPForLast60Seconds =>
       completedCalls.isEmpty match {
         case true =>
-          log info s"Completed calls Actor GetACDLastFor60Seconds | NO completedCalls: " + completedCalls
+          log info s"Completed calls Actor GetACDAndRTPForLast60Seconds | NO completedCalls: " + completedCalls
           sender ! List()
         case false =>
-          val f: List[Future[Int]] = completedCalls.map(x => (x._2 ? GetACDLastFor60Seconds).mapTo[Int]).toList
-          log info s"Completed calls Actor GetACDLastFor60Seconds , asking all call actors" + Future.sequence(f)
+          val f: List[Future[CompletedCallStats]] = completedCalls.map(x => (x._2 ? GetACDAndRTPForLast60Seconds).mapTo[CompletedCallStats]).toList
+          log info s"Completed calls Actor GetACDAndRTPForLast60Seconds , asking all call actors" + Future.sequence(f)
           Future.sequence(f) pipeTo sender
       }
     // sender ! 100

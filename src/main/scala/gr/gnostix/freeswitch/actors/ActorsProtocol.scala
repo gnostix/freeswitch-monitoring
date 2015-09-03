@@ -46,11 +46,13 @@ object ActorsProtocol {
 
   case object GetAllHeartBeat extends RouterRequest
 
-  case object GetFailedCallsTimeSeries extends RouterRequest
+  //case object GetFailedCallsTimeSeries extends RouterRequest
 
-  case object GetConcurrentCallsTimeSeries extends RouterRequest
+  case object GetBasicStatsTimeSeries extends RouterRequest
 
-  case object GetBasicAcdTimeSeries extends RouterRequest
+  //case object GetConcurrentCallsTimeSeries extends RouterRequest
+
+  //case object GetBasicAcdTimeSeries extends RouterRequest
 
   case object GetCompletedCallMinutes extends RouterRequest
 
@@ -62,7 +64,7 @@ object ActorsProtocol {
 
   case class CallTerminated(callEnd: CallEnd) extends RouterProtocol
 
-  case object GetACDLastFor60Seconds extends RouterRequest
+  case object GetACDAndRTPForLast60Seconds extends RouterRequest
 
   case class AcdData(acd: Double) extends RouterResponse
 

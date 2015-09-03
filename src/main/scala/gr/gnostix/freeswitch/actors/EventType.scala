@@ -10,9 +10,9 @@ sealed trait EventType {
   def eventName: String
 }
 
-case class HeartBeat(eventName: String, eventInfo: String, upTime: String, uptimeMsec: Long, sessionCount: Int,
-                     sessionPerSecond: Int, eventDateTimestamp: Timestamp, idleCPU: String, sessionPeakMax: Int,
-                     sessionPeakMaxFiveMin: Int, freeSWITCHHostname: String, freeSWITCHIPv4: String)
+case class HeartBeat(eventName: String, eventInfo: String, uptimeMsec: Long, sessionCount: Int,
+                     sessionPerSecond: Int, eventDateTimestamp: Timestamp, idleCPU: Double, sessionPeakMax: Int,
+                     sessionPeakMaxFiveMin: Int, freeSWITCHHostname: String, freeSWITCHIPv4: String, upTime: String)
   extends EventType
 
 case class ChatHeartBeat(author: String, message: String)

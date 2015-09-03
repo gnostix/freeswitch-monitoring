@@ -18,7 +18,7 @@ class CentralMessageRouter extends Actor with ActorLogging {
   val wsLiveEventsActor = context.actorOf(Props[WSLiveEventsActor], "wsLiveEventsActor")
   val completedCallsActor = context.actorOf(Props[CompletedCallsActor], "completedCallsActor")
   val heartBeatActor = context.actorOf(Props(new HeartBeatActor(wsLiveEventsActor)), "heartBeatActor")
-  val eslConnectionDispatcherActor = context.actorOf(Props[EslConnectionDispatcherActor], "eslConnectionDispatcherActor")
+  val eslConnectionDispatcherActor = context.actorOf(Props(new EslConnectionDispatcherActor(wsLiveEventsActor)), "eslConnectionDispatcherActor")
   val callRouterActor = context.actorOf(Props(new CallRouter(wsLiveEventsActor, completedCallsActor)), "callRouter")
   val basicStatsActor = context.actorOf(Props(new BasicStatsActor(callRouterActor, completedCallsActor, wsLiveEventsActor)), "basicStatsActor")
 
@@ -47,8 +47,7 @@ class CentralMessageRouter extends Actor with ActorLogging {
       // api calls asking for data
       callRouterActor forward x
 
-    case x@(GetConcurrentCallsTimeSeries | GetFailedCallsTimeSeries
-      | GetBasicAcdTimeSeries) =>
+    case x@(GetBasicStatsTimeSeries) =>
       // api calls asking for data
     basicStatsActor forward x
 

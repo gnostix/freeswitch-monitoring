@@ -46,8 +46,8 @@ class EslEventRouter extends Actor with ActorLogging {
         freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) =>
           log info s"no uuid $uuid" + x.toString
 
-        case x @ HeartBeat(eventType, eventInfo, upTime, sessionCount, sessionPerSecond, eventDateTimestamp, idleCPU,
-        sessionPeakMax, sessionPeakMaxFiveMin, freeSWITCHHostname, freeSWITCHIPv4, uptimeMsec) =>
+        case x @ HeartBeat(eventType, eventInfo, uptimeMsec, sessionCount, sessionPerSecond, eventDateTimestamp, idleCPU,
+        sessionPeakMax, sessionPeakMaxFiveMin, freeSWITCHHostname, freeSWITCHIPv4, upTime) =>
 
           heartBeatActor ! x
 
@@ -160,9 +160,9 @@ class EslEventRouter extends Actor with ActorLogging {
       case x => new Timestamp(x.toLong / 1000)
     }
 
-    HeartBeat("HEARTBEAT", eventInfo, upTime, uptimeMsec.toLong, sessionCount.toInt, sessionPerSecond.toInt,
-      eventDateTimestamp, idleCPU, sessionPeakMax.toInt,
-      sessionPeakMaxFiveMin.toInt, freeSWITCHHostname, freeSWITCHIPv4)
+    HeartBeat("HEARTBEAT", eventInfo, uptimeMsec.toLong, sessionCount.toInt, sessionPerSecond.toInt,
+      eventDateTimestamp, idleCPU.toDouble, sessionPeakMax.toInt,
+      sessionPeakMaxFiveMin.toInt, freeSWITCHHostname, freeSWITCHIPv4, upTime)
   }
 
 

@@ -104,17 +104,17 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
 
   // get basic stats
 
-  get("/stats/GetFailedCallsTimeSeries"){
-    myActor ? GetFailedCallsTimeSeries
+  get("/stats/GetBasicStatsTimeSeries"){
+    myActor ? GetBasicStatsTimeSeries
   }
-
+/*
   get("/stats/GetConcurrentCallsTimeSeries"){
     myActor ? GetConcurrentCallsTimeSeries
   }
 
   get("/stats/GetBasicAcdTimeSeries"){
     myActor ask GetBasicAcdTimeSeries
-  }
+  }*/
 
 }
 

@@ -4,7 +4,7 @@ import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
-import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetACDLastFor60Seconds, CallTerminated}
+import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetACDAndRTPForLast60Seconds, CallTerminated}
 import org.scalatra.atmosphere.AtmosphereClient
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -18,6 +18,8 @@ import scala.concurrent.Future
 /*object CallActor {
   def props(channelA: CallNew): Props = Props(new CallActor(channelA))
 }*/
+
+case class CompletedCallStats(acd: Int, rtpQuality: Double)
 
 class CallActor extends Actor with ActorLogging {
 
@@ -110,12 +112,12 @@ implicit val timeout = Timeout(1 seconds) // needed for `?` below
           sender ! all
       }
 
-    case x @ GetACDLastFor60Seconds =>
+    case x @ GetACDAndRTPForLast60Seconds =>
       //log info s"--------> CallActor GetACDLastFor60Seconds: $x"
       endCallChannel.headOption match {
         case Some(a) =>
           //log info s"--------> CallActor on CompletedCalls: $a"
-          sender ! a.billSec
+          sender ! CompletedCallStats(a.billSec, a.rtpQualityPerc)
         case None => log warning "-----> ignore GetACDLastFor60Seconds.. channel empty!!"
       }
 

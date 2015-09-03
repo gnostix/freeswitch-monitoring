@@ -15,7 +15,8 @@ import org.scalatra.atmosphere.JsonMessage
 object ActorsJsonProtocol {
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  def caseClassToJsonMessage(message: RouterProtocol): JsonMessage =
+
+  def caseClassToJsonMessage(message: Any): JsonMessage =
     JsonMessage(Extraction.decompose(message))
 
   def callsTimeSeriesToJson(callsTimeSeries: BasicStatsCalls): JsonMessage =
