@@ -59,7 +59,7 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
             case None =>
               x.callerChannelAnsweredTime match {
                 case None => failedCallsActor ! x
-                case Some(a) => log info s"Call $callUUID doesn't exist! with answered time " + a
+                case Some(a) => log warning s"Call $callUUID doesn't exist! with answered time " + a
               }
               log info s"Call $callUUID doesn't exist!"
 

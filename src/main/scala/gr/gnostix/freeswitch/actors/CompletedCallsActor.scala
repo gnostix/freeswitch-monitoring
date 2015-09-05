@@ -39,7 +39,7 @@ class CompletedCallsActor extends Actor with ActorLogging {
     case x @ GetACDAndRTPByTime(t) =>
       completedCalls.isEmpty match {
         case true =>
-          log info s"Completed calls Actor GetACDAndRTPForLast60Seconds | NO completedCalls: " + completedCalls
+          //log info s"Completed calls Actor GetACDAndRTPForLast60Seconds | NO completedCalls: " + completedCalls
           sender ! List()
         case false =>
           val act = completedCalls.map(x => x._2).filter(s => s.hangupTime.after(t))
@@ -47,28 +47,23 @@ class CompletedCallsActor extends Actor with ActorLogging {
            case a => (a.callActor ? GetACDAndRTP).mapTo[CompletedCallStats]
           }.toList
 
-            /*completedCalls.filter().map{
-            case (a,y) => (y.callActor ? x).mapTo[Option[CompletedCallStats]]
-          }.toList
-*/
-          log info s"Completed calls Actor GetACDAndRTPForLast60Seconds , asking all call actors" + Future.sequence(f)
+          //log info s"Completed calls Actor GetACDAndRTPForLast60Seconds , asking all call actors" + Future.sequence(f)
           Future.sequence(f) pipeTo sender
       }
 
     case x@GetACDAndRTP =>
       completedCalls.isEmpty match {
         case true =>
-          log info s"Completed calls Actor GetACDAndRTPForLast60Seconds | NO completedCalls: " + completedCalls
+          //log info s"Completed calls Actor GetACDAndRTPForLast60Seconds | NO completedCalls: " + completedCalls
           sender ! List()
         case false =>
           val f: List[Future[CompletedCallStats]] = completedCalls.map{
             case (x,y) => (y.callActor ? GetACDAndRTP).mapTo[CompletedCallStats]
           }.toList
 
-          log info s"Completed calls Actor GetACDAndRTPForLast60Seconds , asking all call actors" + Future.sequence(f)
+          //log info s"Completed calls Actor GetACDAndRTPForLast60Seconds , asking all call actors" + Future.sequence(f)
           Future.sequence(f) pipeTo sender
       }
-    // sender ! 100
 
     case x@GetCompletedCalls =>
       val calls = completedCalls.keys.toList

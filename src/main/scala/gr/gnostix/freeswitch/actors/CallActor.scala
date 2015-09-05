@@ -17,9 +17,6 @@ import scala.concurrent.Future
  * Created by rebel on 17/7/15.
  */
 
-/*object CallActor {
-  def props(channelA: CallNew): Props = Props(new CallActor(channelA))
-}*/
 
 case class CompletedCallStats(acd: Int, rtpQuality: Double, callerChannelHangupTime: Timestamp)
 
@@ -44,21 +41,11 @@ class CallActor extends Actor with ActorLogging {
       log info s"======== in call actor $x"
       (activeChannels get uuid) match {
         case None =>
-          /*
-                    callUuid match {
-                      case Some(a) =>
-                        AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.newCallToJson(x))
-
-                      case None =>
-                        callUuid = Some(callUUID)
-                    }
-                    */
-          //val actor = context actorOf ChannelActor.props(x)
           val actor = context.actorOf(Props[ChannelActor], uuid)
           actor ! x
           context watch actor
 
-          log warning s"We create the actor Channel $uuid"
+//          log warning s"We create the actor Channel $uuid"
           val newMap = activeChannels updated(uuid, actor)
           context become idle(newMap)
         case Some(actor) =>
@@ -113,19 +100,7 @@ class CallActor extends Actor with ActorLogging {
 
           sender ! all
       }
-/*
 
-    case x@GetACDAndRTPByTime(lastCheck) =>
-      endCallChannel.headOption match {
-        case Some(a) =>
-          //log info s"--------> CallActor on CompletedCalls: $a"
-          a.callerChannelHangupTime.after(lastCheck) match  {
-            case true =>  sender ! CompletedCallStats(a.billSec, a.rtpQualityPerc)
-          }
-        case None => log warning "-----> ignore GetACDLastFor60Seconds.. channel empty!!"
-      }
-
-*/
 
     case x@GetACDAndRTP =>
       //log info s"--------> CallActor GetACDLastFor60Seconds: $x"
@@ -138,7 +113,7 @@ class CallActor extends Actor with ActorLogging {
 
     case CallTerminated(callEnd) =>
       terminatedChannels += 1
-      log info s"call actor channel is terminated " + terminatedChannels
+      //log info s"call actor channel is terminated " + terminatedChannels
       val updatedActiveChannels = activeChannels.filter(_._2 != sender())
 
       if ((terminatedChannels >= 2) || (updatedActiveChannels.size == 0)) {

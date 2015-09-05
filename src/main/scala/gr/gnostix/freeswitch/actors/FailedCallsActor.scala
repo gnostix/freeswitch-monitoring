@@ -22,12 +22,26 @@ class FailedCallsActor(wsLiveEventsActor: ActorRef) extends Actor with ActorLogg
     case x @ CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
     callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
     freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) =>
-      log info "-------> add an extra failed call"
-      failedCalls ::= x
-      //failedCalls = failedCalls.sortWith { (leftE, rightE) => leftE.callerChannelHangupTime.before(rightE.callerChannelHangupTime) }
-      val fCall = FailedCall("FAILED_CALL", x.fromUser, x.toUser, x.callUUID, x.freeSWITCHIPv4)
-      wsLiveEventsActor ! ActorsJsonProtocol.failedCallToJson(fCall)
-      //AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.failedCallToJson(fCall))
+
+    // the case where we get two FAILED call leg for the same call
+    //{"eventName":"FAILED_CALL","fromUser":"0000000000","toUser":"19189898989","callUUID":"8315d80c-c404-4bcb-8612-94edb9863765","freeSWITCHIPv4":"10.143.0.54"}
+    //{"eventName":"FAILED_CALL","fromUser":"1000","toUser":"9898989","callUUID":"8315d80c-c404-4bcb-8612-94edb9863765","freeSWITCHIPv4":"10.143.0.54"}
+
+      failedCalls.find(a => a.callUUID == x.callUUID) match {
+        case Some(c) =>
+          log info "we have this failed call so now we get the second system leg"
+          c.fromUser == "0000000000" match {
+            case true =>
+              failedCalls = failedCalls.filter(ca => ca.callUUID != x.callUUID)
+              failedCalls ::= x
+            case false =>
+          }
+        case None =>
+          log info "-------> add an extra failed call"
+          failedCalls ::= x
+          val fCall = FailedCall("FAILED_CALL", x.fromUser, x.toUser, x.callUUID, x.freeSWITCHIPv4)
+          wsLiveEventsActor ! ActorsJsonProtocol.failedCallToJson(fCall)
+      }
 
     case x @ GetFailedCalls =>
       log info "returning the failed calls " + failedCalls
