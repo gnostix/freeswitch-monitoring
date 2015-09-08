@@ -21,7 +21,8 @@ public class MyEslConnection {
 
             if (conn.canSend() == true) System.out.println("connected");
             //conn.setEventSubscriptions( "plain", "CHANNEL_HANGUP_COMPLETE CHANNEL_CALLSTATE  CHANNEL_CREATE CHANNEL_EXECUTE CHANNEL_EXECUTE_COMPLETE CHANNEL_DESTROY" );
-            conn.setEventSubscriptions( "plain", "all" );
+            //conn.setEventSubscriptions( "plain", "all" );
+            conn.setEventSubscriptions( "plain", "CHANNEL_HANGUP_COMPLETE CHANNEL_ANSWER  HEARTBEAT" );
             conn.addEventListener(new MyEslEventListener(centralMessageRouter));
 
             // on failure catch the exception and don't start the CallRouter!!!
