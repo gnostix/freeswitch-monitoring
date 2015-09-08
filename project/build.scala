@@ -29,6 +29,7 @@ object FreeswitchopBuild extends Build {
       scalacOptions in ThisBuild ++= Seq("-feature"),
       libraryDependencies ++= Seq(
         "org.scalatra" %% "scalatra" % ScalatraVersion,
+        "org.scalatra" %% "scalatra-auth" % ScalatraVersion,
         "org.scalatra" %% "scalatra-scalate" % ScalatraVersion,
         "org.scalatra" %% "scalatra-specs2" % ScalatraVersion % "test",
         "org.scalatra" %% "scalatra-scalatest" % ScalatraVersion % "test",
@@ -44,8 +45,9 @@ object FreeswitchopBuild extends Build {
         "org.scalatest" % "scalatest_2.11" % "2.2.5" % "test",
         "net.databinder.dispatch" %% "dispatch-core" % "0.11.3",
         "org.freeswitch.esl.client" % "org.freeswitch.esl.client" % "0.9.2",
-        "ch.qos.logback" % "logback-classic" % "1.1.2" % "runtime"
-  ),
+        "ch.qos.logback" % "logback-classic" % "1.1.2" % "runtime",
+        "javax.mail" % "mail" % "1.4.1"
+      ),
   scalateTemplateConfig in Compile <<= (sourceDirectory in Compile) { base =>
     Seq(
       TemplateConfig(

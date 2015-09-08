@@ -1,5 +1,7 @@
 package gr.gnostix.freeswitch.servlets
 
+import gr.gnostix.api.auth.AuthenticationSupport
+import gr.gnostix.freeswitch.FreeswitchopStack
 import org.scalatra._
 import org.json4s.{DefaultFormats, Formats}
 import scalate.ScalateSupport
@@ -22,10 +24,22 @@ import ExecutionContext.Implicits.global
 class WSEslServlet extends ScalatraServlet
 with ScalateSupport
 with JValueResult
-with JacksonJsonSupport with SessionSupport
-with AtmosphereSupport {
+with JacksonJsonSupport
+with SessionSupport
+//with AuthenticationSupport
+with AtmosphereSupport
+with FreeswitchopStack {
 
   protected implicit val jsonFormats: Formats = DefaultFormats
+
+  before() {
+    contentType = formats("json")
+ //   requireLogin()
+  }
+
+  get("/test"){
+    "test works"
+  }
 
   atmosphere("/events") {
     log("---------------> atmosphere /live/events")

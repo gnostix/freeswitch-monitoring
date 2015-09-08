@@ -5,6 +5,7 @@ import java.sql.Timestamp
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import akka.util.Timeout
+import gr.gnostix.api.auth.AuthenticationSupport
 import gr.gnostix.freeswitch.FreeswitchopStack
 import gr.gnostix.freeswitch.actors.ActorsProtocol._
 import org.joda.time.DateTime
@@ -16,11 +17,10 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-case class Koko(date: DateTime)
-
 
 class EslActorApp(system:ActorSystem, myActor:ActorRef)
-  extends ScalatraServlet with FutureSupport with JacksonJsonSupport with CorsSupport with FreeswitchopStack
+  extends ScalatraServlet with FutureSupport with JacksonJsonSupport
+  with CorsSupport with FreeswitchopStack with AuthenticationSupport
 {
 
   implicit val timeout = new Timeout(10 seconds)
@@ -34,15 +34,13 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
 
   before() {
     contentType = formats("json")
+    requireLogin()
   }
 
   options("/*") {
     response.setHeader("Access-Control-Allow-Headers", request.getHeader("Access-Control-Request-Headers"))
   }
 
-  get("/koko"){
-    Koko(new DateTime())
-  }
 
   // You'll see the output from this in the browser.
   get("/ask") {
