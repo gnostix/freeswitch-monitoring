@@ -30,7 +30,8 @@ public class EslConnection {
             if (conn.canSend() == true)
             {
                 System.out.println("conn.canSend() connected");
-                conn.setEventSubscriptions("plain", "all");
+                //conn.setEventSubscriptions("plain", "all");
+                conn.setEventSubscriptions( "plain", "CHANNEL_HANGUP_COMPLETE CHANNEL_ANSWER  HEARTBEAT" );
                 conn.addEventListener(new MyEslEventListener(eslMessageRouter));
             }
             return new ConectionStatus(true, "all good");
