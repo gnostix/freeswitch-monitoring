@@ -79,13 +79,13 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
     freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) =>
       log info s"no uuid $uuid" + x.toString
 
-    case GetCalls =>
+    case GetConcurrentCalls =>
       val calls = activeCalls.keys.toList
       //log info s"======== $calls"
       // channels / 2 (each call has two channels)
       sender() ! GetCallsResponse(calls.size, calls)
 
-    case x@GetConcurrentCalls =>
+    case x@GetTotalConcurrentCalls =>
       // log info "call router GetConcurrentCalls received .."
       sender ! ConcurrentCallsNum(activeCalls.size)
 

@@ -15,7 +15,7 @@ class ScalatraBootstrap extends LifeCycle {
 
 
   override def init(context: ServletContext) {
-    //context.mount(new ChatController, "/fs-moni/live/*")
+    context.mount(new ChatController, "/")
     context.mount(new CentralServlet, "/user/*")
     context.mount(new WSEslServlet, "/fs-moni/live/*")
     context.mount(new EslActorApp(system, myRouter), "/actors/*")

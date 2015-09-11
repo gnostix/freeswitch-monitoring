@@ -42,7 +42,7 @@ class CentralMessageRouter extends Actor with ActorLogging {
     case x @ (GetLastHeartBeat | GetAllHeartBeat) =>
       heartBeatActor forward x
 
-    case x @ (GetCalls | GetConcurrentCalls | GetFailedCalls | GetFailedCallsByDate |
+    case x @ (GetConcurrentCalls | GetTotalConcurrentCalls | GetFailedCalls | GetFailedCallsByDate |
               GetTotalFailedCalls  )=>
       // api calls asking for data
       callRouterActor forward x

@@ -26,33 +26,6 @@ class ChatController extends ScalatraServlet
     ssp("/index")
   }
 
-  atmosphere("/events") {
-    log("---------------> atmosphere /live/events")
-    new AtmosphereClient {
-      def receive: AtmoReceive = {
-        case Connected =>
-          println("Client %s is connected" format uuid)
-          //broadcast(("author" -> "Someone") ~ ("message" -> "joined the room") ~ ("time" -> (new Date().getTime.toString)), Everyone)
-
-        case Disconnected(ClientDisconnected, _) =>
-          println("Client %s is disconnected" format uuid)
-
-          //broadcast(("author" -> "Someone") ~ ("message" -> "has left the room") ~ ("time" -> (new Date().getTime.toString)), Everyone)
-
-        case Disconnected(ServerDisconnected, _) =>
-          println("Server disconnected the client %s" format uuid)
-
-        case _: TextMessage =>
-          broadcast(("author" -> "system") ~ ("message" -> "Only json is allowed") ~ ("time" -> (new Date().getTime.toString)))
-
-        case JsonMessage(json) =>
-          println("-----> message received on events " + json.toString)
-          //val msg = json merge (("time" -> (new Date().getTime().toString)): JValue)
-          broadcast(json) // by default a broadcast is to everyone but self
-          //send(json) // also send to the sender
-      }
-    }
-  }
 
 
   atmosphere("/the-chat") {

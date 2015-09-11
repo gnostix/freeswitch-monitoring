@@ -55,7 +55,7 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
 
   def receive: Receive = {
     case BasicStatsTick =>
-      val conCallsT: Future[ConcurrentCallsNum] = (callRouterActor ? GetConcurrentCalls).mapTo[ConcurrentCallsNum]
+      val conCallsT: Future[ConcurrentCallsNum] = (callRouterActor ? GetTotalConcurrentCalls).mapTo[ConcurrentCallsNum]
       val failedCallsT: Future[TotalFailedCalls] = (callRouterActor ? GetTotalFailedCalls).mapTo[TotalFailedCalls]
       val completedCallsStatsT: Future[List[CompletedCallStats]] =
         (completedCallsActor ? GetACDAndRTPByTime(lastBasicStatsTickTime)).mapTo[List[CompletedCallStats]]
@@ -94,7 +94,7 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
           basicStats ::= x._1
           totalOfLastValueFailedCalls = x._2
 
-        case Failure(e) => log warning "BasicStatsTick failed in response"
+        case Failure(e) => log warning "BasicStatsTick failed in response " + e.getMessage
       }
 
     case x@StatsPerCustomer(_, _) =>

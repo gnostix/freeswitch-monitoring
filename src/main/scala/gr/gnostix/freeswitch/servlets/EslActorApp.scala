@@ -52,8 +52,12 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
     myActor ? eslConnectionData
   }
 
-  get("/GetCalls"){
-    myActor ? GetCalls
+  get("/GetConcurrentCalls"){
+    myActor ? GetConcurrentCalls
+  }
+
+  get("/GetTotalConcurrentCalls"){
+    myActor ? GetTotalConcurrentCalls
   }
 
   get("/GetCompletedCalls"){

@@ -67,7 +67,7 @@ class CompletedCallsActor extends Actor with ActorLogging {
 
     case x@GetCompletedCalls =>
       val calls = completedCalls.keys.toList
-      log info s"CompletedCallsActor | GetCompletedCalls: $calls"
+      //log info s"CompletedCallsActor | GetCompletedCalls: $calls"
       // channels / 2 (each call has two channels)
       sender() ! GetCallsResponse(calls.size, calls)
 

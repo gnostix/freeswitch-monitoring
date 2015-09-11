@@ -44,7 +44,7 @@ class FailedCallsActor(wsLiveEventsActor: ActorRef) extends Actor with ActorLogg
       }
 
     case x @ GetFailedCalls =>
-      log info "returning the failed calls " + failedCalls
+      //log info "returning the failed calls " + failedCalls
       sender ! failedCalls
 
     case x @ GetTotalFailedCalls =>

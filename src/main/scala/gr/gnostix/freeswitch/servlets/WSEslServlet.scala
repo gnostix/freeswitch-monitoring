@@ -28,13 +28,18 @@ with JacksonJsonSupport
 with SessionSupport
 //with AuthenticationSupport
 with AtmosphereSupport
-with FreeswitchopStack {
+with FreeswitchopStack
+with CorsSupport {
 
   protected implicit val jsonFormats: Formats = DefaultFormats
 
   before() {
     contentType = formats("json")
  //   requireLogin()
+  }
+
+  options("/*") {
+    response.setHeader("Access-Control-Allow-Headers", request.getHeader("Access-Control-Request-Headers"))
   }
 
   get("/test"){
