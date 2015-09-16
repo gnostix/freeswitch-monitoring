@@ -75,7 +75,7 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
               log info s"------> response from BasicStatsTick failed calls ${r2.failedCalls - totalOfLastValueFailedCalls} - completed calls ${r3.size}"
               val r3Sorted = r3.sortWith { (leftE, rightE) => leftE.callerChannelHangupTime.before(rightE.callerChannelHangupTime) }
               val asr = r3Sorted.size.toDouble / (r3Sorted.size + (r2.failedCalls - totalOfLastValueFailedCalls)) * 100
-              val acd = r3Sorted.map(x => x.acd).sum / r3Sorted.size
+              val acd = BigDecimal((r3Sorted.map(x => x.acd).sum / r3Sorted.size) / 60.toDouble).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble //seconds to minutes
               val rtpQ = r3Sorted.map(x => x.rtpQuality).sum / r3Sorted.size.toDouble
               lastBasicStatsTickTime = r3Sorted.head.callerChannelHangupTime
 
@@ -90,7 +90,8 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
       response.onComplete {
         case Success(x) =>
           //log info "------> response from BasicStatsTick"
-          wsLiveEventsActor ! ActorsJsonProtocol.caseClassToJsonMessage(x._1)
+          wsLiveEventsActor ! x._1
+          //wsLiveEventsActor ! ActorsJsonProtocol.caseClassToJsonMessage(x._1)
           basicStats ::= x._1
           totalOfLastValueFailedCalls = x._2
 

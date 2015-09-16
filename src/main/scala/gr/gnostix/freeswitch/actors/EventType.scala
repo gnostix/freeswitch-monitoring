@@ -15,7 +15,6 @@ case class HeartBeat(eventName: String, eventInfo: String, uptimeMsec: Long, ses
                      sessionPeakMaxFiveMin: Int, freeSWITCHHostname: String, freeSWITCHIPv4: String, upTime: String)
   extends EventType
 
-case class ChatHeartBeat(author: String, message: String)
 
 sealed trait CallEventType extends EventType {
   def fromUser: String

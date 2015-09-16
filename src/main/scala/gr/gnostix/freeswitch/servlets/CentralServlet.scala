@@ -2,7 +2,7 @@ package gr.gnostix.freeswitch.servlets
 
 import gr.gnostix.api.auth.AuthenticationSupport
 import gr.gnostix.freeswitch.FreeswitchopStack
-import org.json4s.{Formats, DefaultFormats}
+import org.json4s.{JValue, Formats, DefaultFormats}
 import org.scalatra.{ScalatraServlet, CorsSupport}
 import org.scalatra.json.JacksonJsonSupport
 
@@ -49,6 +49,14 @@ with FreeswitchopStack {
     scentry.logout()
   }
 
-
+  notFound {
+    // remove content type in case it was set through an action
+    contentType = null
+    // Try to render a ScalateTemplate if no route matched
+    findTemplate(requestPath) map { path =>
+      contentType = "text/html"
+      layoutTemplate(path)
+    } orElse serveStaticResource() getOrElse resourceNotFound()
+  }
 
 }

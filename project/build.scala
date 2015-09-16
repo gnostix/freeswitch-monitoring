@@ -10,8 +10,8 @@ object FreeswitchopBuild extends Build {
   val Name = "FreeswitchOP"
   val Version = "0.1.0-SNAPSHOT"
   val ScalaVersion = "2.11.5"
-  val ScalatraVersion = "2.3.0"
-  val json4sversion = "3.2.10"
+  val ScalatraVersion = "2.3.1"
+  val json4sversion = "3.2.11"
   val jettyVersion = "9.2.1.v20140609" //9.2.10.v20150310"
 
 

@@ -1,27 +1,26 @@
 package gr.gnostix.freeswitch.servlets
 
-import gr.gnostix.api.auth.AuthenticationSupport
-import gr.gnostix.freeswitch.FreeswitchopStack
-import org.scalatra._
-import org.json4s.{DefaultFormats, Formats}
-import scalate.ScalateSupport
-import org.scalatra.atmosphere._
-import org.scalatra.servlet.AsyncSupport
-import org.scalatra.json.{JValueResult, JacksonJsonSupport}
-import org.json4s._
-import JsonDSL._
 import java.util.Date
-import java.text.SimpleDateFormat
-import org.fusesource.scalate.Template
 
+import _root_.akka.actor.{ActorRef, ActorSystem}
+import gr.gnostix.freeswitch.FreeswitchopStack
+import gr.gnostix.freeswitch.actors.ActorsProtocol.{RemoveAtmoClientUuid, AddAtmoClientUuid}
+import org.atmosphere.cpr.{AtmosphereResource, AtmosphereResourceFactory}
+import org.json4s.JsonDSL._
+import org.json4s.{DefaultFormats, Formats, _}
+import org.scalatra._
+import org.scalatra.atmosphere._
+import org.scalatra.json.{JValueResult, JacksonJsonSupport}
+import org.scalatra.scalate.ScalateSupport
+
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
-import ExecutionContext.Implicits.global
 
 /**
  * Created by rebel on 18/7/15.
  */
 
-class WSEslServlet extends ScalatraServlet
+class WSEslServlet(system:ActorSystem, myActor:ActorRef) extends ScalatraServlet
 with ScalateSupport
 with JValueResult
 with JacksonJsonSupport
@@ -46,31 +45,81 @@ with CorsSupport {
     "test works"
   }
 
+
+  get("/") {
+    contentType="text/html"
+    ssp("/index")
+  }
+
+  atmosphere("/koko") {
+    new AtmosphereClient {
+      def receive: AtmoReceive = {
+        case Connected =>
+          myActor ! AddAtmoClientUuid(uuid)
+          println("Client %s is connected" format uuid)
+          //broadcast(("author" -> "Someone") ~ ("message" -> "joined the room") ~ ("time" -> (new Date().getTime.toString )), Everyone)
+
+        case Disconnected(ClientDisconnected, _) =>
+          println("Client %s is disconnected" format uuid)
+          //broadcast(("author" -> "Someone") ~ ("message" -> "has left the room") ~ ("time" -> (new Date().getTime.toString )), Everyone)
+
+        case Disconnected(ServerDisconnected, _) =>
+          myActor ! RemoveAtmoClientUuid(uuid)
+          println("Server disconnected the client %s" format uuid)
+
+        case x @ TextMessage(_) =>
+          println("text message received %s" format uuid)
+          //broadcast(x.toString())
+        //send(("author" -> "system") ~ ("message" -> "Only json is allowed") ~ ("time" -> (new Date().getTime.toString )))
+
+        case JsonMessage(json) =>
+          println("------ json " + json.toString)
+          println("Got message %s from %s".format((json \ "message").extract[String], (json \ "author").extract[String]))
+          val msg = json merge (("time" -> (new Date().getTime().toString)): JValue)
+          broadcast(msg) // by default a broadcast is to everyone but self
+        //send(msg) // also send to the sender
+      }
+    }
+  }
+
   atmosphere("/events") {
     log("---------------> atmosphere /live/events")
     new AtmosphereClient {
       def receive: AtmoReceive = {
         case Connected =>
-          println("Client %s is connected" format uuid)
+       //   myActor ! AddAtmoClientUuid(uuid)
+          println("The Client %s is connected" format uuid)
           broadcast(("author" -> "Someone") ~ ("message" -> "joined the room") ~ ("time" -> (new Date().getTime.toString)), Everyone)
 
-        case Disconnected(ClientDisconnected, _) =>
+        case x @ Disconnected(ClientDisconnected, _) =>
+          //myActor ! RemoveAtmoClientUuid(uuid)
+          println("Disconnected(ClientDisconnected, _) | Client %s is disconnected" format uuid)
           broadcast(("author" -> "Someone") ~ ("message" -> "has left the room") ~ ("time" -> (new Date().getTime.toString)), Everyone)
+          //AtmosphereResourceFactory.getDefault.remove(uuid)
+
+/*
+
+        case Error(Some(error)) =>
+          println("----error-----" + error)
+*/
 
         case Disconnected(ServerDisconnected, _) =>
-          println("Server disconnected the client %s" format uuid)
+         // myActor ! RemoveAtmoClientUuid(uuid)
+          broadcast(("author" -> "Someone") ~ ("message" -> "has left the room") ~ ("time" -> (new Date().getTime.toString)), Everyone)
+          println("Disconnected(ServerDisconnected, _) | Server disconnected the client %s" format uuid)
 
         case _: TextMessage =>
           broadcast(("author" -> "system") ~ ("message" -> "Only json is allowed") ~ ("time" -> (new Date().getTime.toString)))
 
         case JsonMessage(json) =>
+          println("JsonMessage(json) this.Everyone " + this.Everyone)
           println("-----> message received on events " + json.toString)
           //val msg = json merge (("time" -> (new Date().getTime().toString)): JValue)
           broadcast(json) // by default a broadcast is to everyone but self
         //  send(msg) // also send to the sender
       }
     }
-  }
+   }
 
   error {
     case t: Throwable => t.printStackTrace()

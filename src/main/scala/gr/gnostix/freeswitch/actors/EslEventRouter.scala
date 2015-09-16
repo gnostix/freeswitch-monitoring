@@ -6,6 +6,7 @@ import akka.actor.SupervisorStrategy.Restart
 import akka.actor.{OneForOneStrategy, Props, Actor, ActorLogging}
 import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetAllHeartBeat, GetLastHeartBeat, Event}
 
+
 /**
  * Created by rebel on 23/8/15.
  */
@@ -46,8 +47,8 @@ class EslEventRouter extends Actor with ActorLogging {
         freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) =>
           log info s"no uuid $uuid" + x.toString
 
-        case x @ HeartBeat(eventType, eventInfo, uptimeMsec, sessionCount, sessionPerSecond, eventDateTimestamp, idleCPU,
-        sessionPeakMax, sessionPeakMaxFiveMin, freeSWITCHHostname, freeSWITCHIPv4, upTime) =>
+        case x @ HeartBeat(eventType, eventInfo, uptimeMsec, sessionCount, sessionPerSecond, eventDateTimestamp,
+        idleCPU, sessionPeakMax, sessionPeakMaxFiveMin, freeSWITCHHostname, freeSWITCHIPv4, upTime) =>
 
           heartBeatActor ! x
 
@@ -161,8 +162,8 @@ class EslEventRouter extends Actor with ActorLogging {
     }
 
     HeartBeat("HEARTBEAT", eventInfo, uptimeMsec.toLong, sessionCount.toInt, sessionPerSecond.toInt,
-      eventDateTimestamp, idleCPU.toDouble, sessionPeakMax.toInt,
-      sessionPeakMaxFiveMin.toInt, freeSWITCHHostname, freeSWITCHIPv4, upTime)
+      eventDateTimestamp, BigDecimal(idleCPU).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble,
+      sessionPeakMax.toInt, sessionPeakMaxFiveMin.toInt, freeSWITCHHostname, freeSWITCHIPv4, upTime)
   }
 
 

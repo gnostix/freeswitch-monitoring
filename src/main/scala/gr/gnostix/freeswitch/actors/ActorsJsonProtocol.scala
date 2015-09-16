@@ -22,7 +22,7 @@ object ActorsJsonProtocol {
   def callsTimeSeriesToJson(callsTimeSeries: BasicStatsCalls): JsonMessage =
   JsonMessage(Extraction.decompose(callsTimeSeries))
 
-  implicit def heartbeatToJson(heartBeat: HeartBeat): JsonMessage =
+  def heartbeatToJson(heartBeat: HeartBeat): JsonMessage =
   JsonMessage(Extraction.decompose(heartBeat))
 
   implicit def newCallToJson(newCall: CallNew): JsonMessage =
@@ -39,8 +39,5 @@ object ActorsJsonProtocol {
     //pretty(render(parse(write(heartBeat))))
     pretty(render(Extraction.decompose(heartBeat)))
 
-  implicit def chatHeartToText(chatHeartBeat: ChatHeartBeat): JsonMessage =
-    JsonMessage(Extraction.decompose(chatHeartBeat))
-    //JsonMessage(parse(write(chatHeartBeat)))
 }
 

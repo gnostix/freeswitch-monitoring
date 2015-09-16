@@ -70,6 +70,10 @@ object ActorsProtocol {
 
   case class AcdData(acd: Double) extends RouterResponse
 
+  case class AddAtmoClientUuid(uuid: String)
+
+  case class RemoveAtmoClientUuid(uuid: String)
+
   object Event {
     def apply(event: EslEvent): Event = Event(event.getEventHeaders.asScala)
 

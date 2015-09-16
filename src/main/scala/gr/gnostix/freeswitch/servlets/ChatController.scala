@@ -17,18 +17,13 @@ class ChatController extends ScalatraServlet
   with JacksonJsonSupport with SessionSupport
   with AtmosphereSupport {
 
- // implicit protected val jsonFormats: Formats = DefaultFormats
-  protected implicit lazy val jsonFormats: Formats = DefaultFormats
-
-
-  get("/") {
-    contentType="text/html"
-    ssp("/index")
-  }
+  implicit protected val jsonFormats: Formats = DefaultFormats
+ // protected implicit lazy val jsonFormats: Formats = DefaultFormats
 
 
 
-  atmosphere("/the-chat") {
+
+  atmosphere("/") {
     new AtmosphereClient {
       def receive: AtmoReceive = {
         case Connected =>
@@ -57,11 +52,11 @@ class ChatController extends ScalatraServlet
     }
   }
 
-  error {
+/*  error {
     case t: Throwable => t.printStackTrace()
-  }
+  }*/
 
-  notFound {
+/*  notFound {
     // remove content type in case it was set through an action
     contentType = null
     // Try to render a ScalateTemplate if no route matched
@@ -69,6 +64,6 @@ class ChatController extends ScalatraServlet
       contentType = "text/html"
       layoutTemplate(path)
     } orElse serveStaticResource() getOrElse resourceNotFound()
-  }
+  }*/
 
 }

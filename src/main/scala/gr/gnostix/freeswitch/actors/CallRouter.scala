@@ -30,7 +30,8 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
 
       (activeCalls get callUUID) match {
         case None =>
-          wsLiveEventsActor ! ActorsJsonProtocol.newCallToJson(x)
+//          wsLiveEventsActor ! ActorsJsonProtocol.newCallToJson(x)
+          wsLiveEventsActor ! x
 
           val actor = context.actorOf(Props[CallActor], callUUID)
           actor ! x
@@ -126,7 +127,8 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
       val completedCall = activeCalls.filter(_._2 == sender())
       completedCallsActor ! CompletedCall(completedCall.head._1, callEnd.callerChannelHangupTime, completedCall.head._2)
 
-      wsLiveEventsActor ! ActorsJsonProtocol.endCallToJson(callEnd)
+      wsLiveEventsActor ! callEnd
+      //wsLiveEventsActor ! ActorsJsonProtocol.endCallToJson(callEnd)
 
       val newMap = activeCalls.filter(_._2 != sender())
       context become idle(newMap)

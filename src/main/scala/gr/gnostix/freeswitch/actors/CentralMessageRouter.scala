@@ -3,6 +3,7 @@ package gr.gnostix.freeswitch.actors
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor.{Props, OneForOneStrategy, Actor, ActorLogging}
 import gr.gnostix.freeswitch.actors.ActorsProtocol._
+import org.scalatra.atmosphere.AtmosphereClient
 
 /**
  * Created by rebel on 23/8/15.
@@ -26,7 +27,8 @@ class CentralMessageRouter extends Actor with ActorLogging {
   // eslConnectionDispatcherActor ! EslConnectionData("localhost", 8021, "ClueCon")
 //  eslConnectionDispatcherActor ! EslConnectionData("192.168.43.128", 8021, "ClueCon")
 
-  eslConnectionDispatcherActor ! EslConnectionData("localhost", 8021, "ClueCon")
+  eslConnectionDispatcherActor ! EslConnectionData("192.168.1.128", 8021, "ClueCon")
+//  eslConnectionDispatcherActor ! EslConnectionData("10.0.0.128", 8021, "ClueCon")
 
   def receive: Receive = {
    // case x @ Event(headers) =>
@@ -72,8 +74,15 @@ class CentralMessageRouter extends Actor with ActorLogging {
     case x@GetChannelInfo(callUuid, channeluuid) =>
       callRouterActor forward x
 
+    case x @ AddAtmoClientUuid(uuid)  =>
+      log info "central actor received  AddAtmoClientUuid(uuid) "
+      wsLiveEventsActor ! x
 
+    case x @ RemoveAtmoClientUuid(uuid) =>
+      log info "central actor received  RemoveAtmoClientUuid(uuid)"
+      wsLiveEventsActor ! x
 
+    case x => log warning "I don't get this message!! " + x.toString
   }
 
 }

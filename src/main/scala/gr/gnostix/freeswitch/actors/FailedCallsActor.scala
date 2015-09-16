@@ -40,7 +40,8 @@ class FailedCallsActor(wsLiveEventsActor: ActorRef) extends Actor with ActorLogg
           log info "-------> add an extra failed call"
           failedCalls ::= x
           val fCall = FailedCall("FAILED_CALL", x.fromUser, x.toUser, x.callUUID, x.freeSWITCHIPv4)
-          wsLiveEventsActor ! ActorsJsonProtocol.failedCallToJson(fCall)
+          wsLiveEventsActor ! fCall
+          //wsLiveEventsActor ! ActorsJsonProtocol.failedCallToJson(fCall)
       }
 
     case x @ GetFailedCalls =>

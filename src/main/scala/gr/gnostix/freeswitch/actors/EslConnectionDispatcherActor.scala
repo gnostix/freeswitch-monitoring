@@ -29,7 +29,8 @@ class EslConnectionDispatcherActor(wSLiveEventsActor: ActorRef) extends Actor wi
             case true =>
               log info "----> connection succeded "
               val resp = ApiReply(s"Connection Ok")
-              wSLiveEventsActor ! ActorsJsonProtocol.caseClassToJsonMessage(resp)
+              wSLiveEventsActor ! resp
+              //wSLiveEventsActor ! ActorsJsonProtocol.caseClassToJsonMessage(resp)
               sender ! resp
 
               val newMap = connections updated(ip, eslConn)
@@ -39,7 +40,8 @@ class EslConnectionDispatcherActor(wSLiveEventsActor: ActorRef) extends Actor wi
               log info "Connection failed for ip " + x.ip
               val resp = ApiReply(connStatus.getMessage)
                 context stop eslEventRouter
-              wSLiveEventsActor ! ActorsJsonProtocol.caseClassToJsonMessage(resp)
+              wSLiveEventsActor ! resp
+              //wSLiveEventsActor ! ActorsJsonProtocol.caseClassToJsonMessage(resp)
               sender ! resp
           }
 

@@ -21,7 +21,8 @@ class HeartBeatActor(wsLiveEventsActor: ActorRef) extends Actor with ActorLoggin
     sessionPeakMax, sessionPeakMaxFiveMin, freeSWITCHHostname, freeSWITCHIPv4, upTime) =>
       heartBeats ::= x
       //AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.heartbeatToJson(x))
-      wsLiveEventsActor ! ActorsJsonProtocol.heartbeatToJson(x)
+      wsLiveEventsActor ! x
+      //wsLiveEventsActor ! ActorsJsonProtocol.heartbeatToJson(x)
       log info "broadcasted HeartBeat to WS"
 
 
