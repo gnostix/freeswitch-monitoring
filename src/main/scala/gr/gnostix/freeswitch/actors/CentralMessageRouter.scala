@@ -38,6 +38,9 @@ class CentralMessageRouter extends Actor with ActorLogging {
       //eslConnectionDispatcherActor ! EslConnectionData("localhost", 8021, "ClueCon")
       eslConnectionDispatcherActor forward x
 
+    case x @ DelEslConnection(ip) =>
+       eslConnectionDispatcherActor forward x
+
     case x @ GetCompletedCalls =>
       completedCallsActor forward x
 

@@ -3,7 +3,7 @@ package gr.gnostix.freeswitch.servlets
 import akka.actor.{ActorRef, ActorSystem}
 import gr.gnostix.api.auth.AuthenticationSupport
 import gr.gnostix.freeswitch.FreeswitchopStack
-import gr.gnostix.freeswitch.actors.ActorsProtocol.EslConnectionData
+import gr.gnostix.freeswitch.actors.ActorsProtocol.{EslConnectionData,DelEslConnection}
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.{CorsSupport, FutureSupport, ScalatraServlet}
@@ -35,11 +35,10 @@ with CorsSupport with FreeswitchopStack with AuthenticationSupport
     myActor ? eslConnectionData
   }
 
-  post("/EslConnectionData"){
-    val eslConnectionData = parsedBody.extract[EslConnectionData]
-    myActor ? eslConnectionData
+  delete("/fs-node/conn-data"){
+    val delEslConnection = parsedBody.extract[DelEslConnection]
+    myActor ? delEslConnection
   }
-
 
   error {
     case t: Throwable => t.printStackTrace()

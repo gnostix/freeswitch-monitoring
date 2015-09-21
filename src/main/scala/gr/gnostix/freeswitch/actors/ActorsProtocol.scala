@@ -58,6 +58,8 @@ object ActorsProtocol {
 
   case class EslConnectionData(ip: String, port: Int, password: String) extends RouterRequest
 
+  case class DelEslConnection(ip: String) extends RouterRequest
+
   case class ShutdownEslConnection(ip: String) extends RouterRequest
 
   case class CompletedCall(uuid: String, hangupTime: Timestamp, callActor: ActorRef) extends RouterProtocol
@@ -88,5 +90,5 @@ object ServletProtocol {
   sealed trait ApiRequest extends ApiProtocol
   sealed trait ApiResponse extends ApiProtocol
 
-  case class ApiReply(message: String) extends  ApiResponse
+  case class ApiReply(status: Int, message: String) extends  ApiResponse
 }

@@ -3,7 +3,7 @@ package gr.gnostix.freeswitch.actors
 import akka.actor._
 import gr.gnostix.freeswitch.actors.ServletProtocol.ApiReply
 import gr.gnostix.freeswitch.{EslConnection}
-import gr.gnostix.freeswitch.actors.ActorsProtocol.{ShutdownEslConnection, EslConnectionData}
+import gr.gnostix.freeswitch.actors.ActorsProtocol.{ShutdownEslConnection, EslConnectionData,DelEslConnection}
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -18,6 +18,21 @@ class EslConnectionDispatcherActor(wSLiveEventsActor: ActorRef) extends Actor wi
 
   def idle(connections: scala.collection.Map[String, EslConnection]): Receive = {
 
+    case x @ DelEslConnection(ip) =>
+      connections get x.ip  match {
+        case Some(eslConnection) =>
+          // close connection
+          log info "----> shutdown connection with "
+          eslConnection.deinitConnection()
+          val newMap = connections - x.ip
+          actorConnections = newMap
+          context become idle(newMap)
+          sender ! ApiReply(200, "connection terminated")
+
+          case None => sender ! ApiReply(400, "this ip doesn't exists")
+      }
+      
+
     case x @ EslConnectionData(ip, port, password) =>
       connections get x.ip match {
         case None =>
@@ -28,7 +43,7 @@ class EslConnectionDispatcherActor(wSLiveEventsActor: ActorRef) extends Actor wi
           connStatus.isConnected match {
             case true =>
               log info "----> connection succeded "
-              val resp = ApiReply(s"Connection Ok")
+              val resp = ApiReply(200, "Connection Ok")
               wSLiveEventsActor ! resp
               //wSLiveEventsActor ! ActorsJsonProtocol.caseClassToJsonMessage(resp)
               sender ! resp
@@ -38,7 +53,7 @@ class EslConnectionDispatcherActor(wSLiveEventsActor: ActorRef) extends Actor wi
               context become idle(newMap)
             case false =>
               log info "Connection failed for ip " + x.ip
-              val resp = ApiReply(connStatus.getMessage)
+              val resp = ApiReply(400, connStatus.getMessage)
                 context stop eslEventRouter
               wSLiveEventsActor ! resp
               //wSLiveEventsActor ! ActorsJsonProtocol.caseClassToJsonMessage(resp)
@@ -47,19 +62,22 @@ class EslConnectionDispatcherActor(wSLiveEventsActor: ActorRef) extends Actor wi
 
         case Some(actor) =>
           log info "we already have this ip connection " + x.ip
-          sender ! ApiReply(s"we already have this ip connection ${x.ip}")
+          sender ! ApiReply(400, s"we already have this ip connection ${x.ip}")
       }
 
     case x @ ShutdownEslConnection(ip) =>
       connections get x.ip match {
         case None =>
-          sender ! ApiReply("this connection doesn't exist")
+          sender ! ApiReply(400, "this connection doesn't exist")
 
         case Some(eslConnection) =>
           // close connection
           log info "----> shutdown connection with "
           eslConnection.deinitConnection()
-          sender ! ApiReply("connection terminated")
+          sender ! ApiReply(200, "connection terminated")
+          val newMap = connections - x.ip
+          actorConnections = newMap
+          context become idle(newMap)
       }
 
     case Tick =>
@@ -67,7 +85,7 @@ class EslConnectionDispatcherActor(wSLiveEventsActor: ActorRef) extends Actor wi
         case (a,y) => y.checkConnection() match {
           case x if x.isConnected => "all good"
           case x if !x.isConnected =>
-            sender ! ApiReply(x.getMessage)
+            sender ! ApiReply(400, x.getMessage)
             log warning(s"---> EslConnectionDispatcherActor | the connection with ip $a is down!!")
         }
         case _ => log info "---> EslConnectionDispatcherActor | empty connections Map"
