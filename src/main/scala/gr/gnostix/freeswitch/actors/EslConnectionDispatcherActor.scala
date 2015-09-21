@@ -24,7 +24,7 @@ class EslConnectionDispatcherActor(wSLiveEventsActor: ActorRef) extends Actor wi
           // close connection
           log info "----> shutdown connection with "
           eslConnection.deinitConnection()
-          val newMap = connections - x.ip
+          val newMap = connections.filter(c => c._1 != x.ip)
           actorConnections = newMap
           context become idle(newMap)
           sender ! ApiReply(200, "connection terminated")

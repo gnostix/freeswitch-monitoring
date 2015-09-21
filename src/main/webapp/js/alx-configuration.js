@@ -70,11 +70,13 @@ $(function () {
 
 function delete_user(row,ip)
 {
-    //alert(ip);
+    var formData = {
+        "ip": ip
+    };
     $.ajax({
         type: 'DELETE', // define the type of HTTP verb we want to use (POST for our form)
         url: 'http://fs-moni.cloudapp.net:8080/configuration/fs-node/conn-data', // the url where we want to POST
-        data: JSON.stringify(ip), // our data object
+        data: JSON.stringify(formData), // our data object
         dataType: 'json', // what type of data do we expect back from the server
         contentType: "application/json",
         encode: true
@@ -89,7 +91,7 @@ function delete_user(row,ip)
         .fail(function(data) {
             // show any errors
             // best to remove for production
-            console.log("on fail " + data);
+            console.log("on fail " + JSON.stringify(data));
         });
 
 
