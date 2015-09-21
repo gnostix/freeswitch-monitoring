@@ -18,7 +18,7 @@ $(function () {
 
     var request = {
         //url: "ws://fs-moni.cloudapp.net:8080/fs-moni/live/events",
-        url: "fs-moni/live/koko",
+        url: "http://fs-moni.cloudapp.net:8080/fs-moni/live/koko",
         //url: "the-chat",
         //url: "ws://localhost:8080/fs-moni/live/events",
         contentType: "application/json",
