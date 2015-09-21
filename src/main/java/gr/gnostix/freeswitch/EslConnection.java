@@ -23,6 +23,10 @@ public class EslConnection {
         this.password = password;
     }
 
+    public ActorRef getActor(){
+        return this.eslMessageRouter;
+    }
+
     public ConectionStatus connectEsl() {
         try {
             conn.connect(ip, 8021, password, 10);
