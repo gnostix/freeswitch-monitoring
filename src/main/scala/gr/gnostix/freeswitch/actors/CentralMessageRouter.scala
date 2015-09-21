@@ -27,7 +27,7 @@ class CentralMessageRouter extends Actor with ActorLogging {
   // eslConnectionDispatcherActor ! EslConnectionData("localhost", 8021, "ClueCon")
 //  eslConnectionDispatcherActor ! EslConnectionData("192.168.43.128", 8021, "ClueCon")
 
-  eslConnectionDispatcherActor ! EslConnectionData("fs-instance.com", 8021, "ClueCon")
+//  eslConnectionDispatcherActor ! EslConnectionData("fs-instance.com", 8021, "ClueCon")
 //  eslConnectionDispatcherActor ! EslConnectionData("10.0.0.128", 8021, "ClueCon")
 
   def receive: Receive = {

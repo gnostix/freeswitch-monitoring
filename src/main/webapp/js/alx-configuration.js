@@ -36,6 +36,8 @@ $(function () {
                     // show any errors
                     // best to remove for production
                     console.log("on fail " + data);
+                    $(".form-horizontal").remove();
+                    $( ".inputRes" ).replaceWith( data );
                 });
 
             // stop the form from submitting the normal way and refreshing the page

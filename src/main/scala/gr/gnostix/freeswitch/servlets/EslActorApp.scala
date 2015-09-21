@@ -47,10 +47,7 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
     "Do stuff and give me an answer"
   }
 
-  post("/EslConnectionData"){
-    val eslConnectionData = parsedBody.extract[EslConnectionData]
-    myActor ? eslConnectionData
-  }
+
 
   get("/GetConcurrentCalls"){
     myActor ? GetConcurrentCalls

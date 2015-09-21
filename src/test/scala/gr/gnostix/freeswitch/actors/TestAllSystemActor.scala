@@ -71,7 +71,7 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
         var basicStatsSize = 0
         basicStatsActor ! GetBasicStatsTimeSeries
         expectMsgPF() {
-          case x@List(BasicStatsTimeSeries(_, _, _, _, _, _)) => basicStatsSize = x.size
+          case x@List(BasicStatsTimeSeries(_, _, _, _, _, _, _)) => basicStatsSize = x.size
           case _ => false
         }
         basicStatsSize should be(1)
@@ -118,7 +118,9 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
 
         completedCallsActor ! GetCompletedCalls
         expectMsgPF(FiniteDuration(1, "seconds")) {
-          case x@GetCallsResponse(_, _) => totalCalls = x.totalCalls
+          case x@GetCallsResponse(_, _) =>
+            println("totalCalls: " + x.toString)
+            totalCalls = x.totalCalls
           case _ => totalCalls = -1
         }
 
@@ -147,9 +149,9 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
     "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 120, 100, "the-uuid-channel-a-1")
 
   "this test should" should {
-    " return acd = 150 " in {
+    " return acd = 2.5 min " in {
       within(60000 millis) {
-        var acd = 0d
+        var acd = 300d / 2 / 60 //300 sec / 2 calls /60sec = 2.5 min
 
         callRouterActor ! newChannelSameCallIDA1
         expectNoMsg(FiniteDuration(1, "seconds"))
@@ -169,17 +171,20 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
 
         basicStatsActor ! GetBasicStatsTimeSeries
         expectMsgPF() {
-          case x@List(BasicStatsTimeSeries(_, _, _, _, _, _)) =>
+          case x@List(BasicStatsTimeSeries(_, _, _, _, _, _, _),
+          BasicStatsTimeSeries(_, _, _, _, _, _, _)) =>
             x.headOption match {
               case Some(a) => acd = a.asInstanceOf[BasicStatsTimeSeries].acd
               case None => acd = 10
             }
+            println("-------------> acd" + x.toString)
 
           case x =>
+            println("-------------> " + x.toString)
             acd = -20
         }
         // first call billsec is 180 and second is 120 so ACD is (180+120)/2=150
-        acd should be(150)
+        acd should be(2.5)
       }
     }
 
@@ -230,13 +235,16 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
     }
   }
 
-
+  val endChannelFailedCall2 = CallEnd("the-uuid-channel-aa-154545111", "CHANNEL_ANSWER", "5001", "5002", "GSM", "GSM",
+    "192.168.100.101", "call-uuid-989811988", None,
+    None, new Timestamp(System.currentTimeMillis()),
+    "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 120, 100, "the-uuid-channel-a-276117676")
   "this test should" should {
     " return total FailedCalls " in {
       within(60000 millis) {
 
         var failedCallsNum = 0
-        callRouterActor ! endChannelFailedCall
+        callRouterActor ! endChannelFailedCall2
         expectNoMsg(FiniteDuration(1, "seconds"))
 
         callRouterActor ! GetTotalFailedCalls
@@ -250,10 +258,10 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
     }
   }
 
-  val endChannelFailedCall2 = CallEnd("the-uuid-channel-aa-00000000", "CHANNEL_ANSWER", "5001", "5002", "GSM", "GSM",
-    "192.168.100.101", "call-uuid-9898988", None,
+  val endChannelFailedCall3 = CallEnd("the-uuid-channel-aa-000121200000", "CHANNEL_ANSWER", "5001", "5002", "GSM", "GSM",
+    "192.168.100.101", "call-uuid-98989121288", None,
     None, new Timestamp(System.currentTimeMillis()),
-    "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 120, 100, "the-uuid-channel-a-2767676")
+    "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 120, 100, "the-uuid-channel-a-27121267676")
 
   "this test should" should {
     " return the correct asr 40 " +
@@ -261,7 +269,7 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
       within(60000 millis) {
 
         var asr = 0d
-        callRouterActor ! endChannelFailedCall
+        callRouterActor ! endChannelFailedCall3
         expectNoMsg(FiniteDuration(100, "milliseconds"))
 
         // trigger the actor to get acd data
@@ -272,14 +280,17 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
         basicStatsActor ! GetBasicStatsTimeSeries
 
         expectMsgPF() {
-          case x@List(BasicStatsTimeSeries(_, _, _, _, _, _)) =>
+          case x@List(BasicStatsTimeSeries(_, _, _, _, _, _, _),
+          BasicStatsTimeSeries(_, _, _, _, _, _, _),
+          BasicStatsTimeSeries(_, _, _, _, _, _, _)) =>
             x headOption match {
               case Some(a) => asr = a.asInstanceOf[BasicStatsTimeSeries].asr
               case None => asr = -10
             }
+            println("-----------------> basicStats asr List: " + x)
 
           case x =>
-            println("-----------------> basicStats List: " + x)
+            println("-----------------> basicStats asr List: " + x)
             asr = -20
           /*            x.asInstanceOf[List[BasicStatsTimeSeries]] headOption match {
                         case Some(a) => asr = a.asInstanceOf[BasicStatsTimeSeries].asr
@@ -287,7 +298,7 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
                       }*/
         }
 
-        asr should be(40) // since we have so far 4 total calls and 2 successfull calls asr= 2 / 5 * 100
+        asr should be(25) // since we have so far 4 total calls and 2 successfull calls asr= 2 / 5 * 100
       }
     }
   }

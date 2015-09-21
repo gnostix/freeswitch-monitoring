@@ -64,14 +64,14 @@ class WSLiveEventsActor extends Actor with ActorLogging {
 
     case Tick =>
       //AtmosphereClient.broadcast("/fs-moni/live/koko", heartbeatToJson(Lala("lololololo")))
-      AtmosphereClient.lookup("/fs-moni/live/koko").map{x =>
+/*      AtmosphereClient.lookup("/fs-moni/live/koko").map{x =>
         val it = x.getAtmosphereResources.iterator()
         while (it.hasNext) {
           val a = it.next()
           log info "next uuid is : " + a.uuid()
         }
         log info "-------- end of next uuid ----------"
-        x.broadcast(heartbeatToJson(Lala("koko","lololololo")))}
+        x.broadcast(heartbeatToJson(Lala("koko","lololololo")))}*/
       //log info "WS actore Tick " + heartbeatToJson(Lala("lololololo")).toString
      /* log info "----- " +AtmosphereResourceFactory.getDefault.find(atmoClientsUuid.head)
       .getBroadcaster.broadcast("{\"koko\" : \"kokokokokokok\"} ")*/
