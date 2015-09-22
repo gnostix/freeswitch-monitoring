@@ -39,13 +39,13 @@ $(function () {
                         $('#table > tbody:last').append('<tr><td>'+formData.ip+'</td><td>'+formData.port+'</td><td><button type="button" class="btn btn-danger remove" onclick ="delete_user($(this),\''+formData.ip+'\')">Delete</button></td></tr>');
 
                     } else if(data.status===400){
+                       // alert(data.status);
                         //this removes a class name
                         //$(".form-horizontal").remove();
                         //this replace text in a  class
                         $( ".inputRes" ).replaceWith( data.message);
                         //this changes the class
-                       // $("#message").toggleClass('alert-info alert-success');
-                       // $('#table > tbody:last').append('<tr><td>'+formData.ip+'</td><td>'+formData.port+'</td><td><button type="button" class="btn btn-danger remove" onclick ="delete_user($(this),\''+formData.ip+'\')">Delete</button></td></tr>');
+                        $("#message").toggleClass('alert-info alert-danger');
 
                     }
 
