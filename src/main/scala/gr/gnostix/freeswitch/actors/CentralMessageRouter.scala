@@ -41,6 +41,9 @@ class CentralMessageRouter extends Actor with ActorLogging {
     case x @ DelEslConnection(ip) =>
        eslConnectionDispatcherActor forward x
 
+    case x @ GetEslConnections =>
+      eslConnectionDispatcherActor forward x
+
     case x @ GetCompletedCalls =>
       completedCallsActor forward x
 

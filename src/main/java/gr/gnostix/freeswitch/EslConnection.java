@@ -62,4 +62,12 @@ public class EslConnection {
         conn.close();
         conn = null;
     }
+
+    public String getIP(){
+        return this.ip;
+    }
+
+    public int getPort(){
+        return this.port;
+    }
 }

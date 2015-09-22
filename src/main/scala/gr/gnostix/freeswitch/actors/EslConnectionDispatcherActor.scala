@@ -3,7 +3,7 @@ package gr.gnostix.freeswitch.actors
 import akka.actor._
 import gr.gnostix.freeswitch.actors.ServletProtocol.ApiReply
 import gr.gnostix.freeswitch.{EslConnection}
-import gr.gnostix.freeswitch.actors.ActorsProtocol.{ShutdownEslConnection, EslConnectionData,DelEslConnection}
+import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetEslConnections, ShutdownEslConnection, EslConnectionData, DelEslConnection}
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -17,6 +17,11 @@ class EslConnectionDispatcherActor(wSLiveEventsActor: ActorRef) extends Actor wi
   var actorConnections: scala.collection.Map[String, EslConnection] = Map()
 
   def idle(connections: scala.collection.Map[String, EslConnection]): Receive = {
+
+    case x @ GetEslConnections =>
+      sender ! connections.map{
+        case (ip,conn) => EslConnectionData(conn.getIP, conn.getPort,"the-secret")
+      }.toList
 
     case x @ DelEslConnection(ip) =>
       connections get x.ip  match {

@@ -1,6 +1,39 @@
 $(function () {
     "use strict";
 
+    $(document).ready ( function(){
+        $.ajax({
+            type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
+            url: '/configuration/fs-node/conn-data', // the url where we want to POST
+            //url: 'http://fs-moni.cloudapp.net:8080/configuration/fs-node/conn-data', // the url where we want to POST
+            dataType: 'json', // what type of data do we expect back from the server
+            contentType: "application/json",
+            encode: true
+        })
+            // using the done promise callback
+            .done(function (data) {
+                // log data to the console so we can see
+                //console.log("on success get connections json" + JSON.stringify(data));
+
+                $("#message").toggleClass('alert-info alert-success');
+                $(jQuery.parseJSON(JSON.stringify(data))).each(function() {
+
+                  //  console.log(this.ip + " - ---- -- " + this.port);
+                    $('#table > tbody:last').append('<tr><td>'+this.ip+'</td>' +
+                        '<td>'+this.port+'</td>' +
+                        '<td><button type="button" class="btn btn-danger remove"' +
+                        ' onclick ="delete_user($(this),\''+this.ip+'\')">Delete</button></td></tr>');
+                });
+
+            })
+            // using the fail promise callback
+            .fail(function(data) {
+                // show any errors
+                // best to remove for production
+                console.log("on fail " + JSON.stringify(data));
+            });
+    });
+
 
     $(document).ready(function () {
 
@@ -18,7 +51,8 @@ $(function () {
             // process the form
             $.ajax({
                 type: 'POST', // define the type of HTTP verb we want to use (POST for our form)
-                url: 'http://fs-moni.cloudapp.net:8080/configuration/fs-node/conn-data', // the url where we want to POST
+                //url: 'http://fs-moni.cloudapp.net:8080/configuration/fs-node/conn-data', // the url where we want to POST
+                url: '/configuration/fs-node/conn-data', // the url where we want to POST
                 data: JSON.stringify(formData), // our data object
                 dataType: 'json', // what type of data do we expect back from the server
                 contentType: "application/json",
@@ -75,7 +109,8 @@ function delete_user(row,ip)
     };
     $.ajax({
         type: 'DELETE', // define the type of HTTP verb we want to use (POST for our form)
-        url: 'http://fs-moni.cloudapp.net:8080/configuration/fs-node/conn-data', // the url where we want to POST
+        url: '/configuration/fs-node/conn-data', // the url where we want to POST
+        //url: 'http://fs-moni.cloudapp.net:8080/configuration/fs-node/conn-data', // the url where we want to POST
         data: JSON.stringify(formData), // our data object
         dataType: 'json', // what type of data do we expect back from the server
         contentType: "application/json",

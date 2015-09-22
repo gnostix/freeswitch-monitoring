@@ -56,6 +56,8 @@ object ActorsProtocol {
 
   case object GetCompletedCallMinutes extends RouterRequest
 
+  case object GetEslConnections extends RouterRequest
+
   case class EslConnectionData(ip: String, port: Int, password: String) extends RouterRequest
 
   case class DelEslConnection(ip: String) extends RouterRequest
