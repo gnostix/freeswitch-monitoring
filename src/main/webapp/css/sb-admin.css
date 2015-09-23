@@ -106,6 +106,9 @@ li.message-footer {
     margin: 5px 0;
 }
 
+.footer {
+color: #fff}
+
 ul.alert-dropdown {
     width: 200px;
 }
@@ -244,3 +247,66 @@ ul.alert-dropdown {
 .panel-purple > a:hover {
     color: #CC52A3;
 }
+.login-wrapper { 
+  width: 300px; 
+  position: absolute; 
+  left: 50%; 
+  top: 50%; 
+  width: 300px; 
+  margin-left: -150px; 
+  margin-top: -150px; 
+}
+.login-wrapper .checkbox, .login-wrapper .radio { 
+  margin: 7px 0; 
+}
+
+.login-wrapper .thumb { 
+  width: 150px; 
+  margin: 0 auto; 
+}
+.login-wrapper .thumb img, 
+.login-wrapper .thumb-options { 
+  border-radius: 50%; 
+  -webkit-border-radius: 50%; 
+  -moz-border-radius: 50%; 
+}
+.login-wrapper .thumbnail h6 { 
+  margin-bottom: 20px; 
+}
+
+#loginForm {
+
+}
+
+.ghost-btn {
+  
+	background-color: transparent;
+}
+
+.btn-white {
+	color: white;
+	border-color: white;
+	 border: 2px solid #fff;
+	 border-radius:5px;
+}
+.btn-white:hover,
+.btn-white:active {
+  border: 2px solid #fff;
+  border-color: white;		
+  background-color: #fff;
+  color: #000;
+  border-radius:5px;
+}
+
+
+
+.btn-blue {
+	color: #4682B4;
+	border-color: #4682B4;
+}
+.btn-blue:hover {
+  background: #4682B4;
+  color: #fff;
+  border-color: #4682B4;		
+}
+
