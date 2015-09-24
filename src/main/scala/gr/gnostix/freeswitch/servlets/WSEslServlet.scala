@@ -51,7 +51,7 @@ with CorsSupport {
     ssp("/index")
   }
 
-  atmosphere("/koko") {
+  atmosphere("/events") {
     new AtmosphereClient {
       def receive: AtmoReceive = {
         case Connected =>
@@ -82,44 +82,6 @@ with CorsSupport {
     }
   }
 
-  atmosphere("/events") {
-    log("---------------> atmosphere /live/events")
-    new AtmosphereClient {
-      def receive: AtmoReceive = {
-        case Connected =>
-       //   myActor ! AddAtmoClientUuid(uuid)
-          println("The Client %s is connected" format uuid)
-          broadcast(("author" -> "Someone") ~ ("message" -> "joined the room") ~ ("time" -> (new Date().getTime.toString)), Everyone)
-
-        case x @ Disconnected(ClientDisconnected, _) =>
-          //myActor ! RemoveAtmoClientUuid(uuid)
-          println("Disconnected(ClientDisconnected, _) | Client %s is disconnected" format uuid)
-          broadcast(("author" -> "Someone") ~ ("message" -> "has left the room") ~ ("time" -> (new Date().getTime.toString)), Everyone)
-          //AtmosphereResourceFactory.getDefault.remove(uuid)
-
-/*
-
-        case Error(Some(error)) =>
-          println("----error-----" + error)
-*/
-
-        case Disconnected(ServerDisconnected, _) =>
-         // myActor ! RemoveAtmoClientUuid(uuid)
-          broadcast(("author" -> "Someone") ~ ("message" -> "has left the room") ~ ("time" -> (new Date().getTime.toString)), Everyone)
-          println("Disconnected(ServerDisconnected, _) | Server disconnected the client %s" format uuid)
-
-        case _: TextMessage =>
-          broadcast(("author" -> "system") ~ ("message" -> "Only json is allowed") ~ ("time" -> (new Date().getTime.toString)))
-
-        case JsonMessage(json) =>
-          println("JsonMessage(json) this.Everyone " + this.Everyone)
-          println("-----> message received on events " + json.toString)
-          //val msg = json merge (("time" -> (new Date().getTime().toString)): JValue)
-          broadcast(json) // by default a broadcast is to everyone but self
-        //  send(msg) // also send to the sender
-      }
-    }
-   }
 
   error {
     case t: Throwable => t.printStackTrace()

@@ -100,6 +100,9 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
     case x@GetTotalFailedCalls =>
       failedCallsActor forward x
 
+    case x @ GetFailedCallsAnalysis(fromNumberOfDigits, toNumberOfDigits) =>
+      failedCallsActor forward x
+
     case x@GetCallInfo(callUuid) =>
       (activeCalls get callUuid) match {
         case None =>

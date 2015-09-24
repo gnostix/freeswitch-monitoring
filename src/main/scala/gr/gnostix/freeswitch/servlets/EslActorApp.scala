@@ -47,8 +47,6 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
     "Do stuff and give me an answer"
   }
 
-
-
   get("/GetConcurrentCalls"){
     myActor ? GetConcurrentCalls
   }
@@ -67,6 +65,11 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
 
   get("/GetTotalFailedCalls"){
     myActor ? GetTotalFailedCalls
+  }
+
+  post("/get-failed-calls-analysis"){
+    val failedCallsAnalysis = parsedBody.extract[GetFailedCallsAnalysis]
+    myActor ? failedCallsAnalysis
   }
 
   get("/GetFailedCallsByDate/:fromDate/:toDate"){
@@ -115,5 +118,8 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
     myActor ask GetBasicAcdTimeSeries
   }*/
 
+  error {
+    case t: Throwable => t.printStackTrace()
+  }
 }
 

@@ -34,6 +34,9 @@ class CentralMessageRouter extends Actor with ActorLogging {
    // case x @ Event(headers) =>
    //   eslEventRouter ! x
 
+    case x @ GetFailedCallsAnalysis(fromNumberOfDigits, toNumberOfDigits) =>
+      callRouterActor forward x
+
     case x @ EslConnectionData(ip, port, password) =>
       //eslConnectionDispatcherActor ! EslConnectionData("localhost", 8021, "ClueCon")
       eslConnectionDispatcherActor forward x
