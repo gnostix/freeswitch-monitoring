@@ -2,6 +2,7 @@ package gr.gnostix.freeswitch.actors
 
 import akka.actor.{Actor, ActorLogging}
 import gr.gnostix.freeswitch.actors.ActorsProtocol.{AddAtmoClientUuid, RemoveAtmoClientUuid}
+import org.atmosphere.cpr.AtmosphereResource
 import org.json4s.NoTypeHints
 import org.json4s.jackson.Serialization
 import org.json4s.jackson.Serialization.write
@@ -54,11 +55,14 @@ class WSLiveEventsActor extends Actor with ActorLogging {
         case 0 => log info "do nothing.. no connected clients.."
         case _ =>
           log info s"the atmoClients list $atmoClientsUuid"
- /*         atmoClientsUuid.map(uuid => AtmosphereClient.broadcast("/fs-moni/live/koko", x, new ClientFilter(uuid) {
-            override def apply(v1: AtmosphereResource): Boolean = true
-          }))*/
-          AtmosphereClient.lookup("/fs-moni/live/koko").map{a =>
-            a.broadcast(heartbeatToJson(x))}
+        /*           atmoClientsUuid.map(uuid => AtmosphereClient.broadcast("/fs-moni/live/events",
+                    ActorsJsonProtocol.caseClassToJsonMessage(x)
+                   ,new ClientFilter(uuid) {
+                    override def apply(v1: AtmosphereResource): Boolean = true
+                  })) */
+          AtmosphereClient.lookup("/fs-moni/live/events").map{
+            a => a.broadcast(heartbeatToJson(x))
+          }
 
       }
 
@@ -85,7 +89,7 @@ class WSLiveEventsActor extends Actor with ActorLogging {
   }
 
   def heartbeatToJson(heartBeat: AnyRef) = {
-    log info "-------Lala to json : " + write(heartBeat)
+    //log info "-------Lala to json : " + write(heartBeat)
     write(heartBeat)
   }
 
