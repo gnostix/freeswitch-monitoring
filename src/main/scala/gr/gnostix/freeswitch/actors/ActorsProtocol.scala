@@ -34,6 +34,8 @@ object ActorsProtocol {
 
   case object GetFailedCalls extends RouterRequest
 
+  case class GetFailedCallsAnalysis(fromNumberOfDigits: Int, toNumberOfDigits: Int) extends RouterRequest
+
   case class GetFailedCallsByDate(from: Timestamp, to: Timestamp) extends RouterRequest
 
   case class GetCallsResponse(totalCalls: Int, activeCallsUUID: List[String]) extends RouterResponse
