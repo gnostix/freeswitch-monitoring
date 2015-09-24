@@ -53,18 +53,18 @@ $(function () {
         try {
             var json = jQuery.parseJSON(message);
             console.log("Got a message");
-			
-			//get the chart by id
-			var chart = $('#heartbeat').highcharts();
-           //get series by id
-		   var asr = chart.get('asr');
-			var acd = chart.get('acd');
-			var rtp = chart.get('rtp');
-			
+
+            //get the chart by id
+            var chart = $('#heartbeat').highcharts();
+            //get series by id
+            var asr = chart.get('asr');
+            var acd = chart.get('acd');
+            var rtp = chart.get('rtp');
+
 			//get the chart by id
 			var chartBasic = $('#basicstats').highcharts();
-			  //get series by id
-           var concurrentCalls = chartBasic.get('concurrentCalls');
+            //get the chart by id
+            var chartBasic = $('#basicstats').highcharts();
 			var failedCalls = chartBasic.get('failedCalls');
 			
 			//get the chart by id
@@ -73,7 +73,7 @@ $(function () {
            var cpuUsage = chartCPU.get('cpuUsage');
 			
 			 //console.log(json);
-            console.log("EVENTNAME:::::"+json.eventName);
+            var failedCalls = chartBasic.get('failedCalls');
 
             //get the chart by id
             var chartCPU = $('#cpu').highcharts();
@@ -86,6 +86,9 @@ $(function () {
             if (json.eventName === "HEARTBEAT") {
                 $("#upTime").text(convertMillisecondsToDigitalClock(json.uptimeMsec).clock);
                 $("#sessionPerSecond").text(json.sessionPerSecond);
+                $("#cpuIdle").text(json.idleCPU);
+                // Add points to graphs
+                cpuidle.addPoint([Date.parse(json.eventDateTimestamp), json.idleCPU]);
 
                 $("#cpuUsage").text(json.cpuUsage+'%');
 				// Add points to graphs
