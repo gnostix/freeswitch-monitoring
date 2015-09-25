@@ -17,10 +17,10 @@ $(function () {
 
 
     var request = {
-        //url: "ws://fs-moni.cloudapp.net:8080/fs-moni/live/events",
+        url: "ws://fs-moni.cloudapp.net:8080/fs-moni/live/events",
         url: "/fs-moni/live/events",
         //url: "the-chat",
-        //url: "ws://localhost:8080/fs-moni/live/events",
+        //url: "ws://10.5.50.249:8080/fs-moni/live/events",
         contentType: "application/json",
         logLevel: 'debug',
         transport: transport,
@@ -60,10 +60,18 @@ $(function () {
             var acd = chart.get('acd');
             var rtp = chart.get('rtp');
 
+			//get the chart by id
+			var chartBasic = $('#basicstats').highcharts();
             //get the chart by id
             var chartBasic = $('#basicstats').highcharts();
+			var failedCalls = chartBasic.get('failedCalls');
+			
+			//get the chart by id
+			var chartCPU = $('#cpu').highcharts();
             //get series by id
             var concurrentCalls = chartBasic.get('concurrentCalls');
+			
+			 //console.log(json);
             var failedCalls = chartBasic.get('failedCalls');
 
             //get the chart by id
@@ -77,10 +85,10 @@ $(function () {
             if (json.eventName === "HEARTBEAT") {
                 $("#upTime").text(convertMillisecondsToDigitalClock(json.uptimeMsec).clock);
                 $("#sessionPerSecond").text(json.sessionPerSecond);
-                $("#cpuIdle").text(json.idleCPU);
-                // Add points to graphs
-                cpuidle.addPoint([Date.parse(json.eventDateTimestamp), json.idleCPU]);
-
+                $("#cpuUsage").text(json.cpuUsage+'%');
+				// Add points to graphs
+                cpuUsage.addPoint([Date.parse(json.eventDateTimestamp), json.cpuUsage]);		 
+           
             } else if (json.eventName === "BASIC_STATS") {
                 console.log("--------------ADDING BASIC STATS");
                 $("#concCallsNum").text(json.concCallsNum);
@@ -188,5 +196,103 @@ $(function () {
             clock: str
         };
     }
+	
+	/* ---------- Popover ---------- */
+	$('[rel="popover"],[data-rel="popover"]').popover({
+     html: true,
+     title: function () {
 
+
+        return " - Score Range"
+     },
+     content: function () {       
+        return '<div class="popcontainer"></div>';
+     }
+	});
+	
+	$('.pop').click(function() {
+    console.log( "Handler for pop.click()." );
+	 getDetails();
+    });
+	
+	
+	
+	function getDetails(){
+		console.log("getDetails --------------------------------");
+		var pop="";
+		var message="";
+		var formData = {
+        "ip": ""
+		};
+       $.ajax({
+	    type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
+        //url: '/actors/concurrent/call/analysis', // the url where we want to POST
+        url: 'http://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details', // the url where we want to POST
+       // url: 'http://10.5.50.249:8080/actors/concurrent/calls/details', // the url where we want to POST
+        //data: JSON.stringify(formData), // our data object
+        dataType: 'json', // what type of data do we expect back from the server
+        contentType: "application/json",
+        encode: true
+        })
+        // using the done promise callback
+       .done(function (data) {
+            // log data to the console so we can see
+              console.log("SUCCESS:__________________ "+JSON.stringify(data));
+			  message = data.message;
+		 pop= '<div class="col-lg-12"> '+
+			'<div class="panel panel-default">  '+
+			'<div class="panel-heading"> '+
+			'<h3 class="panel-title"><i class="fa fa-money fa-fw"></i>Connections</h3> '+
+                          '  </div>'+
+                          '  <div class="panel-body">'+
+                             '   <div class="table-responsive"> '+
+                                 '   <table id="table" class="table table-bordered table-hover table-striped"> '+
+                                     '   <thead>'+
+                                      '  <tr>'+
+                                         '   <th>IP</th>'+
+                                         '   <th>Port</th>'+
+                                          '  <th>Action</th>'+
+                                      '  </tr>'+
+                                      '  </thead>'+
+                                       ' <tbody>'+
+                                      '  </tbody>'+
+                                   ' </table>'+
+                               ' </div>'+
+                           ' </div>'+
+                      '  </div>'+
+                   ' </div>';
+		
+            console.log("on message " + message);
+			$( "div.popcontainer" )
+			.html( pop );
+
+			//return pop;
+			//return message;
+			/* ---------- Popover ---------- 
+			$('.pop').popover({
+			html: true,
+			 delay: { show: 500, hide: 1500 },
+			title: function () {
+
+
+				return " - Score Range"
+			},
+			content: function () {       
+				return message;
+			}	 
+    
+			});
+			*/
+        })
+        // using the fail promise callback
+        .fail(function(data) {
+            // show any errors
+            // best to remove for production
+			pop="JSON.stringify(data)";
+            console.log("on fail " + JSON.stringify(data));
+        });
+ 
+	}
+
+	
 });

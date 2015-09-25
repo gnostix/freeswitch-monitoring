@@ -216,12 +216,12 @@
 	series: [
 		{
 			index: 0,
-			id: 'cpuidle',
+			id: 'cpuUsage',
 			 dashStyle: "Solid",
 			marker: {
 				"enabled": false
 			},
-			name: "CPU Idle",
+			name: "CPU Usage (%)",
 			data: [
 				[
 					(new Date()).getTime(),
