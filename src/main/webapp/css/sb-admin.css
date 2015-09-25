@@ -284,17 +284,17 @@ ul.alert-dropdown {
 }
 
 .btn-white {
-	color: white;
-	border-color: white;
-	 border: 2px solid #fff;
+	color: rgba(255, 255, 255, 0.9);
+	border-color: rgba(0, 0, 0, 0.1);
+	 border: 2px solid ;
 	 border-radius:5px;
 }
 .btn-white:hover,
 .btn-white:active {
-  border: 2px solid #fff;
-  border-color: white;		
-  background-color: #fff;
-  color: #000;
+  border: 2px solid;
+  border-color: rgba(0, 0, 0, 0.2);	
+  background-color: transparent;
+  color: rgba(255, 255, 255, 0.1);
   border-radius:5px;
 }
 

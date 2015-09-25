@@ -4,9 +4,10 @@ $(function () {
     $(document).ready ( function(){
         $.ajax({
             type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
-            url: '/configuration/fs-node/conn-data', // the url where we want to POST
-            //url: 'http://fs-moni.cloudapp.net:8080/configuration/fs-node/conn-data', // the url where we want to POST
-            dataType: 'json', // what type of data do we expect back from the server
+           // url: '/configuration/fs-node/conn-data', // the url where we want to POST
+            url: 'http://fs-moni.cloudapp.net:8080/configuration/fs-node/conn-data', // the url where we want to POST
+            //url: 'http://10.5.50.249:8080/configuration/fs-node/conn-data',
+			dataType: 'json', // what type of data do we expect back from the server
             contentType: "application/json",
             encode: true
         })
@@ -51,9 +52,10 @@ $(function () {
             // process the form
             $.ajax({
                 type: 'POST', // define the type of HTTP verb we want to use (POST for our form)
-                //url: 'http://fs-moni.cloudapp.net:8080/configuration/fs-node/conn-data', // the url where we want to POST
-                url: '/configuration/fs-node/conn-data', // the url where we want to POST
-                data: JSON.stringify(formData), // our data object
+                url: 'http://fs-moni.cloudapp.net:8080/configuration/fs-node/conn-data', // the url where we want to POST
+                //url: '/configuration/fs-node/conn-data', // the url where we want to POST
+                //url: 'http://10.5.50.249:8080/configuration/fs-node/conn-data', // the url where we want to POST
+               	data: JSON.stringify(formData), // our data object
                 dataType: 'json', // what type of data do we expect back from the server
                 contentType: "application/json",
                 encode: true
@@ -110,7 +112,8 @@ function delete_user(row,ip)
     $.ajax({
         type: 'DELETE', // define the type of HTTP verb we want to use (POST for our form)
         url: '/configuration/fs-node/conn-data', // the url where we want to POST
-        //url: 'http://fs-moni.cloudapp.net:8080/configuration/fs-node/conn-data', // the url where we want to POST
+        url: 'http://fs-moni.cloudapp.net:8080/configuration/fs-node/conn-data', // the url where we want to POST
+        //url: 'http://10.5.50.249:8080/configuration/fs-node/conn-data', // the url where we want to POST
         data: JSON.stringify(formData), // our data object
         dataType: 'json', // what type of data do we expect back from the server
         contentType: "application/json",
