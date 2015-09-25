@@ -17,6 +17,7 @@ $(function () {
 
 
     var request = {
+
         url: "ws://fs-moni.cloudapp.net:8080/fs-moni/live/events",
         url: "/fs-moni/live/events",
         //url: "the-chat",
@@ -52,27 +53,27 @@ $(function () {
         try {
             var json = jQuery.parseJSON(message);
             console.log("Got a message");
-
-            //get the chart by id
-            var chart = $('#heartbeat').highcharts();
-            //get series by id
-            var asr = chart.get('asr');
-            var acd = chart.get('acd');
-            var rtp = chart.get('rtp');
-
+			
+			//get the chart by id
+			var chart = $('#heartbeat').highcharts();
+           //get series by id
+		   var asr = chart.get('asr');
+			var acd = chart.get('acd');
+			var rtp = chart.get('rtp');
+			
 			//get the chart by id
 			var chartBasic = $('#basicstats').highcharts();
-            //get the chart by id
-            var chartBasic = $('#basicstats').highcharts();
+			  //get series by id
+           var concurrentCalls = chartBasic.get('concurrentCalls');
 			var failedCalls = chartBasic.get('failedCalls');
 			
 			//get the chart by id
 			var chartCPU = $('#cpu').highcharts();
-            //get series by id
-            var concurrentCalls = chartBasic.get('concurrentCalls');
+			  //get series by id
+           var cpuUsage = chartCPU.get('cpuUsage');
 			
 			 //console.log(json);
-            var failedCalls = chartBasic.get('failedCalls');
+            console.log("EVENTNAME:::::"+json.eventName);
 
             //get the chart by id
             var chartCPU = $('#cpu').highcharts();
@@ -85,6 +86,7 @@ $(function () {
             if (json.eventName === "HEARTBEAT") {
                 $("#upTime").text(convertMillisecondsToDigitalClock(json.uptimeMsec).clock);
                 $("#sessionPerSecond").text(json.sessionPerSecond);
+
                 $("#cpuUsage").text(json.cpuUsage+'%');
 				// Add points to graphs
                 cpuUsage.addPoint([Date.parse(json.eventDateTimestamp), json.cpuUsage]);		 
