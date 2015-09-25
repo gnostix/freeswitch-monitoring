@@ -1,7 +1,7 @@
 package gr.gnostix.freeswitch.actors
 
 import akka.actor._
-import gr.gnostix.freeswitch.actors.ActorsProtocol.{CallTerminated, GetChannelInfo, GetCallInfo}
+import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetConcurrentCallsChannel, CallTerminated, GetChannelInfo, GetCallInfo}
 
 /**
  * Created by rebel on 7/8/15.
@@ -39,6 +39,9 @@ import gr.gnostix.freeswitch.actors.ActorsProtocol.{CallTerminated, GetChannelIn
 
       case x @ GetCallInfo(callUUID) =>
         log info "channel actor sending his state"
+        sender ! channelState.head._2
+
+      case x @ GetConcurrentCallsChannel =>
         sender ! channelState.head._2
 
       case _ => log info s"message  not understood on channelActor"

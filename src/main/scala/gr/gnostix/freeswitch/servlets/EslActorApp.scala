@@ -8,14 +8,17 @@ import akka.util.Timeout
 import gr.gnostix.api.auth.AuthenticationSupport
 import gr.gnostix.freeswitch.FreeswitchopStack
 import gr.gnostix.freeswitch.actors.ActorsProtocol._
+import gr.gnostix.freeswitch.actors.{CallEnd, CallNew}
+import gr.gnostix.freeswitch.actors.ServletProtocol.{ApiReply, ApiReplyData}
 import org.joda.time.DateTime
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json.JacksonJsonSupport
-import org.scalatra.{CorsSupport, FutureSupport, ScalatraServlet}
+import org.scalatra.{AsyncResult, CorsSupport, FutureSupport, ScalatraServlet}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{Future, ExecutionContext}
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import scala.util.{Failure, Success}
 
 
 class EslActorApp(system:ActorSystem, myActor:ActorRef)
@@ -55,8 +58,44 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
     myActor ? GetTotalConcurrentCalls
   }
 
+  get("/concurrent/calls/details"){
+    val data: Future[List[CallNew]] = (myActor ? GetConcurrentCallsChannel).mapTo[List[CallNew]]
+
+    new AsyncResult {
+      val is =
+        for {
+          dt <- data
+        } yield ApiReplyData(200,"all good", dt)
+
+    }
+  }
+
   get("/GetCompletedCalls"){
     myActor ? GetCompletedCalls
+  }
+
+  get("/failed/calls/details"){
+    val data: Future[List[CallEnd]] = (myActor ? GetFailedCallsChannel).mapTo[List[CallEnd]]
+
+    new AsyncResult {
+      val is =
+        for {
+          dt <- data
+        } yield ApiReplyData(200,"all good", dt)
+
+    }
+  }
+
+  get("/completed/calls/details"){
+    val data: Future[List[CallNew]] = (myActor ? GetCompletedCallsChannel).mapTo[List[CallNew]]
+
+    new AsyncResult {
+      val is =
+        for {
+          dt <- data
+        } yield ApiReplyData(200,"all good", dt)
+
+    }
   }
 
   get("/GetFailedCalls"){
