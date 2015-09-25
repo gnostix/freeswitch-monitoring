@@ -6,7 +6,7 @@ import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
-import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetACDAndRTPByTime, GetACDAndRTP, CallTerminated}
+import gr.gnostix.freeswitch.actors.ActorsProtocol._
 import org.scalatra.atmosphere.AtmosphereClient
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -100,6 +100,9 @@ class CallActor extends Actor with ActorLogging {
 
           sender ! all
       }
+
+    case x @ (GetConcurrentCallsChannel | GetCompletedCallsChannel) =>
+      activeChannels.head._2 forward x
 
 
     case x@GetACDAndRTP =>

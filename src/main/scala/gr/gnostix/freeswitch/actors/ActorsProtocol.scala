@@ -34,6 +34,8 @@ object ActorsProtocol {
 
   case object GetFailedCalls extends RouterRequest
 
+  case class GetFailedCallsAnalysis(fromNumberOfDigits: Int, toNumberOfDigits: Int) extends RouterRequest
+
   case class GetFailedCallsByDate(from: Timestamp, to: Timestamp) extends RouterRequest
 
   case class GetCallsResponse(totalCalls: Int, activeCallsUUID: List[String]) extends RouterResponse
@@ -41,6 +43,13 @@ object ActorsProtocol {
   case class GetCallInfo(uuid: String) extends RouterRequest
 
   case class GetChannelInfo(callUuid: String, channelUuid: String) extends RouterRequest
+
+  case object GetConcurrentCallsChannel extends RouterRequest
+
+  case object GetFailedCallsChannel extends RouterRequest
+
+  case object GetCompletedCallsChannel extends RouterRequest
+
 
   case object GetLastHeartBeat extends RouterRequest
 
@@ -93,4 +102,6 @@ object ServletProtocol {
   sealed trait ApiResponse extends ApiProtocol
 
   case class ApiReply(status: Int, message: String) extends  ApiResponse
+  case class ApiReplyData(status: Int, message: String, payload: Any) extends  ApiResponse
+
 }

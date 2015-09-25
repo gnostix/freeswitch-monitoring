@@ -149,7 +149,7 @@ class EslEventRouter extends Actor with ActorLogging {
     val upTime = headers get "Up-Time" getOrElse "_UNKNOWN"
     val sessionCount = headers get "Session-Count" getOrElse "0"
     val sessionPerSecond = headers get "Session-Per-Sec" getOrElse "0"
-    val idleCPU = headers get "Idle-CPU" getOrElse "0"
+    val cpuUsage = 100 - (headers get "Idle-CPU" getOrElse "0").toDouble
     val sessionPeakMax = headers get "Session-Peak-Max" getOrElse "0"
     val sessionPeakMaxFiveMin = headers get "Session-Peak-FiveMin" getOrElse "0"
     val freeSWITCHHostname = headers get "FreeSWITCH-Hostname" getOrElse "0"
@@ -162,7 +162,7 @@ class EslEventRouter extends Actor with ActorLogging {
     }
 
     HeartBeat("HEARTBEAT", eventInfo, uptimeMsec.toLong, sessionCount.toInt, sessionPerSecond.toInt,
-      eventDateTimestamp, BigDecimal(idleCPU).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble,
+      eventDateTimestamp, BigDecimal(cpuUsage).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble,
       sessionPeakMax.toInt, sessionPeakMaxFiveMin.toInt, freeSWITCHHostname, freeSWITCHIPv4, upTime)
   }
 

@@ -27,12 +27,25 @@ class CentralMessageRouter extends Actor with ActorLogging {
   // eslConnectionDispatcherActor ! EslConnectionData("localhost", 8021, "ClueCon")
 //  eslConnectionDispatcherActor ! EslConnectionData("192.168.43.128", 8021, "ClueCon")
 
-//  eslConnectionDispatcherActor ! EslConnectionData("fs-instance.com", 8021, "ClueCon")
+  eslConnectionDispatcherActor ! EslConnectionData("fs-instance.com", 8021, "ClueCon")
 //  eslConnectionDispatcherActor ! EslConnectionData("10.0.0.128", 8021, "ClueCon")
 
   def receive: Receive = {
    // case x @ Event(headers) =>
    //   eslEventRouter ! x
+
+    case x @ GetConcurrentCallsChannel =>
+      callRouterActor forward x
+
+    case x @ GetFailedCallsChannel =>
+      callRouterActor forward x
+
+    case x @ GetCompletedCallsChannel =>
+      completedCallsActor forward x
+
+
+    case x @ GetFailedCallsAnalysis(fromNumberOfDigits, toNumberOfDigits) =>
+      callRouterActor forward x
 
     case x @ EslConnectionData(ip, port, password) =>
       //eslConnectionDispatcherActor ! EslConnectionData("localhost", 8021, "ClueCon")

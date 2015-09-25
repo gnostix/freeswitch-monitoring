@@ -1,7 +1,7 @@
 package gr.gnostix.freeswitch.actors
 
 import akka.actor.{ActorRef, Actor, ActorLogging}
-import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetFailedCallsByDate, GetTotalFailedCalls, GetFailedCalls}
+import gr.gnostix.freeswitch.actors.ActorsProtocol._
 import org.scalatra.atmosphere.AtmosphereClient
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -43,6 +43,19 @@ class FailedCallsActor(wsLiveEventsActor: ActorRef) extends Actor with ActorLogg
           wsLiveEventsActor ! fCall
           //wsLiveEventsActor ! ActorsJsonProtocol.failedCallToJson(fCall)
       }
+
+    case x @ GetFailedCallsAnalysis(fromNumberOfDigits, toNumberOfDigits) =>
+      sender ! failedCalls.groupBy(x => x.fromUserIP).map{
+        case (ip, call) => call.groupBy(pr => pr.fromUser.substring(0,fromNumberOfDigits)).map{
+          case (fromUser, call2) => call2.groupBy(_.toUser.substring(0, toNumberOfDigits)).map{
+            case (toUser, call3) => (ip, fromUser, toUser, call3.size)
+          }
+        }
+      }
+
+    case x @ GetFailedCallsChannel =>
+      sender ! failedCalls
+
 
     case x @ GetFailedCalls =>
       //log info "returning the failed calls " + failedCalls
