@@ -2,17 +2,25 @@ package gr.gnostix.freeswitch.actors
 
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
-import gr.gnostix.freeswitch.actors.ActorsProtocol.CompletedCall
+import akka.pattern.{ask, pipe}
+import akka.util.Timeout
+import scala.language.postfixOps
+import scala.concurrent.duration._
+
+import scala.concurrent.Future
 
 
 class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) extends Actor with ActorLogging {
 
   import gr.gnostix.freeswitch.actors.ActorsProtocol._
+  import context.dispatcher
 
   override val supervisorStrategy =
     OneForOneStrategy() {
       case _ => Restart
     }
+
+  implicit val timeout = Timeout(1 seconds) // needed for `?` below
 
   // create the FailedCallsActor in advance
   val failedCallsActor = context.actorOf(Props(new FailedCallsActor(wsLiveEventsActor)), "failedCallsActor")
@@ -125,6 +133,17 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
         case Some(actor) =>
           actor forward x
       }
+
+    case x @ GetConcurrentCallsChannel =>
+      val f: List[Future[CallNew]] = activeCalls.map{
+        case (a,y) => (y ? x).mapTo[CallNew]
+      }.toList
+
+      Future.sequence(f) pipeTo sender
+
+
+    case x @ GetFailedCallsChannel =>
+      failedCallsActor forward x
 
     case CallTerminated(callEnd) =>
       val completedCall = activeCalls.filter(_._2 == sender())

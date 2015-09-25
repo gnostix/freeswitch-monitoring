@@ -33,6 +33,9 @@ First have a Freeswitch instance and configure the connection from the java clas
 
 After the last command the container will start on localhost:8080
 
+### Demo live
+
+This is [FS-Moni](http://fs-moni.cloudapp.net:8080 "FS-Moni") demo app link.
 
 ### Basic events arriving in the web socket
 

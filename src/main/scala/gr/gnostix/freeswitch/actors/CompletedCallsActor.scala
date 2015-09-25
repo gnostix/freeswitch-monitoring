@@ -6,7 +6,6 @@ import akka.actor.SupervisorStrategy.Restart
 import akka.actor.{Actor, ActorLogging, ActorRef, OneForOneStrategy}
 import akka.pattern.{ask, pipe}
 import akka.util.Timeout
-import gr.gnostix.freeswitch.actors.ActorsProtocol.GetACDAndRTP
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -17,6 +16,7 @@ import scala.language.postfixOps
  */
 
 case class HangupActor(hangupTime: Timestamp, callActor: ActorRef)
+
 class CompletedCallsActor extends Actor with ActorLogging {
 
   import gr.gnostix.freeswitch.actors.ActorsProtocol._
@@ -35,6 +35,14 @@ class CompletedCallsActor extends Actor with ActorLogging {
       val newMap = completedCalls updated(uuid, HangupActor(timeHangup, callActor))
       log info s"-----> new call coming on Completed Calls Actor $newMap"
       context become idle(newMap)
+
+    case x @ GetCompletedCallsChannel =>
+      val f: List[Future[CallNew]] = completedCalls.map{
+        case (a,y) => (y.callActor ? x).mapTo[CallNew]
+      }.toList
+
+      Future.sequence(f) pipeTo sender
+
 
     case x @ GetACDAndRTPByTime(t) =>
       completedCalls.isEmpty match {

@@ -44,6 +44,13 @@ object ActorsProtocol {
 
   case class GetChannelInfo(callUuid: String, channelUuid: String) extends RouterRequest
 
+  case object GetConcurrentCallsChannel extends RouterRequest
+
+  case object GetFailedCallsChannel extends RouterRequest
+
+  case object GetCompletedCallsChannel extends RouterRequest
+
+
   case object GetLastHeartBeat extends RouterRequest
 
   case object GetAllHeartBeat extends RouterRequest
@@ -95,4 +102,6 @@ object ServletProtocol {
   sealed trait ApiResponse extends ApiProtocol
 
   case class ApiReply(status: Int, message: String) extends  ApiResponse
+  case class ApiReplyData(status: Int, message: String, payload: Any) extends  ApiResponse
+
 }

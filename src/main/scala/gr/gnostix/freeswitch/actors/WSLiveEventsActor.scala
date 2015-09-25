@@ -2,7 +2,7 @@ package gr.gnostix.freeswitch.actors
 
 import akka.actor.{Actor, ActorLogging}
 import gr.gnostix.freeswitch.actors.ActorsProtocol.{AddAtmoClientUuid, RemoveAtmoClientUuid}
-import org.atmosphere.cpr.AtmosphereResource
+import org.atmosphere.cpr.{BroadcasterFactory, Broadcaster, AtmosphereResource}
 import org.json4s.NoTypeHints
 import org.json4s.jackson.Serialization
 import org.json4s.jackson.Serialization.write
@@ -42,14 +42,14 @@ class WSLiveEventsActor extends Actor with ActorLogging {
       atmoClientsUuid.size match {
         case 0 => log info "do nothing.. no connected clients.."
         case _ =>
-          AtmosphereClient.lookup("/fs-moni/live/koko").map{a =>
-            a.broadcast(heartbeatToJson(x))}
+          AtmosphereClient.lookup("/fs-moni/live/events").map{a =>
+            a.broadcast(caseClassToJson(x))}
 
       }
 
     //case x: OutboundMessage =>
     case x: EventType =>
-      log info "OutboundMessage coming .."
+      log info "OutboundMessage coming .. " + x.eventName
       //AtmosphereClient.broadcast("/fs-moni/live/koko", x)
       atmoClientsUuid.size match {
         case 0 => log info "do nothing.. no connected clients.."
@@ -61,8 +61,10 @@ class WSLiveEventsActor extends Actor with ActorLogging {
                     override def apply(v1: AtmosphereResource): Boolean = true
                   })) */
           AtmosphereClient.lookup("/fs-moni/live/events").map{
-            a => a.broadcast(heartbeatToJson(x))
+            a =>
+            a.broadcast(caseClassToJson(x))
           }
+//              BroadcasterFactory.getDefault().lookup(atmoClientsUuid.head).broadcast('something');
 
       }
 
@@ -88,9 +90,9 @@ class WSLiveEventsActor extends Actor with ActorLogging {
     case _ => log warning "WSLiveEventsActor | Unknown Message .."
   }
 
-  def heartbeatToJson(heartBeat: AnyRef) = {
+  def caseClassToJson(event: AnyRef) = {
     //log info "-------Lala to json : " + write(heartBeat)
-    write(heartBeat)
+    write(event)
   }
 
   context.system.scheduler.schedule(3000 milliseconds,

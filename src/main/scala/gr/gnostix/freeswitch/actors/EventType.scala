@@ -11,7 +11,7 @@ sealed trait EventType {
 }
 
 case class HeartBeat(eventName: String, eventInfo: String, uptimeMsec: Long, sessionCount: Int,
-                     sessionPerSecond: Int, eventDateTimestamp: Timestamp, idleCPU: Double, sessionPeakMax: Int,
+                     sessionPerSecond: Int, eventDateTimestamp: Timestamp, cpuUsage: Double, sessionPeakMax: Int,
                      sessionPeakMaxFiveMin: Int, freeSWITCHHostname: String, freeSWITCHIPv4: String, upTime: String)
   extends EventType
 

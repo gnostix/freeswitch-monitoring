@@ -1,7 +1,7 @@
 package gr.gnostix.freeswitch.actors
 
 import akka.actor.{ActorRef, Actor, ActorLogging}
-import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetFailedCallsAnalysis, GetFailedCallsByDate, GetTotalFailedCalls, GetFailedCalls}
+import gr.gnostix.freeswitch.actors.ActorsProtocol._
 import org.scalatra.atmosphere.AtmosphereClient
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -52,6 +52,10 @@ class FailedCallsActor(wsLiveEventsActor: ActorRef) extends Actor with ActorLogg
           }
         }
       }
+
+    case x @ GetFailedCallsChannel =>
+      sender ! failedCalls
+
 
     case x @ GetFailedCalls =>
       //log info "returning the failed calls " + failedCalls
