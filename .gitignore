@@ -70,3 +70,4 @@ jrebel.lic
 # Alex files
 src/main/scala/gr/gnostix/freeswitch/tmp/*
 hs_err*
+*.orig
