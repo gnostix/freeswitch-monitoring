@@ -33,7 +33,7 @@ class CompletedCallsActor extends Actor with ActorLogging {
   def idle(completedCalls: scala.collection.Map[String, HangupActor]): Receive = {
     case CompletedCall(uuid, timeHangup, callActor) =>
       val newMap = completedCalls updated(uuid, HangupActor(timeHangup, callActor))
-      log info s"-----> new call coming on Completed Calls Actor $newMap"
+      //log info s"-----> new call coming on Completed Calls Actor $newMap"
       context become idle(newMap)
 
     case x @ GetCompletedCallsChannel =>

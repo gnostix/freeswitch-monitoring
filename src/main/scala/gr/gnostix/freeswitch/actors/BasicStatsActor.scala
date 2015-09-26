@@ -113,7 +113,7 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
   }
 
   context.system.scheduler.schedule(10000 milliseconds,
-    10000 milliseconds,
+    30000 milliseconds,
     self,
     BasicStatsTick)
 

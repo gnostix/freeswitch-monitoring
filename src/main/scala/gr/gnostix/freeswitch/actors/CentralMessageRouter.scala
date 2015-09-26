@@ -94,11 +94,11 @@ class CentralMessageRouter extends Actor with ActorLogging {
       callRouterActor forward x
 
     case x @ AddAtmoClientUuid(uuid)  =>
-      log info "central actor received  AddAtmoClientUuid(uuid) "
+      //log info "central actor received  AddAtmoClientUuid(uuid) "
       wsLiveEventsActor ! x
 
     case x @ RemoveAtmoClientUuid(uuid) =>
-      log info "central actor received  RemoveAtmoClientUuid(uuid)"
+      //log info "central actor received  RemoveAtmoClientUuid(uuid)"
       wsLiveEventsActor ! x
 
     case x => log warning "I don't get this message!! " + x.toString
