@@ -23,7 +23,7 @@ class HeartBeatActor(wsLiveEventsActor: ActorRef) extends Actor with ActorLoggin
       //AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.heartbeatToJson(x))
       wsLiveEventsActor ! x
       //wsLiveEventsActor ! ActorsJsonProtocol.heartbeatToJson(x)
-      log info "broadcasted HeartBeat to WS"
+      //log info "broadcasted HeartBeat to WS"
 
 
     case x @ GetLastHeartBeat =>
