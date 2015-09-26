@@ -18,7 +18,7 @@ $(function () {
 
     var request = {
 
-        url: "ws://fs-moni.cloudapp.net:8080/fs-moni/live/events",
+        //url: "ws://fs-moni.cloudapp.net:8080/fs-moni/live/events",
         url: "/fs-moni/live/events",
         //url: "the-chat",
         //url: "ws://10.5.50.249:8080/fs-moni/live/events",
@@ -61,24 +61,16 @@ $(function () {
             var acd = chart.get('acd');
             var rtp = chart.get('rtp');
 
-			//get the chart by id
-			var chartBasic = $('#basicstats').highcharts();
-            //get the chart by id
+		    //get the chart by id
             var chartBasic = $('#basicstats').highcharts();
 			var failedCalls = chartBasic.get('failedCalls');
-			
+            var concurrentCalls = chartBasic.get('concurrentCalls');
+
 			//get the chart by id
 			var chartCPU = $('#cpu').highcharts();
 			  //get series by id
-           var cpuUsage = chartCPU.get('cpuUsage');
-			
-			 //console.log(json);
-            var failedCalls = chartBasic.get('failedCalls');
+            var cpuUsage = chartCPU.get('cpuUsage');
 
-            //get the chart by id
-            var chartCPU = $('#cpu').highcharts();
-            //get series by id
-            var cpuidle = chartCPU.get('cpuidle');
 
             //console.log(json);
             console.log("EVENTNAME:::::" + json.eventName);
@@ -86,10 +78,6 @@ $(function () {
             if (json.eventName === "HEARTBEAT") {
                 $("#upTime").text(convertMillisecondsToDigitalClock(json.uptimeMsec).clock);
                 $("#sessionPerSecond").text(json.sessionPerSecond);
-                $("#cpuIdle").text(json.idleCPU);
-                // Add points to graphs
-                cpuidle.addPoint([Date.parse(json.eventDateTimestamp), json.idleCPU]);
-
                 $("#cpuUsage").text(json.cpuUsage+'%');
 				// Add points to graphs
                 cpuUsage.addPoint([Date.parse(json.eventDateTimestamp), json.cpuUsage]);		 
