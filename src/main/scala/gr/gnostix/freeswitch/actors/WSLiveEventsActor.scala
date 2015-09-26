@@ -16,7 +16,7 @@ import scala.language.postfixOps
  * Created by rebel on 29/8/15.
  */
 
-sealed trait Kokoko1 {
+sealed trait Kokoko {
   def eventName: String
 }
 case class Lala(eventName: String, vava: String) extends Kokoko
