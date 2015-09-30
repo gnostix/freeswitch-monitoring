@@ -60,3 +60,5 @@ This is [FS-Moni](http://fs-moni.cloudapp.net:8080 "FS-Moni") demo app link.
 8. http://localhost:8080/actors/lastHeartbeat
 9. http://localhost:8080/actors/allHeartbeats
 10. http://localhost:8080/actors/stats/GetBasicStatsTimeSeries
+
+## Contact: p_alx at hotmail dot com

@@ -110,7 +110,7 @@ class CompletedCallsActor extends Actor with ActorLogging {
 
       //stop all actors from remain map
       remainMap.map(s => context stop  s._2.asInstanceOf[HangupActor].callActor)
-      
+
       // I should make sure here that we take the newest calls!
       context become idle(newMap)
 
