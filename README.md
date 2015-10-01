@@ -36,12 +36,13 @@ a) Clone the project and from the application git folder, run bellow commands.
 After the last command the container will start on localhost:8080
 
 b)
-You can also download a ready build war file.
+You can also [download](http://fs-moni.cloudapp.net/freeswitchop_2.11-0.1.0-SNAPSHOT.war) a ready build war file.
 
 *	download file from location
 *	have installed in a server java oracle 7 or 8
 *	have installed a jetty server 9 between versions 9.2.1.v20140609 or 9.2.10.v20150310 
 *	add war file as root app in the Jetty webapps folder. We do that by copying the freeswitch-monitoring.war file to root.war file inside the webapps folder. e.g. in linux cp /war/location/freeswitch-monitoring.war /path/to/jetty/webapps/root.war
+*	start jetty and connect your browser to url jetty-ip:8080
 
 After the installation is complete then:
 
