@@ -56,30 +56,20 @@ class WSLiveEventsActor extends Actor with ActorLogging {
         case 0 => log info "do nothing.. no connected clients.."
         case _ =>
           log info s"the atmoClients list $atmoClientsUuid"
+          AtmosphereClient.lookup("/fs-moni/live/events").foreach( (broadcaster:ScalatraBroadcaster) => {
+            val myResources = broadcaster.getAtmosphereResources.asScala filter {r => atmoClientsUuid.contains(r.uuid())}
+            myResources foreach( (resource:AtmosphereResource) => {
+              val session = resource.getRequest.getSession(false)
 
-          // this has to be reworked and refined!!
-          // remove invalidated AtmosphereResources / http sessions
-          AtmosphereClient.lookup("/fs-moni/live/events").foreach(_.getAtmosphereResources.asScala.toSet foreach (
-            (resource: AtmosphereResource) =>
-              if (resource.getRequest.getSession(false) == null) {
+              if(session == null){
                 log warning (s"-------> Encountered atmosphere resource ${resource.uuid()} associated with invalid session")
                 resource.asInstanceOf[AtmosphereResourceImpl]._destroy()
-
               } else {
-                //check if this resource is in our special client list (logged in to the right account!!)
-                atmoClientsUuid.contains(resource.uuid()) match {
-                  case true =>
-                    log info s"Atmo: this client belongs to this channel and is logged in, id: ${resource.uuid()}"
-                    resource.getBroadcaster.broadcast(caseClassToJson(x))
-
-                  case false =>
-                    log info s"this client is doesn't  belong to this channel, id: ${resource.uuid()}"
-                    //resource.asInstanceOf[AtmosphereResourceImpl]._destroy()
-                }
-                //log info s"the atmo resources are: $resource"
-
+                log info s"Atmo: this client belongs to this channel and is logged in, id: ${resource.uuid()}"
+                resource.getBroadcaster.broadcast(caseClassToJson(x))
               }
-            ))
+            })
+          })
 
       }
 

@@ -12,7 +12,7 @@ object FreeswitchopBuild extends Build {
   val ScalaVersion = "2.11.5"
   val ScalatraVersion = "2.3.1"
   val json4sversion = "3.2.11"
-  val jettyVersion = "9.2.1.v20140609" //9.2.10.v20150310"
+  val jettyVersion = "9.2.10.v20150310" //9.2.10.v20150310" //9.2.1.v20140609
 
 
   lazy val project = Project(
@@ -33,9 +33,9 @@ object FreeswitchopBuild extends Build {
         "org.scalatra" %% "scalatra-scalate" % ScalatraVersion,
         "org.scalatra" %% "scalatra-specs2" % ScalatraVersion % "test",
         "org.scalatra" %% "scalatra-scalatest" % ScalatraVersion % "test",
-        "org.scalatra" %% "scalatra-atmosphere" % ScalatraVersion,
+        "org.scalatra" %% "scalatra-atmosphere" % ScalatraVersion exclude("org.atmosphere", "atmosphere-compat-tomcat"),
         "org.json4s" %% "json4s-jackson" % json4sversion,
-        "org.eclipse.jetty" % "jetty-webapp" % jettyVersion % "container",
+        "org.eclipse.jetty" % "jetty-webapp" % jettyVersion % "container;compile",
         "org.eclipse.jetty" % "jetty-plus" % jettyVersion % "container;provided",
         "org.eclipse.jetty.websocket" % "websocket-server" % jettyVersion % "container;provided",
         "javax.servlet" % "javax.servlet-api" % "3.1.0" % "container;provided;test" artifacts Artifact("javax.servlet-api", "jar", "jar"),
