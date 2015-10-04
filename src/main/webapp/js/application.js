@@ -19,7 +19,7 @@ $(function () {
     var request = {
 
         url: "ws://fs-moni.cloudapp.net:8080/fs-moni/live/events",
-        //url: "/fs-moni/live/events",
+       // url: "/fs-moni/live/events",
         //url: "the-chat",
        // url: "ws://192.168.1.125:8080/fs-moni/live/events",
         contentType: "application/json",
@@ -309,7 +309,7 @@ jQuery(document).ready(function() {
 		};
        $.ajax({
 	    type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
-        //url: '/actors/concurrent/call/analysis', // the url where we want to POST
+        //url: '/actors/concurrent/calls/details', // the url where we want to POST
         url: 'http://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details', // the url where we want to POST
         //url: "ws://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details",
 		 // url: 'http://10.5.50.249:8080/actors/concurrent/calls/details', // the url where we want to POST
@@ -385,7 +385,7 @@ jQuery(document).ready(function() {
 		};
        $.ajax({
 	    type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
-        //url: '/actors/concurrent/call/analysis', // the url where we want to POST
+       // url: '/actors/failed/calls/details', // the url where we want to POST
         url: 'http://fs-moni.cloudapp.net:8080/actors/failed/calls/details', // the url where we want to POST
         //url: "ws://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details",
 		 // url: 'http://10.5.50.249:8080/actors/concurrent/calls/details', // the url where we want to POST
