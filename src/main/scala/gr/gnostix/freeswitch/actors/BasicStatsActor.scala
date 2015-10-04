@@ -36,7 +36,8 @@ sealed trait CustomJobs
 
 //object CustomJob extends CustomJobs
 
-case class StatsPerCustomer(ip: List[String], cliPrefixRegEx: Option[List[String]]) extends CustomJobs
+case class StatsPerCustomer(ip: List[String], cliPrefixRegEx: Option[List[String]], desc: String) extends CustomJobs
+case class StatsPerProvider(ip: List[String], cliPrefixRegEx: Option[List[String]], desc: String) extends CustomJobs
 
 
 class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, wsLiveEventsActor: ActorRef)
@@ -54,6 +55,7 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
   var totalOfLastValueFailedCalls = 0
 
   def receive: Receive = {
+
     case BasicStatsTick =>
       val conCallsT: Future[ConcurrentCallsNum] = (callRouterActor ? GetTotalConcurrentCalls).mapTo[ConcurrentCallsNum]
       val failedCallsT: Future[TotalFailedCalls] = (callRouterActor ? GetTotalFailedCalls).mapTo[TotalFailedCalls]
@@ -100,8 +102,8 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
         case Failure(e) => log warning "BasicStatsTick failed in response " + e.getMessage
       }
 
-    case x@StatsPerCustomer(_, _) =>
-      customJobs ::= x
+//    case x@StatsPerCustomer(_, _) =>
+//      customJobs ::= x
 
     case Tick =>
       basicStats = getRetentionedBasicStats
