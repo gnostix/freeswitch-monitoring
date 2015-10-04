@@ -2,6 +2,7 @@ $(function () {
     "use strict";
 
     $(document).ready ( function(){
+		$('#table').DataTable();
         $.ajax({
             type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
            // url: '/configuration/fs-node/conn-data', // the url where we want to POST

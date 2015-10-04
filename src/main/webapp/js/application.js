@@ -1,6 +1,6 @@
 $(function () {
     "use strict";
-
+	
     var detect = $("#detect");
     var header = $('#header');
     var messages = $('#messages');
@@ -18,10 +18,10 @@ $(function () {
 
     var request = {
 
-        //url: "ws://fs-moni.cloudapp.net:8080/fs-moni/live/events",
-        url: "/fs-moni/live/events",
+        url: "ws://fs-moni.cloudapp.net:8080/fs-moni/live/events",
+        //url: "/fs-moni/live/events",
         //url: "the-chat",
-        //url: "ws://localhost:8080/fs-moni/live/events",
+       // url: "ws://192.168.1.125:8080/fs-moni/live/events",
         contentType: "application/json",
         logLevel: 'debug',
         transport: transport,
@@ -192,7 +192,38 @@ $(function () {
         };
     }
 	
-	/* ---------- Popover ---------- */
+	// CONVERT MILLISECONDS TO custom format
+    function convertMillisecondsToCustomFormat(ms) {
+        var date = new Date(ms);
+        var str =  date.getUTCFullYear() + '-' +
+       (date.getUTCMonth() + 1) + '-' +
+       (date.getUTCDate())      + ' ' +
+       addZero(date.getUTCHours())     + ':' +
+       addZero(date.getUTCMinutes())   + ':' +
+       addZero(date.getUTCSeconds())   + ' ';
+        console.log(str);
+
+        var hours = Math.floor(ms / 3600000); // 1 Hour = 36000 Milliseconds
+        var minutes = Math.floor((ms % 3600000) / 60000); // 1 Minutes = 60000 Milliseconds
+        var seconds = Math.floor(((ms % 360000) % 60000) / 1000);// 1 Second = 1000 Milliseconds
+        console.log("hours" + hours);
+        return {
+            hours: hours,
+            minutes: minutes,
+            seconds: seconds,
+            // clock: hours + ":" + minutes + ":" + seconds
+            clock: str
+        };
+    }
+	
+	function addZero(i) {
+    if (i < 10) {
+        i = "0" + i;
+    }
+    return i;
+}
+	
+	/* ---------- Popover ---------- 
 	$('[rel="popover"],[data-rel="popover"]').popover({
      html: true,
      title: function () {
@@ -200,19 +231,78 @@ $(function () {
 
         return " - Score Range"
      },
-     content: function () {       
-        return '<div class="popcontainer"></div>';
+     content: function () {  
+		var  pop=  '<table id="examplel" class="table table-striped table-bordered"> '+
+                                     '<thead>'+
+                                      '  <tr>'+
+                                         '   <th>uuid</th>'+
+                                         '   <th>Port</th>'+
+                                          '  <th>Action</th>'+
+                                      '  </tr>'+
+                                      '  </thead>'+
+                                       ' <tbody>'+
+									  '  </tbody>'+
+                                   ' </table>'+
+                               ' </div>';
+                        
+		//$( "div.popcontainer" )
+		//.html( pop );
+		
+        return  pop;
      }
+	 
+	 
 	});
 	
-	$('.pop').click(function() {
-    console.log( "Handler for pop.click()." );
-	 getDetails();
-    });
+	*/
+	
+$('#viewCCalls').click(function() {
+  var table = $('#example').DataTable();
+ 
+table.clear().draw();
+            
+  getDetails(table); 
+ //open dialog
+ $('#dialog').dialog('open');
+
+});
+
+$('#viewFCalls').click(function() {
+  var table = $('#failedcallstable').DataTable();
+ 
+table.clear().draw();
+            
+  getFailedCallsDetails(table); 
+ //open dialog
+ $('#failedcallsdialog').dialog('open');
+
+});
+
+
+jQuery(document).ready(function() {
+  
+	// dialog properties
+   $("#dialog").dialog({
+             minWidth: 700,
+			 maxHeight: 600,
+             autoOpen: false,
+			 modal:true
+           }); 
+	
+	 $("#failedcallsdialog").dialog({
+             minWidth: 900,
+			 maxHeight: 600,
+             autoOpen: false,
+			 modal:true
+           }); 
+	
+}); 
+
+
+
 	
 	
-	
-	function getDetails(){
+	function getDetails(table){
 		console.log("getDetails --------------------------------");
 		var pop="";
 		var message="";
@@ -223,61 +313,58 @@ $(function () {
 	    type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
         //url: '/actors/concurrent/call/analysis', // the url where we want to POST
         url: 'http://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details', // the url where we want to POST
-       // url: 'http://10.5.50.249:8080/actors/concurrent/calls/details', // the url where we want to POST
+        //url: "ws://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details",
+		 // url: 'http://10.5.50.249:8080/actors/concurrent/calls/details', // the url where we want to POST
         //data: JSON.stringify(formData), // our data object
         dataType: 'json', // what type of data do we expect back from the server
         contentType: "application/json",
         encode: true
         })
         // using the done promise callback
-       .done(function (data) {
-            // log data to the console so we can see
-              console.log("SUCCESS:__________________ "+JSON.stringify(data));
-			  message = data.message;
-		 pop= '<div class="col-lg-12"> '+
-			'<div class="panel panel-default">  '+
-			'<div class="panel-heading"> '+
-			'<h3 class="panel-title"><i class="fa fa-money fa-fw"></i>Connections</h3> '+
-                          '  </div>'+
-                          '  <div class="panel-body">'+
-                             '   <div class="table-responsive"> '+
-                                 '   <table id="table" class="table table-bordered table-hover table-striped"> '+
-                                     '   <thead>'+
-                                      '  <tr>'+
-                                         '   <th>IP</th>'+
-                                         '   <th>Port</th>'+
-                                          '  <th>Action</th>'+
-                                      '  </tr>'+
-                                      '  </thead>'+
-                                       ' <tbody>'+
-                                      '  </tbody>'+
-                                   ' </table>'+
-                               ' </div>'+
-                           ' </div>'+
-                      '  </div>'+
-                   ' </div>';
+       .done(function (result) {
+		   
+		   
+		   // log data to the console so we can see
+              //console.log("SUCCESS:__________________ "+JSON.stringify(result));
+			  //alert(result.payload.length);
+			 // message = result.message;
 		
-            console.log("on message " + message);
-			$( "div.popcontainer" )
-			.html( pop );
+		
+            //console.log("on message " + message);
+			//$( "div.popcontainer" )
+			//.html( pop );
+			if (result.payload.length > 0) {
+              
+				
+				$.each(result.payload, function (i, n) {
+                        // alert("Sensor Index: " + i + ", Sensor Name: " + n.uuid );
+						
+                       // for (var i = 0; i < n.length ; i++) {
+                             // alert(n.uuid + " - ---- -- ");
+                       // $('#example > tbody:last').append('<tr><td>'+n.uuid+'</td>' +
+                       // '<td>'+n.fromUser+'</td>' +
+                       // '<td>'+n.toUser+'</td></tr>');
+                       // }
+                       table.row.add([n.fromUser, n.toUser, n.fromUserIP, convertMillisecondsToCustomFormat(Date.parse(n.callerChannelAnsweredTime)).clock, n.freeSWITCHHostname]).draw();
+             
+                    });
+             } 
+				
+			
+			/*
+			$(jQuery.parseJSON(JSON.stringify(data))).each(function() {
 
+                  //  console.log(this.ip + " - ---- -- " + this.port);
+                    $('#tableC > tbody:last').append('<tr><td>'+this.ip+'</td>' +
+                        '<td>'+this.port+'</td>' +
+                        '<td>'+JSON.stringify(data)+'</td></tr>');
+             });
+			*/
 			//return pop;
 			//return message;
-			/* ---------- Popover ---------- 
-			$('.pop').popover({
-			html: true,
-			 delay: { show: 500, hide: 1500 },
-			title: function () {
-
-
-				return " - Score Range"
-			},
-			content: function () {       
-				return message;
-			}	 
-    
-			});
-			*/
+			
+		//make table's pagination and style		
+		//$('#example').DataTable();
         })
         // using the fail promise callback
         .fail(function(data) {
@@ -286,8 +373,53 @@ $(function () {
 			pop="JSON.stringify(data)";
             console.log("on fail " + JSON.stringify(data));
         });
+   
+ 
+	}
+	
+	
+	function getFailedCallsDetails(table){
+		console.log("getFailedCallsDetails --------------------------------");
+		var pop="";
+		var message="";
+		var formData = {
+        "ip": ""
+		};
+       $.ajax({
+	    type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
+        //url: '/actors/concurrent/call/analysis', // the url where we want to POST
+        url: 'http://fs-moni.cloudapp.net:8080/actors/failed/calls/details', // the url where we want to POST
+        //url: "ws://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details",
+		 // url: 'http://10.5.50.249:8080/actors/concurrent/calls/details', // the url where we want to POST
+        //data: JSON.stringify(formData), // our data object
+        dataType: 'json', // what type of data do we expect back from the server
+        contentType: "application/json",
+        encode: true
+        })
+        // using the done promise callback
+       .done(function (result) {
+		   
+		 if (result.payload.length > 0) {
+              
+				
+				$.each(result.payload, function (i, n) {
+                     table.row.add([n.fromUser, n.toUser, n.fromUserIP, convertMillisecondsToCustomFormat(Date.parse(n.callerChannelHangupTime)).clock,n.hangupCause, n.freeSWITCHHostname]).draw();
+             
+                 });
+             } 
+				
+		 })
+        // using the fail promise callback
+        .fail(function(data) {
+            // show any errors
+            // best to remove for production
+			pop="JSON.stringify(data)";
+            console.log("on fail " + JSON.stringify(data));
+        });
+   
  
 	}
 
-	
 });
+
+ 

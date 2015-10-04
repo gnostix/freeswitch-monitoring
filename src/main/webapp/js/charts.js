@@ -1,7 +1,7 @@
 	$(function () {
     $('#heartbeat').highcharts({
     chart: {
-		type: "line",
+		type: "area",
 		//backgroundColor: "rgba(255, 255, 255, 0.65)",
 		backgroundColor: "rgba(24, 11, 81, 0.85)",
 		borderRadius: 5,
@@ -22,7 +22,8 @@
 		title: {
 		text: null
 	},
-		//type: "logarithmic",
+		// type: 'logarithmic',
+        // minorTickInterval: 0.1,
 		minorTickInterval: "auto",
 		 gridLineWidth: 0,
           minorGridLineWidth: 0
@@ -196,7 +197,8 @@
 		//type: "logarithmic",
 		minorTickInterval: "auto",
 		 gridLineWidth: 0,
-          minorGridLineWidth: 0
+         minorGridLineWidth: 0,
+		 max:100
 	},
 	colors: [
 		"#67a8e6",
