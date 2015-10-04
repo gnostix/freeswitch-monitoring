@@ -74,12 +74,13 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
             case false => {
               log info s"------> response from BasicStatsTick failed calls ${r2.failedCalls - totalOfLastValueFailedCalls} - completed calls ${r3.size}"
               val r3Sorted = r3.sortWith { (leftE, rightE) => leftE.callerChannelHangupTime.before(rightE.callerChannelHangupTime) }
-              val asr = r3Sorted.size.toDouble / (r3Sorted.size + (r2.failedCalls - totalOfLastValueFailedCalls)) * 100
+              val asr = BigDecimal(r3Sorted.size.toDouble / (r3Sorted.size + (r2.failedCalls - totalOfLastValueFailedCalls)) * 100).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+                log info s" ------> acd r3Sorted sum ${r3Sorted.map(x => x.acd).sum / r3Sorted.size} and size ${r3Sorted.size}"
               val acd = BigDecimal((r3Sorted.map(x => x.acd).sum / r3Sorted.size) / 60.toDouble).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble //seconds to minutes
               val rtpQ = r3Sorted.map(x => x.rtpQuality).sum / r3Sorted.size.toDouble
-              lastBasicStatsTickTime = r3Sorted.head.callerChannelHangupTime
+              lastBasicStatsTickTime = r3Sorted.reverse.head.callerChannelHangupTime
 
-              (BasicStatsTimeSeries(BASIC_STATS, lastBasicStatsTickTime, r1.calls, r2.failedCalls - totalOfLastValueFailedCalls, acd, asr, rtpQ),r2.failedCalls)
+              (BasicStatsTimeSeries(BASIC_STATS, new Timestamp(System.currentTimeMillis), r1.calls, r2.failedCalls - totalOfLastValueFailedCalls, acd, asr, rtpQ),r2.failedCalls)
             }
 
           }
@@ -112,7 +113,7 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
   }
 
   context.system.scheduler.schedule(10000 milliseconds,
-    10000 milliseconds,
+    30000 milliseconds,
     self,
     BasicStatsTick)
 

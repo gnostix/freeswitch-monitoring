@@ -25,9 +25,9 @@ class CentralMessageRouter extends Actor with ActorLogging {
 
   // start the first connection
   // eslConnectionDispatcherActor ! EslConnectionData("localhost", 8021, "ClueCon")
-//  eslConnectionDispatcherActor ! EslConnectionData("192.168.43.128", 8021, "ClueCon")
+  eslConnectionDispatcherActor ! EslConnectionData("192.168.1.128", 8021, "ClueCon")
 
-  eslConnectionDispatcherActor ! EslConnectionData("fs-instance.com", 8021, "ClueCon")
+//  eslConnectionDispatcherActor ! EslConnectionData("fs-instance.com", 8021, "ClueCon")
 //  eslConnectionDispatcherActor ! EslConnectionData("10.0.0.128", 8021, "ClueCon")
 
   def receive: Receive = {
@@ -94,11 +94,11 @@ class CentralMessageRouter extends Actor with ActorLogging {
       callRouterActor forward x
 
     case x @ AddAtmoClientUuid(uuid)  =>
-      log info "central actor received  AddAtmoClientUuid(uuid) "
+      //log info "central actor received  AddAtmoClientUuid(uuid) "
       wsLiveEventsActor ! x
 
     case x @ RemoveAtmoClientUuid(uuid) =>
-      log info "central actor received  RemoveAtmoClientUuid(uuid)"
+      //log info "central actor received  RemoveAtmoClientUuid(uuid)"
       wsLiveEventsActor ! x
 
     case x => log warning "I don't get this message!! " + x.toString

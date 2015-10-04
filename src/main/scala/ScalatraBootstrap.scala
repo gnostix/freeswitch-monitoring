@@ -2,8 +2,7 @@ import javax.servlet.ServletContext
 
 import _root_.akka.actor.{ActorSystem, Props}
 import gr.gnostix.freeswitch.actors.CentralMessageRouter
-import gr.gnostix.freeswitch.servlets.{ConfigurationServlet, WSEslServlet, CentralServlet, EslActorApp}
-import org.atmosphere.cpr.AtmosphereFramework
+import gr.gnostix.freeswitch.servlets.{CentralServlet, ConfigurationServlet, EslActorApp, WSEslServlet}
 import org.scalatra._
 import org.scalatra.example.atmosphere.ChatController
 import org.slf4j.LoggerFactory

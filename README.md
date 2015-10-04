@@ -25,13 +25,29 @@ The Scala, Scalatra ,Atmosphere and Akka.io are the tools used to achive the goa
 
 ## How to run
 
-First have a Freeswitch instance and configure the connection from the java class MyEslConnection.
+First have a Freeswitch instance. You can install the war file in two ways:
+
+a) Clone the project and from the application git folder, run bellow commands.
 
 *	./sbt
 *	compile
 *	container:start
 
 After the last command the container will start on localhost:8080
+
+b)
+You can also [download](http://fs-moni.cloudapp.net/freeswitchop_2.11-0.1.0-SNAPSHOT.war) a ready build war file.
+
+*	download file from location
+*	have installed in a server java oracle 7 or 8
+*	have installed a jetty server 9 between versions 9.2.1.v20140609 or 9.2.10.v20150310 
+*	add war file as root app in the Jetty webapps folder. We do that by copying the freeswitch-monitoring.war file to root.war file inside the webapps folder. e.g. in linux cp /war/location/freeswitch-monitoring.war /path/to/jetty/webapps/root.war
+*	start jetty and connect your browser to url jetty-ip:8080
+
+After the installation is complete then:
+
+The application will try to connect to default hostname fs-instance.com and password ClueCon. You can add to your machine in /etc/hosts file the correct entry for fs-instance.com OR you can just navigate through the interface and go to the configuration and add there your Freeswitch credentials.
+
 
 ### Demo live
 
@@ -60,3 +76,5 @@ This is [FS-Moni](http://fs-moni.cloudapp.net:8080 "FS-Moni") demo app link.
 8. http://localhost:8080/actors/lastHeartbeat
 9. http://localhost:8080/actors/allHeartbeats
 10. http://localhost:8080/actors/stats/GetBasicStatsTimeSeries
+
+## Contact: p_alx at hotmail dot com

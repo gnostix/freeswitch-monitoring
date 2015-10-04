@@ -3,7 +3,7 @@ package gr.gnostix.freeswitch.actors
 import java.sql.Timestamp
 
 import akka.actor.SupervisorStrategy.Restart
-import akka.actor.{Actor, ActorLogging, ActorRef, OneForOneStrategy}
+import akka.actor._
 import akka.pattern.{ask, pipe}
 import akka.util.Timeout
 
@@ -33,7 +33,7 @@ class CompletedCallsActor extends Actor with ActorLogging {
   def idle(completedCalls: scala.collection.Map[String, HangupActor]): Receive = {
     case CompletedCall(uuid, timeHangup, callActor) =>
       val newMap = completedCalls updated(uuid, HangupActor(timeHangup, callActor))
-      log info s"-----> new call coming on Completed Calls Actor $newMap"
+      //log info s"-----> new call coming on Completed Calls Actor $newMap"
       context become idle(newMap)
 
     case x @ GetCompletedCallsChannel =>
@@ -106,7 +106,11 @@ class CompletedCallsActor extends Actor with ActorLogging {
       }
 
     case Tick =>
-      val newMap = completedCalls.take(10080)
+      val (newMap, remainMap) = completedCalls.splitAt(10080)
+
+      //stop all actors from remain map
+      remainMap.map(s => context stop  s._2.asInstanceOf[HangupActor].callActor)
+
       // I should make sure here that we take the newest calls!
       context become idle(newMap)
 

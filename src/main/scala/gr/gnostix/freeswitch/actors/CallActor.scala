@@ -71,7 +71,7 @@ class CallActor extends Actor with ActorLogging {
 
     case x@ActorsProtocol.GetChannelInfo(callUuid, channeluuid) =>
       log info s"-----> Channel $channeluuid  in callActor sender " + sender.toString
-      log info s"-----> Channels " + activeChannels.toString()
+      //log info s"-----> Channels " + activeChannels.toString()
 
       (activeChannels get channeluuid) match {
         case None =>

@@ -55,11 +55,13 @@ with CorsSupport {
     new AtmosphereClient {
       def receive: AtmoReceive = {
         case Connected =>
+          //println("params :" + params("events"))
           myActor ! AddAtmoClientUuid(uuid)
           println("Client %s is connected" format uuid)
           //broadcast(("author" -> "Someone") ~ ("message" -> "joined the room") ~ ("time" -> (new Date().getTime.toString )), Everyone)
 
         case Disconnected(ClientDisconnected, _) =>
+          myActor ! RemoveAtmoClientUuid(uuid)
           println("Client %s is disconnected" format uuid)
           //broadcast(("author" -> "Someone") ~ ("message" -> "has left the room") ~ ("time" -> (new Date().getTime.toString )), Everyone)
 
