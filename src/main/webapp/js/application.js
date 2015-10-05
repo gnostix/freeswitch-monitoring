@@ -1,6 +1,6 @@
 $(function () {
     "use strict";
-	
+
     var detect = $("#detect");
     var header = $('#header');
     var messages = $('#messages');
@@ -21,7 +21,6 @@ $(function () {
         //url: "ws://fs-moni.cloudapp.net:8080/fs-moni/live/events",
         url: "/fs-moni/live/events",
         //url: "the-chat",
-       // url: "ws://192.168.1.125:8080/fs-moni/live/events",
         contentType: "application/json",
         logLevel: 'debug',
         transport: transport,
@@ -61,19 +60,19 @@ $(function () {
             var acd = chart.get('acd');
             var rtp = chart.get('rtp');
 
-		    //get the chart by id
+            //get the chart by id
             var chartBasic = $('#basicstats').highcharts();
-			  //get series by id
-           var concurrentCalls = chartBasic.get('concurrentCalls');
-			var failedCalls = chartBasic.get('failedCalls');
+            //get series by id
+            var concurrentCalls = chartBasic.get('concurrentCalls');
+            var failedCalls = chartBasic.get('failedCalls');
 
-			//get the chart by id
-			var chartCPU = $('#cpu').highcharts();
-			  //get series by id
+            //get the chart by id
+            var chartCPU = $('#cpu').highcharts();
+            //get series by id
             var cpuUsage = chartCPU.get('cpuUsage');
 
-			 //console.log(json);
-            console.log("EVENTNAME:::::"+json.eventName);
+            //console.log(json);
+            console.log("EVENTNAME:::::" + json.eventName);
 
             //console.log(json);
             console.log("EVENTNAME:::::" + json.eventName);
@@ -81,10 +80,10 @@ $(function () {
             if (json.eventName === "HEARTBEAT") {
                 $("#upTime").text(convertMillisecondsToDigitalClock(json.uptimeMsec).clock);
                 $("#sessionPerSecond").text(json.sessionPerSecond);
-                $("#cpuUsage").text(json.cpuUsage+'%');
-				// Add points to graphs
-                cpuUsage.addPoint([Date.parse(json.eventDateTimestamp), json.cpuUsage]);		 
-           
+                $("#cpuUsage").text(json.cpuUsage + '%');
+                // Add points to graphs
+                cpuUsage.addPoint([Date.parse(json.eventDateTimestamp), json.cpuUsage]);
+
             } else if (json.eventName === "BASIC_STATS") {
                 console.log("--------------ADDING BASIC STATS");
                 $("#concCallsNum").text(json.concCallsNum);
@@ -192,16 +191,16 @@ $(function () {
             clock: str
         };
     }
-	
-	// CONVERT MILLISECONDS TO custom format
+
+    // CONVERT MILLISECONDS TO custom format
     function convertMillisecondsToCustomFormat(ms) {
         var date = new Date(ms);
-        var str =  date.getUTCFullYear() + '-' +
-       (date.getUTCMonth() + 1) + '-' +
-       (date.getUTCDate())      + ' ' +
-       addZero(date.getUTCHours())     + ':' +
-       addZero(date.getUTCMinutes())   + ':' +
-       addZero(date.getUTCSeconds())   + ' ';
+        var str = date.getUTCFullYear() + '-' +
+            (date.getUTCMonth() + 1) + '-' +
+            (date.getUTCDate()) + ' ' +
+            addZero(date.getUTCHours()) + ':' +
+            addZero(date.getUTCMinutes()) + ':' +
+            addZero(date.getUTCSeconds()) + ' ';
         console.log(str);
 
         var hours = Math.floor(ms / 3600000); // 1 Hour = 36000 Milliseconds
@@ -216,213 +215,208 @@ $(function () {
             clock: str
         };
     }
-	
-	function addZero(i) {
-    if (i < 10) {
-        i = "0" + i;
+
+    function addZero(i) {
+        if (i < 10) {
+            i = "0" + i;
+        }
+        return i;
     }
-    return i;
-}
-	
-	/* ---------- Popover ---------- 
-	$('[rel="popover"],[data-rel="popover"]').popover({
+
+    /* ---------- Popover ----------
+     $('[rel="popover"],[data-rel="popover"]').popover({
      html: true,
      title: function () {
 
 
-        return " - Score Range"
+     return " - Score Range"
      },
      content: function () {  
-		var  pop=  '<table id="examplel" class="table table-striped table-bordered"> '+
-                                     '<thead>'+
-                                      '  <tr>'+
-                                         '   <th>uuid</th>'+
-                                         '   <th>Port</th>'+
-                                          '  <th>Action</th>'+
-                                      '  </tr>'+
-                                      '  </thead>'+
-                                       ' <tbody>'+
-									  '  </tbody>'+
-                                   ' </table>'+
-                               ' </div>';
-                        
-		//$( "div.popcontainer" )
-		//.html( pop );
-		
-        return  pop;
+     var  pop=  '<table id="examplel" class="table table-striped table-bordered"> '+
+     '<thead>'+
+     '  <tr>'+
+     '   <th>uuid</th>'+
+     '   <th>Port</th>'+
+     '  <th>Action</th>'+
+     '  </tr>'+
+     '  </thead>'+
+     ' <tbody>'+
+     '  </tbody>'+
+     ' </table>'+
+     ' </div>';
+
+     //$( "div.popcontainer" )
+     //.html( pop );
+
+     return  pop;
      }
-	 
-	 
-	});
-	
-	*/
-	
-$('#viewCCalls').click(function() {
-  var table = $('#example').DataTable();
- 
-table.clear().draw();
-            
-  getDetails(table); 
- //open dialog
- $('#dialog').dialog('open');
-	});
-
-});
-	
-$('#viewFCalls').click(function() {
-  var table = $('#failedcallstable').DataTable();
- 
-table.clear().draw();
-            
-  getFailedCallsDetails(table); 
- //open dialog
- $('#failedcallsdialog').dialog('open');
-
-});
 
 
-jQuery(document).ready(function() {
-  
-	// dialog properties
-   $("#dialog").dialog({
-             minWidth: 700,
-			 maxHeight: 600,
-             autoOpen: false,
-			 modal:true
-           }); 
-	
-	 $("#failedcallsdialog").dialog({
-             minWidth: 900,
-			 maxHeight: 600,
-             autoOpen: false,
-			 modal:true
-           }); 
-	
-}); 
+     });
+
+     */
+
+    $('#viewCCalls').click(function () {
+        var table = $('#example').DataTable();
+
+        table.clear().draw();
+
+        getDetails(table);
+        //open dialog
+        $('#dialog').dialog('open');
+    });
 
 
+    $('#viewFCalls').click(function () {
+        var table = $('#failedcallstable').DataTable();
 
-	
-	
-	function getDetails(table){
-		console.log("getDetails --------------------------------");
-		var pop="";
-		var message="";
-		var formData = {
-        "ip": ""
-		};
-       $.ajax({
-	    type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
-        url: '/actors/concurrent/calls/details', // the url where we want to POST
-        // url: 'http://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details', // the url where we want to POST
-        //url: "ws://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details",
-		 // url: 'http://10.5.50.249:8080/actors/concurrent/calls/details', // the url where we want to POST
-        //data: JSON.stringify(formData), // our data object
-        dataType: 'json', // what type of data do we expect back from the server
-        contentType: "application/json",
-        encode: true
+        table.clear().draw();
+
+        getFailedCallsDetails(table);
+        //open dialog
+        $('#failedcallsdialog').dialog('open');
+
+    });
+
+
+    jQuery(document).ready(function () {
+
+        // dialog properties
+        $("#dialog").dialog({
+            minWidth: 700,
+            maxHeight: 600,
+            autoOpen: false,
+            modal: true
+        });
+
+        $("#failedcallsdialog").dialog({
+            minWidth: 900,
+            maxHeight: 600,
+            autoOpen: false,
+            modal: true
+        });
+
+    });
+
+
+    function getDetails(table) {
+        console.log("getDetails --------------------------------");
+        var pop = "";
+        var message = "";
+        var formData = {
+            "ip": ""
+        };
+        $.ajax({
+            type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
+            url: '/actors/concurrent/calls/details', // the url where we want to POST
+            // url: 'http://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details', // the url where we want to POST
+            //url: "ws://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details",
+            // url: 'http://10.5.50.249:8080/actors/concurrent/calls/details', // the url where we want to POST
+            //data: JSON.stringify(formData), // our data object
+            dataType: 'json', // what type of data do we expect back from the server
+            contentType: "application/json",
+            encode: true
         })
-        // using the done promise callback
-       .done(function (result) {
-		   
-		   
-		   // log data to the console so we can see
-              //console.log("SUCCESS:__________________ "+JSON.stringify(result));
-			  //alert(result.payload.length);
-			 // message = result.message;
-		
-		
-            //console.log("on message " + message);
-			//$( "div.popcontainer" )
-			//.html( pop );
-			if (result.payload.length > 0) {
-              
-				
-				$.each(result.payload, function (i, n) {
+            // using the done promise callback
+            .done(function (result) {
+
+
+                // log data to the console so we can see
+                //console.log("SUCCESS:__________________ "+JSON.stringify(result));
+                //alert(result.payload.length);
+                // message = result.message;
+
+
+                //console.log("on message " + message);
+                //$( "div.popcontainer" )
+                //.html( pop );
+                if (result.payload.length > 0) {
+
+
+                    $.each(result.payload, function (i, n) {
                         // alert("Sensor Index: " + i + ", Sensor Name: " + n.uuid );
-						
-                       // for (var i = 0; i < n.length ; i++) {
-                             // alert(n.uuid + " - ---- -- ");
-                       // $('#example > tbody:last').append('<tr><td>'+n.uuid+'</td>' +
-                       // '<td>'+n.fromUser+'</td>' +
-                       // '<td>'+n.toUser+'</td></tr>');
-                       // }
-                       table.row.add([n.fromUser, n.toUser, n.fromUserIP, convertMillisecondsToCustomFormat(Date.parse(n.callerChannelAnsweredTime)).clock, n.freeSWITCHHostname]).draw();
-             
+
+                        // for (var i = 0; i < n.length ; i++) {
+                        // alert(n.uuid + " - ---- -- ");
+                        // $('#example > tbody:last').append('<tr><td>'+n.uuid+'</td>' +
+                        // '<td>'+n.fromUser+'</td>' +
+                        // '<td>'+n.toUser+'</td></tr>');
+                        // }
+                        table.row.add([n.fromUser, n.toUser, n.fromUserIP, convertMillisecondsToCustomFormat(Date.parse(n.callerChannelAnsweredTime)).clock, n.freeSWITCHHostname]).draw();
+
                     });
-             } 
-				
-			
-			/*
-			$(jQuery.parseJSON(JSON.stringify(data))).each(function() {
+                }
 
-                  //  console.log(this.ip + " - ---- -- " + this.port);
-                    $('#tableC > tbody:last').append('<tr><td>'+this.ip+'</td>' +
-                        '<td>'+this.port+'</td>' +
-                        '<td>'+JSON.stringify(data)+'</td></tr>');
-             });
-			*/
-			//return pop;
-			//return message;
-			
-		//make table's pagination and style		
-		//$('#example').DataTable();
-        })
-        // using the fail promise callback
-        .fail(function(data) {
-            // show any errors
-            // best to remove for production
-			pop="JSON.stringify(data)";
-            console.log("on fail " + JSON.stringify(data));
-        });
-   
- 
-	}
-	
-	
-	function getFailedCallsDetails(table){
-		console.log("getFailedCallsDetails --------------------------------");
-		var pop="";
-		var message="";
-		var formData = {
-        "ip": ""
-		};
-       $.ajax({
-	    type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
-        url: '/actors/failed/calls/details', // the url where we want to POST
-        //url: 'http://fs-moni.cloudapp.net:8080/actors/failed/calls/details', // the url where we want to POST
-        //url: "ws://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details",
-		 // url: 'http://10.5.50.249:8080/actors/concurrent/calls/details', // the url where we want to POST
-        //data: JSON.stringify(formData), // our data object
-        dataType: 'json', // what type of data do we expect back from the server
-        contentType: "application/json",
-        encode: true
-        })
-        // using the done promise callback
-       .done(function (result) {
-		   
-		 if (result.payload.length > 0) {
-              
-				
-				$.each(result.payload, function (i, n) {
-                     table.row.add([n.fromUser, n.toUser, n.fromUserIP, convertMillisecondsToCustomFormat(Date.parse(n.callerChannelHangupTime)).clock,n.hangupCause, n.freeSWITCHHostname]).draw();
-             
+
+                /*
+                 $(jQuery.parseJSON(JSON.stringify(data))).each(function() {
+
+                 //  console.log(this.ip + " - ---- -- " + this.port);
+                 $('#tableC > tbody:last').append('<tr><td>'+this.ip+'</td>' +
+                 '<td>'+this.port+'</td>' +
+                 '<td>'+JSON.stringify(data)+'</td></tr>');
                  });
-             } 
-				
-		 })
-        // using the fail promise callback
-        .fail(function(data) {
-            // show any errors
-            // best to remove for production
-			pop="JSON.stringify(data)";
-            console.log("on fail " + JSON.stringify(data));
-        });
-   
- 
-	}
+                 */
+                //return pop;
+                //return message;
 
-});
+                //make table's pagination and style
+                //$('#example').DataTable();
+            })
+            // using the fail promise callback
+            .fail(function (data) {
+                // show any errors
+                // best to remove for production
+                pop = "JSON.stringify(data)";
+                console.log("on fail " + JSON.stringify(data));
+            });
 
- 
-	
+
+    }
+
+
+    function getFailedCallsDetails(table) {
+        console.log("getFailedCallsDetails --------------------------------");
+        var pop = "";
+        var message = "";
+        var formData = {
+            "ip": ""
+        };
+        $.ajax({
+            type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
+            url: '/actors/failed/calls/details', // the url where we want to POST
+            //url: 'http://fs-moni.cloudapp.net:8080/actors/failed/calls/details', // the url where we want to POST
+            //url: "ws://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details",
+            // url: 'http://10.5.50.249:8080/actors/concurrent/calls/details', // the url where we want to POST
+            //data: JSON.stringify(formData), // our data object
+            dataType: 'json', // what type of data do we expect back from the server
+            contentType: "application/json",
+            encode: true
+        })
+            // using the done promise callback
+            .done(function (result) {
+
+                if (result.payload.length > 0) {
+
+
+                    $.each(result.payload, function (i, n) {
+                        table.row.add([n.fromUser, n.toUser, n.fromUserIP, convertMillisecondsToCustomFormat(Date.parse(n.callerChannelHangupTime)).clock, n.hangupCause, n.freeSWITCHHostname]).draw();
+
+                    });
+                }
+
+            })
+            // using the fail promise callback
+            .fail(function (data) {
+                // show any errors
+                // best to remove for production
+                pop = "JSON.stringify(data)";
+                console.log("on fail " + JSON.stringify(data));
+            });
+
+
+    }
+
+
+})
+;
