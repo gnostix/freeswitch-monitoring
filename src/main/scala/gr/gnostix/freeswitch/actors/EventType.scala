@@ -23,13 +23,13 @@ sealed trait CallEventType extends EventType {
 }
 
 case class CallNew(uuid: String, eventName: String, fromUser: String, toUser: String, readCodec: String, writeCodec: String,
-                   fromUserIP: String, callUUID: String, callerChannelCreatedTime: Option[Timestamp],
+                   fromUserIP: String, toUserIP: String, callUUID: String, callerChannelCreatedTime: Option[Timestamp],
                    callerChannelAnsweredTime: Option[Timestamp], freeSWITCHHostname: String, freeSWITCHIPv4: String)
   extends CallEventType
 
 
 case class CallEnd(uuid: String, eventName: String, fromUser: String, toUser: String, readCodec: String, writeCodec: String,
-                   fromUserIP: String, callUUID: String, callerChannelCreatedTime: Option[Timestamp],
+                   fromUserIP: String, toUserIP: String, callUUID: String, callerChannelCreatedTime: Option[Timestamp],
                    callerChannelAnsweredTime: Option[Timestamp], callerChannelHangupTime: Timestamp,
                    freeSWITCHHostname: String, freeSWITCHIPv4: String, hangupCause: String,  billSec: Int,
                    rtpQualityPerc: Double, otherLegUniqueId: String)

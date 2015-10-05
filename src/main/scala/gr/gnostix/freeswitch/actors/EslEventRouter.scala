@@ -26,23 +26,23 @@ class EslEventRouter extends Actor with ActorLogging {
     case Event(headers) =>
 
       getCallEventType(headers) match {
-        case x @ CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
+        case x @ CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
         callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4)
           if callUUID != "_UNKNOWN" =>
           callRouterActor ! x
 
-        case x@CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
+        case x@CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
         callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4) =>
           log info "_UNKNOWN" + x.toString
 
-        case x @ CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
+        case x @ CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
         callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
         freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId)
           if callUUID != "_UNKNOWN" =>
           log info "-----> " + x.toString
           callRouterActor ! x
 
-        case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
+        case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
         callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
         freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) =>
           log info s"no uuid $uuid" + x.toString
@@ -103,6 +103,7 @@ class EslEventRouter extends Actor with ActorLogging {
     val readCodec = headers get "Channel-Read-Codec-Name" getOrElse "_UNKNOWN"
     val writeCodec = headers get "Channel-Write-Codec-Name" getOrElse "_UNKNOWN"
     val fromUserIP = headers get "Caller-Network-Addr" getOrElse "_UNKNOWN"
+    val toUserIP = headers get "Other-Leg-Network-Addr" getOrElse "_UNKNOWN"
     val freeSWITCHHostname = headers get "FreeSWITCH-Hostname" getOrElse "0"
     val freeSWITCHIPv4 = headers get "FreeSWITCH-IPv4" getOrElse "0"
 
@@ -120,7 +121,7 @@ class EslEventRouter extends Actor with ActorLogging {
       case "CHANNEL_ANSWER" =>
         val callUUID = headers get "Channel-Call-UUID" getOrElse "_UNKNOWN"
 
-        CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
+        CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
           callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4)
 
       case "CHANNEL_HANGUP_COMPLETE" =>
@@ -135,7 +136,7 @@ class EslEventRouter extends Actor with ActorLogging {
           case x => new Timestamp(x.toLong / 1000)
         }
 
-        CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID, callerChannelCreatedTime,
+        CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID, callerChannelCreatedTime,
           callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname, freeSWITCHIPv4, hangupCause,
           billSec.toInt, rtpQualityPerc.toDouble, otherLegUniqueId)
 

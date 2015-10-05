@@ -27,77 +27,80 @@ class CentralMessageRouter extends Actor with ActorLogging {
   // eslConnectionDispatcherActor ! EslConnectionData("localhost", 8021, "ClueCon")
   eslConnectionDispatcherActor ! EslConnectionData("192.168.1.128", 8021, "ClueCon")
 
-//  eslConnectionDispatcherActor ! EslConnectionData("fs-instance.com", 8021, "ClueCon")
-//  eslConnectionDispatcherActor ! EslConnectionData("10.0.0.128", 8021, "ClueCon")
+  //  eslConnectionDispatcherActor ! EslConnectionData("fs-instance.com", 8021, "ClueCon")
+  //  eslConnectionDispatcherActor ! EslConnectionData("10.0.0.128", 8021, "ClueCon")
 
   def receive: Receive = {
-   // case x @ Event(headers) =>
-   //   eslEventRouter ! x
+    // case x @ Event(headers) =>
+    //   eslEventRouter ! x
 
-    case x @ GetConcurrentCallsChannel =>
+    case x@GetConcurrentCallsChannel =>
       callRouterActor forward x
 
-    case x @ GetFailedCallsChannel =>
+    case x@GetFailedCallsChannel =>
       callRouterActor forward x
 
-    case x @ GetCompletedCallsChannel =>
+    case x@GetCompletedCallsChannel =>
       completedCallsActor forward x
 
 
-    case x @ GetFailedCallsAnalysis(fromNumberOfDigits, toNumberOfDigits) =>
+    case x@GetFailedCallsAnalysis(fromNumberOfDigits, toNumberOfDigits) =>
       callRouterActor forward x
 
-    case x @ EslConnectionData(ip, port, password) =>
+    case x@EslConnectionData(ip, port, password) =>
       //eslConnectionDispatcherActor ! EslConnectionData("localhost", 8021, "ClueCon")
       eslConnectionDispatcherActor forward x
 
-    case x @ DelEslConnection(ip) =>
-       eslConnectionDispatcherActor forward x
-
-    case x @ GetEslConnections =>
+    case x@DelEslConnection(ip) =>
       eslConnectionDispatcherActor forward x
 
-    case x @ GetCompletedCalls =>
+    case x@GetEslConnections =>
+      eslConnectionDispatcherActor forward x
+
+    case x@GetCompletedCalls =>
       completedCallsActor forward x
 
-    case x @ (GetLastHeartBeat | GetAllHeartBeat) =>
+    case x@(GetLastHeartBeat | GetAllHeartBeat) =>
       heartBeatActor forward x
 
-    case x @ (GetConcurrentCalls | GetTotalConcurrentCalls | GetFailedCalls | GetFailedCallsByDate |
-              GetTotalFailedCalls  )=>
+    case x@(GetConcurrentCalls | GetTotalConcurrentCalls | GetFailedCalls | GetFailedCallsByDate |
+            GetTotalFailedCalls) =>
       // api calls asking for data
       callRouterActor forward x
 
     case x@(GetBasicStatsTimeSeries) =>
       // api calls asking for data
-    basicStatsActor forward x
+      basicStatsActor forward x
 
-/*    case x@GetConcurrentCalls =>
-      // log info "call router GetConcurrentCalls received .."
-      callRouterActor forward x
+    /*    case x@GetConcurrentCalls =>
+          // log info "call router GetConcurrentCalls received .."
+          callRouterActor forward x
 
-    case x@GetFailedCalls =>
-      log info "--------> ask for failed calls"
-      callRouterActor forward x
+        case x@GetFailedCalls =>
+          log info "--------> ask for failed calls"
+          callRouterActor forward x
 
-    case x@GetFailedCallsByDate =>
-      callRouterActor forward x
+        case x@GetFailedCallsByDate =>
+          callRouterActor forward x
 
-    case x@GetTotalFailedCalls =>
-      callRouterActor forward x
-*/
+        case x@GetTotalFailedCalls =>
+          callRouterActor forward x
+    */
     case x@GetCallInfo(callUuid) =>
       callRouterActor forward x
 
+    case x@InitializeDashboard =>
+      basicStatsActor ! x
+      heartBeatActor ! x
 
     case x@GetChannelInfo(callUuid, channeluuid) =>
       callRouterActor forward x
 
-    case x @ AddAtmoClientUuid(uuid)  =>
+    case x@AddAtmoClientUuid(uuid) =>
       //log info "central actor received  AddAtmoClientUuid(uuid) "
       wsLiveEventsActor ! x
 
-    case x @ RemoveAtmoClientUuid(uuid) =>
+    case x@RemoveAtmoClientUuid(uuid) =>
       //log info "central actor received  RemoveAtmoClientUuid(uuid)"
       wsLiveEventsActor ! x
 
