@@ -1,6 +1,6 @@
 $(function () {
     "use strict";
-
+	
     var detect = $("#detect");
     var header = $('#header');
     var messages = $('#messages');
@@ -21,7 +21,6 @@ $(function () {
         //url: "ws://fs-moni.cloudapp.net:8080/fs-moni/live/events",
         url: "/fs-moni/live/events",
         //url: "the-chat",
-       // url: "ws://192.168.1.125:8080/fs-moni/live/events",
         contentType: "application/json",
         logLevel: 'debug',
         transport: transport,
@@ -203,7 +202,7 @@ $(function () {
        addZero(date.getUTCMinutes())   + ':' +
        addZero(date.getUTCSeconds())   + ' ';
         console.log(str);
-	
+
         var hours = Math.floor(ms / 3600000); // 1 Hour = 36000 Milliseconds
         var minutes = Math.floor((ms % 3600000) / 60000); // 1 Minutes = 60000 Milliseconds
         var seconds = Math.floor(((ms % 360000) % 60000) / 1000);// 1 Second = 1000 Milliseconds
@@ -232,7 +231,7 @@ $(function () {
 
         return " - Score Range"
      },
-     content: function () {       
+     content: function () {  
 		var  pop=  '<table id="examplel" class="table table-striped table-bordered"> '+
                                      '<thead>'+
                                       '  <tr>'+
@@ -266,8 +265,8 @@ table.clear().draw();
  //open dialog
  $('#dialog').dialog('open');
 
-	});
-	
+});
+
 $('#viewFCalls').click(function() {
   var table = $('#failedcallstable').DataTable();
  
@@ -297,7 +296,7 @@ jQuery(document).ready(function() {
 			 modal:true
            }); 
 	
-    });
+}); 
 
 
 
@@ -315,7 +314,7 @@ jQuery(document).ready(function() {
         url: '/actors/concurrent/calls/details', // the url where we want to POST
         // url: 'http://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details', // the url where we want to POST
         //url: "ws://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details",
-       // url: 'http://10.5.50.249:8080/actors/concurrent/calls/details', // the url where we want to POST
+		 // url: 'http://10.5.50.249:8080/actors/concurrent/calls/details', // the url where we want to POST
         //data: JSON.stringify(formData), // our data object
         dataType: 'json', // what type of data do we expect back from the server
         contentType: "application/json",
@@ -325,7 +324,7 @@ jQuery(document).ready(function() {
        .done(function (result) {
 		   
 		   
-            // log data to the console so we can see
+		   // log data to the console so we can see
               //console.log("SUCCESS:__________________ "+JSON.stringify(result));
 			  //alert(result.payload.length);
 			 // message = result.message;
@@ -351,7 +350,7 @@ jQuery(document).ready(function() {
                     });
              } 
 				
-		
+			
 			/*
 			$(jQuery.parseJSON(JSON.stringify(data))).each(function() {
 
@@ -374,12 +373,11 @@ jQuery(document).ready(function() {
 			pop="JSON.stringify(data)";
             console.log("on fail " + JSON.stringify(data));
         });
-
-
-			}	 
+   
+ 
+	}
 	
 	
-    
 	function getFailedCallsDetails(table){
 		console.log("getFailedCallsDetails --------------------------------");
 		var pop="";
@@ -407,10 +405,10 @@ jQuery(document).ready(function() {
 				$.each(result.payload, function (i, n) {
                      table.row.add([n.fromUser, n.toUser, n.fromUserIP, convertMillisecondsToCustomFormat(Date.parse(n.callerChannelHangupTime)).clock,n.hangupCause, n.freeSWITCHHostname]).draw();
              
-			});
+                 });
              } 
 				
-        })
+		 })
         // using the fail promise callback
         .fail(function(data) {
             // show any errors
@@ -423,5 +421,5 @@ jQuery(document).ready(function() {
 	}
 
 });
+
  
-	
