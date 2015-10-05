@@ -37,8 +37,8 @@ class CompletedCallsActor extends Actor with ActorLogging {
       context become idle(newMap)
 
     case x @ GetCompletedCallsChannel =>
-      val f: List[Future[CallNew]] = completedCalls.map{
-        case (a,y) => (y.callActor ? x).mapTo[CallNew]
+      val f: List[Future[CallEnd]] = completedCalls.map{
+        case (a,y) => (y.callActor ? x).mapTo[CallEnd]
       }.toList
 
       Future.sequence(f) pipeTo sender

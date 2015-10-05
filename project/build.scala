@@ -33,7 +33,7 @@ object FreeswitchopBuild extends Build {
         "org.scalatra" %% "scalatra-scalate" % ScalatraVersion,
         "org.scalatra" %% "scalatra-specs2" % ScalatraVersion % "test",
         "org.scalatra" %% "scalatra-scalatest" % ScalatraVersion % "test",
-        "org.scalatra" %% "scalatra-atmosphere" % ScalatraVersion exclude("org.atmosphere", "atmosphere-compat-tomcat"),
+        "org.scalatra" %% "scalatra-atmosphere" % ScalatraVersion,// exclude("org.atmosphere", "atmosphere-compat-tomcat"),
         "org.json4s" %% "json4s-jackson" % json4sversion,
         "org.eclipse.jetty" % "jetty-webapp" % jettyVersion % "container;compile",
         "org.eclipse.jetty" % "jetty-plus" % jettyVersion % "container;provided",

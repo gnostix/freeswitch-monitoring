@@ -22,6 +22,8 @@ object ActorsProtocol {
 
   case class Event(headers: scala.collection.Map[String, String]) extends RouterRequest
 
+  case object InitializeDashboard extends RouterRequest
+
   case object GetConcurrentCalls extends RouterRequest
 
   case object GetCompletedCalls extends RouterRequest

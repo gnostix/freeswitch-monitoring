@@ -50,6 +50,11 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
     "Do stuff and give me an answer"
   }
 
+  get("/initialize/dashboard"){
+    myActor ! InitializeDashboard
+    ApiReply(200,"all good")
+  }
+
   get("/GetConcurrentCalls"){
     myActor ? GetConcurrentCalls
   }
@@ -70,9 +75,9 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
     }
   }
 
-  get("/GetCompletedCalls"){
+/*  get("/GetCompletedCalls"){
     myActor ? GetCompletedCalls
-  }
+  }*/
 
   get("/failed/calls/details"){
     val data: Future[List[CallEnd]] = (myActor ? GetFailedCallsChannel).mapTo[List[CallEnd]]
@@ -87,7 +92,7 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
   }
 
   get("/completed/calls/details"){
-    val data: Future[List[CallNew]] = (myActor ? GetCompletedCallsChannel).mapTo[List[CallNew]]
+    val data: Future[List[CallEnd]] = (myActor ? GetCompletedCallsChannel).mapTo[List[CallEnd]]
 
     new AsyncResult {
       val is =

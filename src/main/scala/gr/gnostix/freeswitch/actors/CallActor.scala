@@ -36,7 +36,7 @@ class CallActor extends Actor with ActorLogging {
 
   def idle(activeChannels: scala.collection.Map[String, ActorRef]): Receive = {
 
-    case x@CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
+    case x@CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
     callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4) =>
       log info s"======== in call actor $x"
       (activeChannels get uuid) match {
@@ -52,7 +52,7 @@ class CallActor extends Actor with ActorLogging {
           log warning s"We have this Channel $uuid"
       }
 
-    case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
+    case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
     callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
     freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) =>
       (activeChannels get uuid) match {

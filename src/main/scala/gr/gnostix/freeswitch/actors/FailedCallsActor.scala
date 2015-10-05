@@ -19,7 +19,7 @@ class FailedCallsActor(wsLiveEventsActor: ActorRef) extends Actor with ActorLogg
   val Tick = "tick"
 
   def receive: Receive = {
-    case x @ CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
+    case x @ CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
     callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
     freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) =>
 

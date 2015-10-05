@@ -31,7 +31,7 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
 
   def idle(activeCalls: scala.collection.Map[String, ActorRef]): Receive = {
 
-    case x@CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
+    case x@CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
     callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4)
       if callUUID != "_UNKNOWN" =>
       log info x.toString
@@ -52,11 +52,11 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
           log info s"Call $callUUID already active, sending the second channel .."
       }
 
-    case x@CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
+    case x@CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
     callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4) =>
       log info "_UNKNOWN" + x.toString
 
-    case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
+    case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
     callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
     freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) if callUUID != "_UNKNOWN" =>
       log info "-----> " + x.toString
@@ -83,7 +83,7 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
           log info s"Call $callUUID already active"
       }
 
-    case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, callUUID,
+    case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
     callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
     freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) =>
       log info s"no uuid $uuid" + x.toString
@@ -147,7 +147,11 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
 
     case CallTerminated(callEnd) =>
       val completedCall = activeCalls.filter(_._2 == sender())
-      completedCallsActor ! CompletedCall(completedCall.head._1, callEnd.callerChannelHangupTime, completedCall.head._2)
+
+      completedCall.size match {
+        case 0 => log error "this call doesn't exist in concurrent calls when completed !!!"
+        case _ => completedCallsActor ! CompletedCall(completedCall.head._1, callEnd.callerChannelHangupTime, completedCall.head._2)
+      }
 
       wsLiveEventsActor ! callEnd
       //wsLiveEventsActor ! ActorsJsonProtocol.endCallToJson(callEnd)
