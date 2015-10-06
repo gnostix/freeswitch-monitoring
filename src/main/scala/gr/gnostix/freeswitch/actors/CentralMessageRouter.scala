@@ -89,9 +89,11 @@ class CentralMessageRouter extends Actor with ActorLogging {
     case x@GetCallInfo(callUuid) =>
       callRouterActor forward x
 
-    case x@InitializeDashboard =>
-      basicStatsActor ! x
-      heartBeatActor ! x
+    case x@InitializeDashboardBasicStats =>
+      basicStatsActor forward x
+
+    case x@InitializeDashboardHeartBeat =>
+      heartBeatActor forward x
 
     case x@GetChannelInfo(callUuid, channeluuid) =>
       callRouterActor forward x

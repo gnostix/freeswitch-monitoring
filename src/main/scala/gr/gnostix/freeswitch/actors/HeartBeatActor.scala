@@ -1,10 +1,10 @@
 package gr.gnostix.freeswitch.actors
 
-import akka.actor.{ActorRef, Actor, ActorLogging}
-import gr.gnostix.freeswitch.actors.ActorsProtocol.{InitializeDashboard, GetAllHeartBeat, GetLastHeartBeat}
-import org.scalatra.atmosphere.AtmosphereClient
-import scala.concurrent.duration._
+import akka.actor.{Actor, ActorLogging, ActorRef}
+import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetAllHeartBeat, GetLastHeartBeat, InitializeDashboardHeartBeat}
+
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 import scala.language.postfixOps
 
 /**
@@ -25,8 +25,8 @@ class HeartBeatActor(wsLiveEventsActor: ActorRef) extends Actor with ActorLoggin
       //wsLiveEventsActor ! ActorsJsonProtocol.heartbeatToJson(x)
       //log info "broadcasted HeartBeat to WS"
 
-    case x@InitializeDashboard =>
-      heartBeats.take(50).map{e => wsLiveEventsActor ! e}
+    case x@InitializeDashboardHeartBeat =>
+      sender ! heartBeats.take(30)
 
     case x @ GetLastHeartBeat =>
       log info "-----------> ask for last heartbeat"

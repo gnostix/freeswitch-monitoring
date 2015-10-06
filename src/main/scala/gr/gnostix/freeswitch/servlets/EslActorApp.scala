@@ -51,10 +51,10 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
     "Do stuff and give me an answer"
   }
 
-  get("/initialize/dashboard"){
+/*  get("/initialize/dashboard"){
     myActor ! InitializeDashboard
     ApiReply(200,"all good")
-  }
+  }*/
 
   get("/GetConcurrentCalls"){
     myActor ? GetConcurrentCalls
