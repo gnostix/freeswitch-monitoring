@@ -262,6 +262,7 @@ $(function () {
         var table = $('#asracdstable').DataTable( {
 		//"deferRender": true
 		} );
+		
 
         table.clear().draw();
 
@@ -277,8 +278,8 @@ $(function () {
        //init
 	   $.ajax({
             type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
-           // url: '/actors/initialize/dashboard', // the url where we want to POST
-             url: 'http://fs-moni.cloudapp.net:8080/actors/initialize/dashboard', // the url where we want to POST
+            url: '/actors/initialize/dashboard', // the url where we want to POST
+            // url: 'http://fs-moni.cloudapp.net:8080/actors/initialize/dashboard', // the url where we want to POST
             
             dataType: 'json', // what type of data do we expect back from the server
             contentType: "application/json",
@@ -338,7 +339,7 @@ $(function () {
             type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
             url: '/actors/concurrent/calls/details', // the url where we want to POST
            //  url: 'http://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details', // the url where we want to POST
-            //url: "ws://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details",
+           // url: "ws://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details",
             // url: 'http://10.5.50.249:8080/actors/concurrent/calls/details', // the url where we want to POST
             //data: JSON.stringify(formData), // our data object
             dataType: 'json', // what type of data do we expect back from the server
