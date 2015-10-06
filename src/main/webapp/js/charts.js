@@ -6,7 +6,7 @@
 		backgroundColor: "rgba(24, 11, 81, 0.85)",
 		borderRadius: 5,
 		borderColor: "#ffffff",
-		borderWidth: 3
+		borderWidth: 2
 	},
 	title: {
 		//text: "Live Monitoring"
@@ -18,12 +18,17 @@
 	credits: {
       enabled: false
 	},
+	 plotOptions: {
+            series: {
+                stacking: 'normal'
+            }
+        },
 	yAxis: {
 		title: {
 		text: null
 	},
 		// type: 'logarithmic',
-        // minorTickInterval: 0.1,
+        // minorTickInterval: 0.1, //solution for error with zero values display
 		minorTickInterval: "auto",
 		 gridLineWidth: 0,
           minorGridLineWidth: 0
@@ -41,7 +46,8 @@
 		"#91e8e1"
 	],
 	xAxis: {
-		type: "datetime"
+		type: "datetime",
+        tickPixelInterval: 100
 	},
 	series: [
 		{
@@ -100,7 +106,7 @@
 		backgroundColor: "rgba(24, 11, 81, 0.85)",
 		borderRadius: 5,
 		borderColor: "#ffffff",
-		borderWidth: 3
+		borderWidth: 2
 	},
 	title: {
 		//text: "Live Monitoring"
@@ -112,12 +118,18 @@
 	credits: {
       enabled: false
 	},
+	 plotOptions: {
+            series: {
+                stacking: 'normal'
+            }
+        },
 	yAxis: {
 		title: {
 		text: null
 	},
 		//type: "logarithmic",
-		minorTickInterval: "auto",
+		// minorTickInterval: 0.1,
+		 minorTickInterval: "auto",
 		 gridLineWidth: 0,
           minorGridLineWidth: 0
 	},
@@ -134,7 +146,8 @@
 		"#91e8e1"
 	],
 	xAxis: {
-		type: "datetime"
+		type: "datetime",
+        tickPixelInterval: 100
 	},
 	series: [
 		{
@@ -178,7 +191,7 @@
 		backgroundColor: "rgba(24, 11, 81, 0.85)",
 		borderRadius: 5,
 		borderColor: "#ffffff",
-		borderWidth: 3
+		borderWidth: 2
 	},
 	title: {
 		//text: "Live Monitoring"
@@ -213,7 +226,8 @@
 		"#91e8e1"
 	],
 	xAxis: {
-		type: "datetime"
+		type: "datetime",
+        tickPixelInterval: 100
 	},
 	series: [
 		{

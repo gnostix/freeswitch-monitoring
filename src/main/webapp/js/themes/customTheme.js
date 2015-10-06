@@ -81,6 +81,7 @@ Highcharts.theme = {
    },
    plotOptions: {
       series: {
+		  borderWidth: 0,
          dataLabels: {
             color: '#B0B0B3'
          },

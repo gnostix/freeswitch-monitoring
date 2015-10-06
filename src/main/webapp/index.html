@@ -281,7 +281,7 @@
                             </div>
                         </div>
                         <a href="#">
-                            <div class="panel-footer">
+                            <div class="panel-footer pop" id="viewASR">
                                 <span class="pull-left">View Details</span>
                                 <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                                 <div class="clearfix"></div>
@@ -303,7 +303,7 @@
                             </div>
                         </div>
                         <a href="#">
-                            <div class="panel-footer">
+                             <div class="panel-footer pop" id="viewACD">
                                 <span class="pull-left">View Details</span>
                                 <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                                 <div class="clearfix"></div>
@@ -328,8 +328,8 @@
                         </div>
                         <a href="#">
                             <div class="panel-footer">
-                                <span class="pull-left">View Details</span>
-                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <span class="pull-left"></span>
+                                <span class="pull-right"><i class="fa fa-star"></i></span>
                                 <div class="clearfix"></div>
                             </div>
                         </a>
@@ -350,8 +350,8 @@
                         </div>
                         <a href="#">
                             <div class="panel-footer">
-                                <span class="pull-left">View Details</span>
-                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <span class="pull-left"></span>
+                                <span class="pull-right"><i class="fa fa-clock-o"></i></span>
                                 <div class="clearfix"></div>
                             </div>
                         </a>
@@ -372,8 +372,8 @@
                         </div>
                         <a href="#">
                             <div class="panel-footer">
-                                <span class="pull-left">View Details</span>
-                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <span class="pull-left"></span>
+                                <span class="pull-right"><i class="fa fa-users"></i></span>
                                 <div class="clearfix"></div>
                             </div>
                         </a>
@@ -394,8 +394,8 @@
                         </div>
                         <a href="#">
                             <div class="panel-footer">
-                                <span class="pull-left">View Details</span>
-                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <span class="pull-left"></span>
+                                <span class="pull-right"><i class="fa fa-building"></i></span>
                                 <div class="clearfix"></div>
                             </div>
                         </a>
@@ -441,6 +441,7 @@
                                         <th>From user</th>
                                         <th>To user</th>
 										<th>From User IP</th>
+										<th>To User IP</th>
 										<th>Answered Time</th>
 										<th>Hostname</th>
                                      </tr>
@@ -469,6 +470,30 @@
                             </table>
 </div>
 
+<div title="ASR/ACD details" id="asracddialog" class="table-responsive dialog dialogFrame">
+                            <table class="table table-striped display compact" cellspacing="0"  id="asracdstable">
+                                <thead>
+                                    <tr>
+                                        <th>From user</th>
+                                        <th>To user</th>
+										<th>Read Codec</th>
+										<th>Write Codec</th>
+										<th>From User IP</th>
+										<th>To User IP</th>
+										<th>Caller Channel Answered Time</th>
+										<th>Caller Channel Hangup Time</th>
+										<th>Free SWITCH Hostname</th>
+										<th>FreeSWITCH IPv4</th>
+										<th>Hangup Cause</th>
+										<th>BillSec</th>
+										<th>RTP Quality %</th>
+                                     </tr>
+                                </thead>
+                                <tbody class="rows">
+                                  
+                                </tbody>
+                            </table>
+</div>
  <!-- jQuery -->
  <script src="js/jquery-1.9.0.js"></script>
 
