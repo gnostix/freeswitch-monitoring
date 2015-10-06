@@ -40,19 +40,6 @@ class WSLiveEventsActor extends Actor with ActorLogging {
     case x@AddAtmoClientUuid(uuid) =>
       log info s"adding new client with uuid ${x.uuid}"
       atmoClientsUuid ::= x.uuid
-      val conCallsT: Future[List[BasicStatsTimeSeries]] = (context.parent ? InitializeDashboardBasicStats).mapTo[List[BasicStatsTimeSeries]]
-      val failedCallsT: Future[List[HeartBeat]] = (context.parent ? InitializeDashboardHeartBeat).mapTo[List[HeartBeat]]
-      val response = for {
-        r1 <- conCallsT
-        r2 <- failedCallsT
-      } yield (r1 ::: r2) // merge two lists with diferrent kind of case classes
-
-      response.onComplete {
-        case Success(x) =>
-          broadcastByUuid(uuid, x)
-
-        case Failure(e) => log warning "BasicStatsTick failed in response " + e.getMessage
-      }
 
     case x@RemoveAtmoClientUuid(uuid) =>
       atmoClientsUuid = atmoClientsUuid.filter(_ != uuid)

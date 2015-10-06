@@ -8,7 +8,7 @@ import _root_.akka.util.Timeout
 import gr.gnostix.api.auth.AuthenticationSupport
 import gr.gnostix.freeswitch.FreeswitchopStack
 import gr.gnostix.freeswitch.actors.ActorsProtocol._
-import gr.gnostix.freeswitch.actors.{CallEnd, CallNew}
+import gr.gnostix.freeswitch.actors.{BasicStatsTimeSeries, HeartBeat, CallEnd, CallNew}
 import gr.gnostix.freeswitch.actors.ServletProtocol.{ApiReply, ApiReplyData}
 import org.joda.time.DateTime
 import org.json4s.{DefaultFormats, Formats}
@@ -51,10 +51,30 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
     "Do stuff and give me an answer"
   }
 
-/*  get("/initialize/dashboard"){
-    myActor ! InitializeDashboard
-    ApiReply(200,"all good")
-  }*/
+  get("/initialize/dashboard/heartbeat"){
+    val data: Future[List[HeartBeat]] = (myActor ? InitializeDashboardHeartBeat).mapTo[List[HeartBeat]]
+
+    new AsyncResult {
+      val is =
+        for {
+          dt <- data
+        } yield ApiReplyData(200,"all good", dt)
+
+    }
+  }
+
+  get("/initialize/dashboard/basicstats"){
+    val data: Future[List[BasicStatsTimeSeries]] = (myActor ? InitializeDashboardBasicStats).mapTo[List[BasicStatsTimeSeries]]
+
+    new AsyncResult {
+      val is =
+        for {
+          dt <- data
+        } yield ApiReplyData(200,"all good", dt)
+
+    }
+  }
+
 
   get("/GetConcurrentCalls"){
     myActor ? GetConcurrentCalls
