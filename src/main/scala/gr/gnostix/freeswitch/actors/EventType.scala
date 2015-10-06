@@ -24,7 +24,8 @@ sealed trait CallEventType extends EventType {
 
 case class CallNew(uuid: String, eventName: String, fromUser: String, toUser: String, readCodec: String, writeCodec: String,
                    fromUserIP: String, toUserIP: String, callUUID: String, callerChannelCreatedTime: Option[Timestamp],
-                   callerChannelAnsweredTime: Option[Timestamp], freeSWITCHHostname: String, freeSWITCHIPv4: String)
+                   callerChannelAnsweredTime: Option[Timestamp], freeSWITCHHostname: String, freeSWITCHIPv4: String,
+                    callDirection: String, pdd: Float, ringingSec: Float)
   extends CallEventType
 
 
@@ -32,7 +33,8 @@ case class CallEnd(uuid: String, eventName: String, fromUser: String, toUser: St
                    fromUserIP: String, toUserIP: String, callUUID: String, callerChannelCreatedTime: Option[Timestamp],
                    callerChannelAnsweredTime: Option[Timestamp], callerChannelHangupTime: Timestamp,
                    freeSWITCHHostname: String, freeSWITCHIPv4: String, hangupCause: String,  billSec: Int,
-                   rtpQualityPerc: Double, otherLegUniqueId: String)
+                   rtpQualityPerc: Double, otherLegUniqueId: String, hangupDisposition: String, callDirection: String,
+                    mos: Double, pdd: Float, ringingSec: Float)
   extends CallEventType
 
 case class FailedCall(eventName: String, fromUser: String, toUser: String, callUUID: String, freeSWITCHIPv4: String)

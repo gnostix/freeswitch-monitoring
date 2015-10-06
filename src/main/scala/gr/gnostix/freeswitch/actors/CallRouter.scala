@@ -32,7 +32,7 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
   def idle(activeCalls: scala.collection.Map[String, ActorRef]): Receive = {
 
     case x@CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
-    callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4)
+    callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4, callDirection, pdd, ringTimeSec)
       if callUUID != "_UNKNOWN" =>
       log info x.toString
 
@@ -53,12 +53,14 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
       }
 
     case x@CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
-    callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4) =>
+    callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4, callDirection, pdd, ringTimeSec) =>
       log info "_UNKNOWN" + x.toString
 
     case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
     callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
-    freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) if callUUID != "_UNKNOWN" =>
+    freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId, hangupDisposition, callDirection, mos,
+    pdd, ringTimeSec)
+      if x.callUUID != "_UNKNOWN" =>
       log info "-----> " + x.toString
 
       (activeCalls get callUUID) match {
@@ -85,7 +87,8 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
 
     case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
     callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
-    freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) =>
+    freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId, hangupDisposition, callDirection, mos,
+    pdd, ringTimeSec) =>
       log info s"no uuid $uuid" + x.toString
 
     case GetConcurrentCalls =>

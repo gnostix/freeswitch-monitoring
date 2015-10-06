@@ -19,7 +19,7 @@ import gr.gnostix.freeswitch.actors.ActorsProtocol._
     def receive: Receive = {
 
       case x @ CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
-      callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4) =>
+      callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4, callDirection, pdd, ringTimeSec) =>
         //channelState = channelState updated(uuid, x)
         channelState += (uuid -> x)
 
@@ -27,11 +27,12 @@ import gr.gnostix.freeswitch.actors.ActorsProtocol._
 
       case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
       callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
-      freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) =>
+      freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId, hangupDisposition, callDirection, mos,
+      pdd, ringTimeSec) =>
         //context stop self
         // send message to parrent tha the channel is terminated
         log info s" channel actor state Map on CallEnd $channelState"
-        channelState += (uuid -> x)
+        channelState += (x.uuid -> x)
         context.parent ! CallTerminated(x)
 
       case GetChannelInfo(callUuid, channeluuid) =>
