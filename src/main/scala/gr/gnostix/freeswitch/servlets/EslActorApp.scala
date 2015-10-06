@@ -2,9 +2,9 @@ package gr.gnostix.freeswitch.servlets
 
 import java.sql.Timestamp
 
-import akka.actor.{ActorRef, ActorSystem}
-import akka.pattern.ask
-import akka.util.Timeout
+import _root_.akka.actor.{ActorRef, ActorSystem}
+import _root_.akka.pattern.ask
+import _root_.akka.util.Timeout
 import gr.gnostix.api.auth.AuthenticationSupport
 import gr.gnostix.freeswitch.FreeswitchopStack
 import gr.gnostix.freeswitch.actors.ActorsProtocol._
@@ -13,7 +13,7 @@ import gr.gnostix.freeswitch.actors.ServletProtocol.{ApiReply, ApiReplyData}
 import org.joda.time.DateTime
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json.JacksonJsonSupport
-import org.scalatra.{AsyncResult, CorsSupport, FutureSupport, ScalatraServlet}
+import org.scalatra._
 
 import scala.concurrent.{Future, ExecutionContext}
 import scala.concurrent.duration._
@@ -24,6 +24,7 @@ import scala.util.{Failure, Success}
 class EslActorApp(system:ActorSystem, myActor:ActorRef)
   extends ScalatraServlet with FutureSupport with JacksonJsonSupport
   with CorsSupport with FreeswitchopStack with AuthenticationSupport
+  with GZipSupport
 {
 
   implicit val timeout = new Timeout(10 seconds)

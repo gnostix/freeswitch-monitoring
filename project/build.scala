@@ -37,6 +37,7 @@ object FreeswitchopBuild extends Build {
         "org.json4s" %% "json4s-jackson" % json4sversion,
         "org.eclipse.jetty" % "jetty-webapp" % jettyVersion % "container;compile",
         "org.eclipse.jetty" % "jetty-plus" % jettyVersion % "container;provided",
+        "org.eclipse.jetty" % "jetty-servlets" % jettyVersion,
         "org.eclipse.jetty.websocket" % "websocket-server" % jettyVersion % "container;provided",
         "javax.servlet" % "javax.servlet-api" % "3.1.0" % "container;provided;test" artifacts Artifact("javax.servlet-api", "jar", "jar"),
         "com.typesafe.akka" %% "akka-actor" % "2.3.12",

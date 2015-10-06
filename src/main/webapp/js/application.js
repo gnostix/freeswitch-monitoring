@@ -455,8 +455,8 @@ $(function () {
         };
         $.ajax({
             type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
-           // url: '/actors/completed/calls/details', // the url where we want to POST
-            url: 'http://fs-moni.cloudapp.net:8080/actors/completed/calls/details', // the url where we want to POST
+           url: '/actors/completed/calls/details', // the url where we want to POST
+            //url: 'http://fs-moni.cloudapp.net:8080/actors/completed/calls/details', // the url where we want to POST
             dataType: 'json', // what type of data do we expect back from the server
             contentType: "application/json",
             encode: true

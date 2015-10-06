@@ -55,17 +55,17 @@ class WSLiveEventsActor extends Actor with ActorLogging {
       atmoClientsUuid.size match {
         case 0 => log info "do nothing.. no connected clients.."
         case _ =>
-          log info s"the atmoClients list $atmoClientsUuid"
+//          log info s"the atmoClients list $atmoClientsUuid"
           AtmosphereClient.lookup("/fs-moni/live/events").foreach( (broadcaster:ScalatraBroadcaster) => {
             val myResources = broadcaster.getAtmosphereResources.asScala filter {r => atmoClientsUuid.contains(r.uuid())}
             myResources foreach( (resource:AtmosphereResource) => {
               val session = resource.getRequest.getSession(false)
 
               if(session == null){
-                log warning (s"-------> Encountered atmosphere resource ${resource.uuid()} associated with invalid session")
+  //              log warning (s"-------> Encountered atmosphere resource ${resource.uuid()} associated with invalid session")
                 resource.asInstanceOf[AtmosphereResourceImpl]._destroy()
               } else {
-                log info s"Atmo: this client belongs to this channel and is logged in, id: ${resource.uuid()}"
+  //              log info s"Atmo: this client belongs to this channel and is logged in, id: ${resource.uuid()}"
                 resource.getBroadcaster.broadcast(caseClassToJson(x))
               }
             })

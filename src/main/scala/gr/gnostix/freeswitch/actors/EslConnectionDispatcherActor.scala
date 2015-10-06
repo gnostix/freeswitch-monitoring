@@ -27,12 +27,12 @@ class EslConnectionDispatcherActor(wSLiveEventsActor: ActorRef) extends Actor wi
       connections get x.ip  match {
         case Some(eslConnection) =>
           // close connection
-          log info "----> shutdown connection with "
+          log info s"----> shutdown connection with ip: ${x.ip} and connections: $connections"
           eslConnection.deinitConnection()
           val newMap = connections.filter(c => c._1 != x.ip)
           // stop the esl event actor for this connection
           context stop eslConnection.getActor()
-
+          log info s"----> shutdown connection with connections: $newMap"
           actorConnections = newMap
           context become idle(newMap)
           sender ! ApiReply(200, "connection terminated")
@@ -43,6 +43,7 @@ class EslConnectionDispatcherActor(wSLiveEventsActor: ActorRef) extends Actor wi
       
 
     case x @ EslConnectionData(ip, port, password) =>
+      log info s"esl connections: $connections"
       connections get x.ip match {
         case None =>
           val eslEventRouter = context.actorOf(Props[EslEventRouter], x.ip)
@@ -69,25 +70,11 @@ class EslConnectionDispatcherActor(wSLiveEventsActor: ActorRef) extends Actor wi
               sender ! resp
           }
 
-        case Some(actor) =>
-          log info "we already have this ip connection " + x.ip
+        case Some(eslConnection) =>
+          log error s"we already have this ip connection ${x.ip} and connections: ${connections}"
           sender ! ApiReply(400, s"we already have this ip connection ${x.ip}")
       }
 
-    case x @ ShutdownEslConnection(ip) =>
-      connections get x.ip match {
-        case None =>
-          sender ! ApiReply(400, "this connection doesn't exist")
-
-        case Some(eslConnection) =>
-          // close connection
-          log info "----> shutdown connection with "
-          eslConnection.deinitConnection()
-          sender ! ApiReply(200, "connection terminated")
-          val newMap = connections - x.ip
-          actorConnections = newMap
-          context become idle(newMap)
-      }
 
     case Tick =>
       connections.map{

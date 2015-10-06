@@ -112,7 +112,7 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
       sender ! basicStats
 
     case x@InitializeDashboard =>
-      basicStats.take(50).map{e => wsLiveEventsActor ! e}
+      basicStats.take(30).map{e => wsLiveEventsActor ! e}
 
     case x => log info "basic stats actor: I don't know this message " + x.toString
   }
