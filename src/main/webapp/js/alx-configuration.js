@@ -74,7 +74,9 @@ $(document).ready ( function(){
             // process the form
             $.ajax({
                 type: 'POST', // define the type of HTTP verb we want to use (POST for our form)
+
                 url: path+'/configuration/fs-node/conn-data', // the url where we want to POST
+
                // url: '/configuration/fs-node/conn-data', // the url where we want to POST
                 //url: 'http://10.5.50.249:8080/configuration/fs-node/conn-data', // the url where we want to POST
                	data: JSON.stringify(formData), // our data object

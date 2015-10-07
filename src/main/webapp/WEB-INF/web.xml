@@ -12,4 +12,5 @@
   <listener>
     <listener-class>org.scalatra.servlet.ScalatraListener</listener-class>
   </listener>
+
 </web-app>

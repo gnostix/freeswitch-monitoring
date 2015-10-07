@@ -111,14 +111,14 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
     case x@GetBasicStatsTimeSeries =>
       sender ! basicStats
 
-    case x@InitializeDashboard =>
-      basicStats.take(50).map{e => wsLiveEventsActor ! e}
+    case x@InitializeDashboardBasicStats =>
+      sender ! basicStats.take(30)
 
     case x => log info "basic stats actor: I don't know this message " + x.toString
   }
 
   context.system.scheduler.schedule(10000 milliseconds,
-    10000 milliseconds,
+    60000 milliseconds,
     self,
     BasicStatsTick)
 

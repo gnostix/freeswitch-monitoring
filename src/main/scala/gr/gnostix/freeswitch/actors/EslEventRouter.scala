@@ -27,24 +27,26 @@ class EslEventRouter extends Actor with ActorLogging {
 
       getCallEventType(headers) match {
         case x @ CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
-        callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4)
+        callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4, callDirection, pdd, ringTimeSec)
           if callUUID != "_UNKNOWN" =>
           callRouterActor ! x
 
         case x@CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
-        callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4) =>
+        callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4, callDirection, pdd, ringTimeSec) =>
           log info "_UNKNOWN" + x.toString
 
         case x @ CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
         callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
-        freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId)
-          if callUUID != "_UNKNOWN" =>
+        freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId, hangupDisposition, callDirection, mos,
+        pdd, ringTimeSec)
+          if x.callUUID != "_UNKNOWN" =>
           log info "-----> " + x.toString
           callRouterActor ! x
 
         case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
         callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
-        freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId) =>
+        freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId, hangupDisposition, callDirection, mos,
+        pdd, ringTimeSec) =>
           log info s"no uuid $uuid" + x.toString
 
         case x @ HeartBeat(eventType, eventInfo, uptimeMsec, sessionCount, sessionPerSecond, eventDateTimestamp,
@@ -106,6 +108,8 @@ class EslEventRouter extends Actor with ActorLogging {
     val toUserIP = headers get "Other-Leg-Network-Addr" getOrElse "_UNKNOWN"
     val freeSWITCHHostname = headers get "FreeSWITCH-Hostname" getOrElse "0"
     val freeSWITCHIPv4 = headers get "FreeSWITCH-IPv4" getOrElse "0"
+    val callDirection = headers get "Call-Direction" getOrElse "_UNKNOWN"
+    val callUUID = headers get "Channel-Call-UUID" getOrElse "_UNKNOWN"
 
     val callerChannelCreatedTime = headers get "Caller-Channel-Created-Time" getOrElse "0" match {
       case "0" => None
@@ -117,19 +121,39 @@ class EslEventRouter extends Actor with ActorLogging {
       case x => Some(new Timestamp(x.toLong / 1000))
     }
 
+    val varStartStamp = headers get "variable_start_uepoch" getOrElse "0" match {
+      case "0" => 0
+      case x => x.toLong
+    }
+
+    val varProgressEpoch = headers get "variable_progress_uepoch" getOrElse "0" match {
+      case "0" => 0
+      case x => x.toLong
+    }
+
+    val varAnswerEpoch = headers get "variable_answer_uepoch" getOrElse "0" match {
+      case "0" => 0
+      case x => x.toLong
+    }
+
+    val pdd = getPDD(varProgressEpoch, varStartStamp)
+    val ringTimeSec = getRingTimeSec(varAnswerEpoch, varProgressEpoch)
+
+
     eventName match {
       case "CHANNEL_ANSWER" =>
-        val callUUID = headers get "Channel-Call-UUID" getOrElse "_UNKNOWN"
 
         CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
-          callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4)
+          callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4,
+          callDirection, pdd, ringTimeSec)
 
       case "CHANNEL_HANGUP_COMPLETE" =>
-        val callUUID = headers get "Channel-Call-UUID" getOrElse "_UNKNOWN"
         val otherLegUniqueId = headers get "Other-Leg-Unique-ID" getOrElse "_UNKNOWN"
         val hangupCause = headers get "Hangup-Cause" getOrElse "_UNKNOWN"
         val billSec = headers get "variable_billsec" getOrElse "0"
         val rtpQualityPerc = headers get "variable_rtp_audio_in_quality_percentage" getOrElse "0"
+        val hangupDisposition = headers get "variable_sip_hangup_disposition" getOrElse "_UNKNOWN"
+        val mos = headers get "variable_rtp_audio_in_mos" getOrElse "0"
 
         val callerChannelHangupTime =  headers get "Caller-Channel-Hangup-Time" getOrElse "0" match {
           case "0" => new Timestamp(System.currentTimeMillis) // if the call failed this value would be 0 but we need the time that the call failed
@@ -138,7 +162,8 @@ class EslEventRouter extends Actor with ActorLogging {
 
         CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID, callerChannelCreatedTime,
           callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname, freeSWITCHIPv4, hangupCause,
-          billSec.toInt, rtpQualityPerc.toDouble, otherLegUniqueId)
+          billSec.toInt, rtpQualityPerc.toDouble, otherLegUniqueId, hangupDisposition, callDirection, mos.toDouble,
+          pdd, ringTimeSec)
 
     }
 
@@ -167,8 +192,15 @@ class EslEventRouter extends Actor with ActorLogging {
       sessionPeakMax.toInt, sessionPeakMaxFiveMin.toInt, freeSWITCHHostname, freeSWITCHIPv4, upTime)
   }
 
+def getPDD(varProgressEpoch: Long, varStartStamp: Long): Float = {
+  // PDD calculation
+  (varProgressEpoch - varStartStamp) / 1000 / 1000 // 1000 to milliseconds and / 1000 to seconds
+}
 
-
+  def getRingTimeSec(varAnswerEpoch: Long, varProgressEpoch: Long): Float = {
+    // PDD calculation
+    (varAnswerEpoch - varProgressEpoch) / 1000 / 1000 // 1000 to milliseconds and / 1000 to seconds
+  }
 
 }
 

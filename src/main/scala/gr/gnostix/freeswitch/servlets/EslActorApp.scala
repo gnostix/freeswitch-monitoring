@@ -2,18 +2,18 @@ package gr.gnostix.freeswitch.servlets
 
 import java.sql.Timestamp
 
-import akka.actor.{ActorRef, ActorSystem}
-import akka.pattern.ask
-import akka.util.Timeout
+import _root_.akka.actor.{ActorRef, ActorSystem}
+import _root_.akka.pattern.ask
+import _root_.akka.util.Timeout
 import gr.gnostix.api.auth.AuthenticationSupport
 import gr.gnostix.freeswitch.FreeswitchopStack
 import gr.gnostix.freeswitch.actors.ActorsProtocol._
-import gr.gnostix.freeswitch.actors.{CallEnd, CallNew}
+import gr.gnostix.freeswitch.actors.{BasicStatsTimeSeries, HeartBeat, CallEnd, CallNew}
 import gr.gnostix.freeswitch.actors.ServletProtocol.{ApiReply, ApiReplyData}
 import org.joda.time.DateTime
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json.JacksonJsonSupport
-import org.scalatra.{AsyncResult, CorsSupport, FutureSupport, ScalatraServlet}
+import org.scalatra._
 
 import scala.concurrent.{Future, ExecutionContext}
 import scala.concurrent.duration._
@@ -24,6 +24,7 @@ import scala.util.{Failure, Success}
 class EslActorApp(system:ActorSystem, myActor:ActorRef)
   extends ScalatraServlet with FutureSupport with JacksonJsonSupport
   with CorsSupport with FreeswitchopStack with AuthenticationSupport
+  with GZipSupport
 {
 
   implicit val timeout = new Timeout(10 seconds)
@@ -50,10 +51,30 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
     "Do stuff and give me an answer"
   }
 
-  get("/initialize/dashboard"){
-    myActor ! InitializeDashboard
-    ApiReply(200,"all good")
+  get("/initialize/dashboard/heartbeat"){
+    val data: Future[List[HeartBeat]] = (myActor ? InitializeDashboardHeartBeat).mapTo[List[HeartBeat]]
+
+    new AsyncResult {
+      val is =
+        for {
+          dt <- data
+        } yield ApiReplyData(200,"all good", dt)
+
+    }
   }
+
+  get("/initialize/dashboard/basicstats"){
+    val data: Future[List[BasicStatsTimeSeries]] = (myActor ? InitializeDashboardBasicStats).mapTo[List[BasicStatsTimeSeries]]
+
+    new AsyncResult {
+      val is =
+        for {
+          dt <- data
+        } yield ApiReplyData(200,"all good", dt)
+
+    }
+  }
+
 
   get("/GetConcurrentCalls"){
     myActor ? GetConcurrentCalls
