@@ -32,17 +32,12 @@ $(document).ready ( function(){
 
                        
                         table.row.add([n.ip, n.port,'<button type="button" class="btn btn-danger remove">Delete</button>']).draw();
-<<<<<<< HEAD
+
 
                     });
                 }
 
-=======
 
-                    });
-                }
-
->>>>>>> 02768c58366dd282e73147e7348c77ed49f6f1c2
                /*  $("#message").toggleClass('alert-info alert-success');
                 $(jQuery.parseJSON(JSON.stringify(data))).each(function() {
 
@@ -81,13 +76,11 @@ $(document).ready ( function(){
             // process the form
             $.ajax({
                 type: 'POST', // define the type of HTTP verb we want to use (POST for our form)
-<<<<<<< HEAD
-                url: path+'/configuration/fs-node/conn-data', // the url where we want to POST
-=======
+
 
                 url: path+'/configuration/fs-node/conn-data', // the url where we want to POST
 
->>>>>>> 02768c58366dd282e73147e7348c77ed49f6f1c2
+
                // url: '/configuration/fs-node/conn-data', // the url where we want to POST
                 //url: 'http://10.5.50.249:8080/configuration/fs-node/conn-data', // the url where we want to POST
                	data: JSON.stringify(formData), // our data object

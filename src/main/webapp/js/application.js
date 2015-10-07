@@ -376,7 +376,6 @@ $(function () {
             var asr = chart.get('asr');
             var acd = chart.get('acd');
             var rtp = chart.get('rtp');
-<<<<<<< HEAD
 
            
             //get series by id
@@ -409,40 +408,7 @@ $(function () {
                     });
                 }
 
-=======
 
-           
-            //get series by id
-            var concurrentCalls = chartBasic.get('concurrentCalls');
-            var failedCalls = chartBasic.get('failedCalls');
-
-              
-			 if (result.payload.length > 0) {
-				$("#concCallsNum").text(result.payload[0].concCallsNum);
-				$("#failedCallsNum").text(result.payload[0].failedCallsNum);
-				$("#acd").text(result.payload[0].acd);
-				$("#asr").text(result.payload[0].asr);
-				$("#rtpQualityAvg").text(result.payload[0].rtpQualityAvg);
-
-                    $.each(result.payload, function (i, n) {
-                        // console.log("Sensor Index: " + i + ", cpu usage: " + n.cpuUsage );
-
-                     
-						// Add points to graphs
-						rtp.addPoint([Date.parse(n.dateTime), n.rtpQualityAvg]);
-						asr.addPoint([Date.parse(n.dateTime), n.asr]);
-						acd.addPoint([Date.parse(n.dateTime), n.acd]);
-						
-						//add points to graph
-						//var milliSeconds = Date.parse(json.dateTime);
-						//console.log("adding basic:"+milliSeconds);
-						concurrentCalls.addPoint([Date.parse(n.dateTime), n.concCallsNum]);
-						failedCalls.addPoint([Date.parse(n.dateTime), n.failedCallsNum]);
-
-                    });
-                }
-
->>>>>>> 02768c58366dd282e73147e7348c77ed49f6f1c2
             })
             // using the fail promise callback
             .fail(function (data) {
@@ -643,15 +609,12 @@ $(function () {
         };
         $.ajax({
             type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
-<<<<<<< HEAD
-           // url: '/actors/completed/calls/details', // the url where we want to POST
-            url: path+'/actors/completed/calls/details', // the url where we want to POST
-=======
+
 
            // url: '/actors/completed/calls/details', // the url where we want to POST
             url: path+'/actors/completed/calls/details', // the url where we want to POST
 
->>>>>>> 02768c58366dd282e73147e7348c77ed49f6f1c2
+
             dataType: 'json', // what type of data do we expect back from the server
             contentType: "application/json",
             encode: true
