@@ -21,14 +21,55 @@
 
     <!-- Custom Fonts -->
     <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-
+<!--datatable-->
+	<link href="https://cdn.datatables.net/1.10.9/css/jquery.dataTables.min.css" rel="stylesheet" >
+	
+	 <link href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css">
+	
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+ <style type="text/css">
+     
+	    
+	#page-wrapper { 
+            background-image: url(images/background.jpg); 
+			/* Set rules to fill background */
+			
+             /* Background image is centered vertically and horizontally at all times */
+  background-position: center center !important;
+  
+  /* Background image doesn't tile */
+  background-repeat: no-repeat !important;
+  
+  /* Background image is fixed in the viewport so that it doesn't move when 
+     the content's height is greater than the image's height */
+  background-attachment: fixed !important;
+  
+  /* This is what makes the background image rescale based
+     on the container's size */
+  background-size: cover !important;
+  
+        }
+        @media only screen and (max-width: 320px) {
+            #page-wrapper { 
+                background-image: url(images/background.jpg); 
+                 background-size: cover !important;
+            }
+        }
 
+         @media only screen and (max-width: 720px) {
+            #page-wrapper { 
+                background-image: url(images/background.jpg); 
+                 background-size: cover !important;
+            }
+        }
+	
+      
+    </style>
 </head>
 
 <body>
@@ -156,7 +197,7 @@
                 </li>
 
                  <li class="active">
-                    <a href="configuration.html"><i class="fa fa-fw fa-dashboard"></i> Configuration</a>
+                    <a href="configuration.html"><i class="fa fa-fw fa-edit"></i> Setup</a>
                 </li>
             </ul>
         </div>
@@ -167,74 +208,52 @@
 
         <div class="container-fluid">
 
-            <!-- Page Heading -->
-            <div class="row">
-                <div class="col-lg-12">
-                    <h1 class="page-header">
-                        Dashboard <small>Statistics Overview</small>
-                    </h1>
-                    <ol class="breadcrumb">
-                        <li class="active">
-                            <i class="fa fa-dashboard"></i> Dashboard
-                        </li>
-                    </ol>
-                </div>
-            </div>
-            <!-- /.row -->
-
-            <div class="row">
-                <div class="col-lg-12">
-                    <div id="message" class="alert alert-info alert-dismissable">
+            
+                <!-- Main jumbotron for a primary marketing message or call to action -->
+                <div class="jumbotron">
+				  <div class="row">
+					<div class="col-lg-12">
+						<div id="message" class="alert alert-info alert-dismissable">
                         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
                         <i id="responseInput" class="fa fa-info-circle"></i>  <strong class="inputRes">Please enter connection credentials</strong></div>
-                </div>
-            </div>
-            <!-- /.row -->
-
-
-
-            <div class="row">
-
-                <form class="form-horizontal" id="eslConnForm">
-                    <div class="form-group">
-                        <!--<label for="inputIPAddress" class="control-label col-xs-2">IP Address</label>-->
-                        <div class="col-xs-10">
-                            <input type="string" class="form-control" id="eslIPAddress" placeholder="IP Address" value="fs-instance.com">
-                        </div>
+					</div>
+				  </div>
+			       
+				  <form role="form">
+				 <div class="row">
+                    <div class="col-lg-4 text-center">
+                         <div class="panel panel-default">
+                                <input type="text" class="form-control" id="eslIPAddress" placeholder="IP Address">
+						 </div>   
+                        
                     </div>
-                    <div class="form-group">
-                        <!--<label for="inputPort" class="control-label col-xs-2">Port</label>-->
-                        <div class="col-xs-10">
-                            <input type="number" class="form-control" id="eslPort" placeholder="Port" value="8021">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <!--<label for="inputPassword" class="control-label col-xs-2">Password</label>-->
-                        <div class="col-xs-10">
-                            <input type="password" class="form-control" id="eslPassword" placeholder="Password" value="ClueCon">
-                        </div>
-                    </div>
-<!--                    <div class="form-group">
-                        <div class="col-xs-offset-2 col-xs-10">
-                            <div class="checkbox">
-                                <label><input type="checkbox"> Remember me</label>
-                            </div>
-                        </div>
-                    </div>-->
-                    <div class="form-group">
-                        <div class="col-xs-offset-2 col-xs-10">
-                            <button type="submit" class="btn btn-primary">Login</button>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-12">
+                    <div class="col-lg-4 text-center">
                         <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>Connections</h3>
+                              <input type="number" class="form-control" id="eslPort" placeholder="Port">
+                           
+                        </div>
+                    </div>
+                    <div class="col-lg-4 text-center">
+                        <div class="panel panel-default">
+                           <input type="password" class="form-control" id="eslPassword" placeholder="Password">
+                         
+                        </div>
+                    </div>
+                </div>
+				 <div class="form-group">
+                        <div class="pull-right">
+                            <button type="button"  id="eslConnForm" class="btn btn-primary">Login</button>
+                        </div>
+                    </div>
+					
+					
+					   <div id="tableRow"class="row" style="display:none">
+							<div class="panel-heading">
+                                <h3 class="panel-title"><i class="fa fa-retweet"></i> Connections</h3>
                             </div>
-                            <div class="panel-body">
-                                <div class="table-responsive">
-                                    <table id="table" class="table table-bordered table-hover table-striped">
+							<div class="col-lg-12 text-center">
+							<div id="tablePanel">
+                                    <table id="table" class="table table-striped display compact" >
                                         <thead>
                                         <tr>
                                             <th>IP</th>
@@ -247,16 +266,27 @@
                                         </tbody>
                                     </table>
                                 </div>
-
-                            </div>
+							</div>
+							
                         </div>
-                    </div>
-            </div>
+				</form>
+                   
+                </div>
+
+            
+            <!-- /.row -->
+
+
                 </form>
             </div>
             </div>
             <!-- /.row -->
+		 <!-- Footer -->
+    <div id="loginFooter" class="loginFooter footer clearfix ">
+        <div class="pull-left">&copy; 2015. Freeswitch monitoring</div>
 
+    </div>
+    <!-- /footer -->
         </div>
         <!-- /.container-fluid -->
 
@@ -266,22 +296,25 @@
 </div>
 <!-- /#wrapper -->
 
-<!-- jQuery -->
-<script src="js/jquery-1.9.0.js"></script>
-<script src="js/jquery.js"></script>
+ <!-- jQuery -->
+ <script src="js/jquery-1.9.0.js"></script>
 
-<!-- Bootstrap Core JavaScript -->
+    <script src="js/jquery.js"></script>
+	<!-- Bootstrap Core JavaScript -->
 <script src="js/bootstrap.min.js"></script>
 
-<!-- Morris Charts JavaScript -->
-<script src="js/plugins/morris/raphael.min.js"></script>
+<script src="http://code.jquery.com/ui/1.11.1/jquery-ui.min.js"></script>
 
 
 <script src="js/jquery.atmosphere.js"></script>
+
+
+<!--datatble-->
+
+<script src="https://cdn.datatables.net/1.10.9/js/jquery.dataTables.min.js"></script>
 <script src="js/alx-configuration.js"></script>
 
 
-<script src='js/jquery.dataTables.min.js'></script>
 
 </body>
 

@@ -1,7 +1,7 @@
 	$(function () {
     $('#heartbeat').highcharts({
     chart: {
-		type: "area",
+		type: "areaspline",
 		//backgroundColor: "rgba(255, 255, 255, 0.65)",
 		backgroundColor: "rgba(24, 11, 81, 0.85)",
 		borderRadius: 5,
@@ -19,9 +19,9 @@
       enabled: false
 	},
 	 plotOptions: {
-            series: {
-                stacking: 'normal'
-            }
+          //  series: {
+          //      stacking: 'normal'
+          //  }
         },
 	yAxis: {
 		title: {
@@ -29,7 +29,7 @@
 	},
 		// type: 'logarithmic',
         // minorTickInterval: 0.1, //solution for error with zero values display
-		minorTickInterval: "auto",
+		//minorTickInterval: "auto",
 		 gridLineWidth: 0,
           minorGridLineWidth: 0
 	},
@@ -52,36 +52,6 @@
 	series: [
 		{
 			index: 0,
-			 id: 'asr',
-			 dashStyle: "Solid",
-			marker: {
-				"enabled": false
-			},
-			name: "ASR",
-			data: [
-				[
-					(new Date()).getTime(),
-					0
-				]
-			]
-		},
-		{
-			index: 1,
-			id:'acd',
-			dashStyle: "Solid",
-			marker: {
-				"enabled": false
-			},
-			name: "ACD",
-			data: [
-				[
-					(new Date()).getTime(),
-					0
-				]
-			]
-		},
-		{
-			index: 2,
 			id:'rtp',
 			dashStyle: "Solid",
 			marker: {
@@ -89,18 +59,49 @@
 			},
 			name: "RTP Quality",
 			data: [
-				[
-					(new Date()).getTime(),
-					0
-				]
+				//[
+					//(new Date()).getTime(),
+					//0
+				//]
+			]
+		},
+		{
+			index: 1,
+			 id: 'asr',
+			 dashStyle: "Solid",
+			marker: {
+				"enabled": false
+			},
+			name: "ASR",
+			data: [
+				//[
+					//(new Date()).getTime(),
+					//0
+				//]
+			]
+		},
+		{
+			index: 2,
+			id:'acd',
+			dashStyle: "Solid",
+			marker: {
+				"enabled": false
+			},
+			name: "ACD",
+			data: [
+				//[
+					//(new Date()).getTime(),
+					//0
+				//]
 			]
 		}
+		
 	]
     });
 	
 	$('#basicstats').highcharts({
     chart: {
-		type: "area",
+		type: "areaspline",
 		//backgroundColor: "rgba(255, 255, 255, 0.65)",
 		//backgroundColor: "rgba(0, 0, 52, 0.85)",
 		backgroundColor: "rgba(24, 11, 81, 0.85)",
@@ -119,9 +120,9 @@
       enabled: false
 	},
 	 plotOptions: {
-            series: {
-                stacking: 'normal'
-            }
+           // series: {
+           //     stacking: 'normal'
+           // }
         },
 	yAxis: {
 		title: {
@@ -129,7 +130,7 @@
 	},
 		//type: "logarithmic",
 		// minorTickInterval: 0.1,
-		 minorTickInterval: "auto",
+		// minorTickInterval: "auto",
 		 gridLineWidth: 0,
           minorGridLineWidth: 0
 	},
@@ -159,10 +160,10 @@
 			},
 			name: "Concurrent Calls",
 			data: [
-				[
-					(new Date()).getTime(),
-					0
-				]
+				//[
+					//(new Date()).getTime(),
+					//0
+				//]
 			]
 		},
 		{
@@ -174,10 +175,10 @@
 			},
 			name: "Failed Calls",
 			data: [
-				[
-					(new Date()).getTime(),
-					0
-				]
+				//[
+					//(new Date()).getTime(),
+					//0
+				//]
 			]
 		}
 	]
@@ -239,10 +240,10 @@
 			},
 			name: "CPU Usage (%)",
 			data: [
-				[
-					(new Date()).getTime(),
-					0
-				]
+				//[
+					//(new Date()).getTime(),
+					//0
+				//]
 			]
 		}
 	]

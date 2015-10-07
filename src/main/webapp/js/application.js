@@ -1,6 +1,10 @@
 $(function () {
     "use strict";
-
+	
+	//paths for local tests and server
+	//var path='http://fs-moni.cloudapp.net:8080';
+	var path='';
+	
     var detect = $("#detect");
     var header = $('#header');
     var messages = $('#messages');
@@ -18,7 +22,7 @@ $(function () {
 
     var request = {
 
-       // url: "ws://fs-moni.cloudapp.net:8080/fs-moni/live/events",
+      //  url: "ws://fs-moni.cloudapp.net:8080/fs-moni/live/events",
         url: "/fs-moni/live/events",
         //url: "the-chat",
         contentType: "application/json",
@@ -46,12 +50,12 @@ $(function () {
 
     request.onMessage = function (rs) {
 
-        console.log("onMessage");
+     //   console.log("onMessage");
         var message = rs.responseBody;
-        console.log("MESSAGE:::::" + message);
+       // console.log("MESSAGE:::::" + message);
         try {
             var json = jQuery.parseJSON(message);
-            console.log("Got a message");
+         //   console.log("Got a message");
 
             //get the chart by id
             var chart = $('#heartbeat').highcharts();
@@ -72,10 +76,10 @@ $(function () {
             var cpuUsage = chartCPU.get('cpuUsage');
 
             //console.log(json);
-            console.log("EVENTNAME:::::" + json.eventName);
+           // console.log("EVENTNAME:::::" + json.eventName);
 
             //console.log(json);
-            console.log("EVENTNAME:::::" + json.eventName);
+          //  console.log("EVENTNAME:::::" + json.eventName);
 
             if (json.eventName === "HEARTBEAT") {
                 $("#upTime").text(convertMillisecondsToDigitalClock(json.uptimeMsec).clock);
@@ -85,7 +89,7 @@ $(function () {
                 cpuUsage.addPoint([Date.parse(json.eventDateTimestamp), json.cpuUsage]);
 
             } else if (json.eventName === "BASIC_STATS") {
-                console.log("--------------ADDING BASIC STATS");
+               // console.log("--------------ADDING BASIC STATS");
                 $("#concCallsNum").text(json.concCallsNum);
                 $("#failedCallsNum").text(json.failedCallsNum);
                 $("#acd").text(json.acd);
@@ -177,12 +181,12 @@ $(function () {
         str += date.getUTCMinutes() + " minutes, ";
         str += date.getUTCSeconds() + " seconds ";
 //str += date.getUTCMilliseconds() + " millis";
-        console.log(str);
+       // console.log(str);
 
         var hours = Math.floor(ms / 3600000); // 1 Hour = 36000 Milliseconds
         var minutes = Math.floor((ms % 3600000) / 60000); // 1 Minutes = 60000 Milliseconds
         var seconds = Math.floor(((ms % 360000) % 60000) / 1000);// 1 Second = 1000 Milliseconds
-        console.log("hours" + hours);
+       // console.log("hours" + hours);
         return {
             hours: hours,
             minutes: minutes,
@@ -257,12 +261,9 @@ $(function () {
         $('#asracddialog').dialog('open');
 
     });
-
+	
 	$('#viewACD').click(function () {
-        var table = $('#asracdstable').DataTable( {
-		//"deferRender": true
-		} );
-		
+        var table = $('#asracdstable').DataTable();
 
         table.clear().draw();
 
@@ -272,25 +273,77 @@ $(function () {
 
     });
 
+	 
+	 /*
+	 $('#viewACD').click(function () {
+       // var table = $('#asracdstable').DataTable( {
+		//"deferRender": true
+	  //	} );
+		$('#asracdstableP').DataTable({
+        "ajax": {
+		"url":"http://fs-moni.cloudapp.net:8080/actors/completed/calls/details",
+        "dataSrc": "payload",
+		"columns": [
+            { "data": "readCodec" },
+            { "data": "fromUser" },
+            { "data": "eventName" }
+        ]}
+		});
+
+       // table.clear().draw();
+
+       // getASRACDDetails(table);
+        //open dialog
+       // $('#asracddialog').dialog('open');
+
+      });
+	  */
+
 	
     jQuery(document).ready(function () {
 
-       //init
-	   $.ajax({
+           //init results and charts
+	        $.ajax({
             type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
-            url: '/actors/initialize/dashboard', // the url where we want to POST
-            // url: 'http://fs-moni.cloudapp.net:8080/actors/initialize/dashboard', // the url where we want to POST
+           // url: '/actors/initialize/dashboard', // the url where we want to POST
+             url: path+'/actors/initialize/dashboard/heartbeat',
             
             dataType: 'json', // what type of data do we expect back from the server
             contentType: "application/json",
             encode: true
-        })
+            })
             // using the done promise callback
             .done(function (result) {
-			console.log("SUCCESS:__________________ "+JSON.stringify(result));
-                
+			//console.log("SUCCESS:__________________ "+JSON.stringify(result));
+             
+			
 
-              
+            //get the chart by id
+            var chartCPU = $('#cpu').highcharts();
+            //get series by id
+            var cpuUsage = chartCPU.get('cpuUsage');
+
+           
+               
+				 if (result.payload.length > 0) {
+	
+					//add last value on container
+					 $("#upTime").text(convertMillisecondsToDigitalClock(result.payload[0].uptimeMsec).clock);
+					 $("#sessionPerSecond").text(result.payload[0].sessionPerSecond);
+					 $("#cpuUsage").text(result.payload[0].cpuUsage + '%');
+					 
+                    $.each(result.payload, function (i, n) {
+                       //  console.log("Sensor Index: " + i + ", cpu usage: " + n.cpuUsage );
+
+                        // for (var i = 0; i < n.length ; i++) {
+                        // alert(n.uuid + " - ---- -- ");
+                        cpuUsage.addPoint([Date.parse(n.eventDateTimestamp), n.cpuUsage]);
+				
+                        // }
+
+                    });
+                }
+
             })
             // using the fail promise callback
             .fail(function (data) {
@@ -299,31 +352,131 @@ $(function () {
                 
                 console.log("on fail " + JSON.stringify(data));
             });
+			
+			
+			//basicstats
+			 $.ajax({
+            type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
+           // url: '/actors/initialize/dashboard', // the url where we want to POST
+             url: path+'/actors/initialize/dashboard/basicstats',
+            
+            dataType: 'json', // what type of data do we expect back from the server
+            contentType: "application/json",
+            encode: true
+            })
+            // using the done promise callback
+            .done(function (result) {
+			//console.log("SUCCESS:__________________ "+JSON.stringify(result));
+             //get the chart by id
+            var chartBasic = $('#basicstats').highcharts();
+			 
+			 //get the chart by id
+            var chart = $('#heartbeat').highcharts();
+            //get series by id
+            var asr = chart.get('asr');
+            var acd = chart.get('acd');
+            var rtp = chart.get('rtp');
 
+           
+            //get series by id
+            var concurrentCalls = chartBasic.get('concurrentCalls');
+            var failedCalls = chartBasic.get('failedCalls');
 
+              
+			 if (result.payload.length > 0) {
+				$("#concCallsNum").text(result.payload[0].concCallsNum);
+				$("#failedCallsNum").text(result.payload[0].failedCallsNum);
+				$("#acd").text(result.payload[0].acd);
+				$("#asr").text(result.payload[0].asr);
+				$("#rtpQualityAvg").text(result.payload[0].rtpQualityAvg);
 
-	   // dialog properties
-        $("#dialog").dialog({
+                    $.each(result.payload, function (i, n) {
+                        // console.log("Sensor Index: " + i + ", cpu usage: " + n.cpuUsage );
+
+                     
+						// Add points to graphs
+						rtp.addPoint([Date.parse(n.dateTime), n.rtpQualityAvg]);
+						asr.addPoint([Date.parse(n.dateTime), n.asr]);
+						acd.addPoint([Date.parse(n.dateTime), n.acd]);
+						
+						//add points to graph
+						//var milliSeconds = Date.parse(json.dateTime);
+						//console.log("adding basic:"+milliSeconds);
+						concurrentCalls.addPoint([Date.parse(n.dateTime), n.concCallsNum]);
+						failedCalls.addPoint([Date.parse(n.dateTime), n.failedCallsNum]);
+
+                    });
+                }
+
+            })
+            // using the fail promise callback
+            .fail(function (data) {
+                // show any errors
+                // best to remove for production
+                
+                console.log("on fail " + JSON.stringify(data));
+            });
+			
+	  
+		/*
+		//using datatable custo columns
+		$('#asracdstableP').DataTable({
+         "serverSide": true,
+        "ajax": {
+		"url":"http://fs-moni.cloudapp.net:8080/actors/completed/calls/details",
+        "dataSrc": function (json) {
+			//  alert(json);
+			
+			var return_data = new Array();
+                    $.each(json.payload, function (i, n) {
+                       //  console.log("Sensor Index: " + i + ", Sensor Name: " + n.uuid );
+
+                      return_data.push({
+				'readCodec': n.readCodec
+				})
+                    });
+			
+			var return_data = new Array();
+			for(var i=0;i< json.payload.length; i++){
+				return_data.push({
+				'readCodec': json.payload[i].readCodec,
+				'fromUser'  :json.payload[i].fromUser,
+				'eventName' : json.payload[i].eventName
+				})
+			 }
+			//  console.log("return_data: " +JSON.stringify(return_data));
+			 return return_data;
+			}
+		 // "dataSrc": "payload",
+		"columns": [
+            { "data": "readCodec" },
+            { "data": "fromUser" },
+            { "data": "eventName" }
+        ]
+		}
+		});
+		*/
+		 // dialog properties
+         $("#dialog").dialog({
             minWidth: 800,
             maxHeight: 600,
             autoOpen: false,
             modal: true
-        });
+         });
 
-        $("#failedcallsdialog").dialog({
+         $("#failedcallsdialog").dialog({
             minWidth: 900,
             maxHeight: 600,
             autoOpen: false,
             modal: true
-        });
+         });
 		
 		 $("#asracddialog").dialog({
             minWidth: 1000,
             maxHeight: 600,
             autoOpen: false,
             modal: true
-        });
-		
+         });
 
     });
 
@@ -337,8 +490,8 @@ $(function () {
         };
         $.ajax({
             type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
-            url: '/actors/concurrent/calls/details', // the url where we want to POST
-           //  url: 'http://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details', // the url where we want to POST
+           // url: '/actors/concurrent/calls/details', // the url where we want to POST
+             url: path+'/actors/concurrent/calls/details', // the url where we want to POST
            // url: "ws://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details",
             // url: 'http://10.5.50.249:8080/actors/concurrent/calls/details', // the url where we want to POST
             //data: JSON.stringify(formData), // our data object
@@ -413,8 +566,8 @@ $(function () {
         };
         $.ajax({
             type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
-            url: '/actors/failed/calls/details', // the url where we want to POST
-           // url: 'http://fs-moni.cloudapp.net:8080/actors/failed/calls/details', // the url where we want to POST
+          //  url: '/actors/failed/calls/details', // the url where we want to POST
+            url: path+'/actors/failed/calls/details', // the url where we want to POST
             //url: "ws://fs-moni.cloudapp.net:8080/actors/concurrent/calls/details",
             // url: 'http://10.5.50.249:8080/actors/concurrent/calls/details', // the url where we want to POST
             //data: JSON.stringify(formData), // our data object
@@ -455,8 +608,8 @@ $(function () {
         };
         $.ajax({
             type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
-           url: '/actors/completed/calls/details', // the url where we want to POST
-            //url: 'http://fs-moni.cloudapp.net:8080/actors/completed/calls/details', // the url where we want to POST
+           // url: '/actors/completed/calls/details', // the url where we want to POST
+            url: path+'/actors/completed/calls/details', // the url where we want to POST
             dataType: 'json', // what type of data do we expect back from the server
             contentType: "application/json",
             encode: true
