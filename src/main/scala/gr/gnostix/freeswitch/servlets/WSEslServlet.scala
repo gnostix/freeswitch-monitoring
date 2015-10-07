@@ -3,6 +3,7 @@ package gr.gnostix.freeswitch.servlets
 import java.util.Date
 
 import _root_.akka.actor.{ActorRef, ActorSystem}
+import gr.gnostix.api.auth.AuthenticationSupport
 import gr.gnostix.freeswitch.FreeswitchopStack
 import gr.gnostix.freeswitch.actors.ActorsProtocol.{RemoveAtmoClientUuid, AddAtmoClientUuid}
 import org.atmosphere.cpr.{AtmosphereResource, AtmosphereResourceFactory}
@@ -25,7 +26,7 @@ with ScalateSupport
 with JValueResult
 with JacksonJsonSupport
 with SessionSupport
-//with AuthenticationSupport
+with AuthenticationSupport
 with AtmosphereSupport
 with FreeswitchopStack
 with CorsSupport {
@@ -34,7 +35,7 @@ with CorsSupport {
 
   before() {
     contentType = formats("json")
- //   requireLogin()
+    requireLogin()
   }
 
   options("/*") {
@@ -48,7 +49,7 @@ with CorsSupport {
 
   get("/") {
     contentType="text/html"
-    ssp("/index")
+    ssp("/login")
   }
 
   atmosphere("/events") {

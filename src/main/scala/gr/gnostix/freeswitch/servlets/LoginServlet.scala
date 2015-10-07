@@ -48,6 +48,7 @@ with FreeswitchopStack {
 
   post("/logout") {
     //SqlUtils.logUserLogout(user.username, session.getId)
+    requireLogin() //??
     scentry.logout()
   }
 
