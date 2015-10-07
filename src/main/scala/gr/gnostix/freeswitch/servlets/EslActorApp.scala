@@ -38,7 +38,7 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
 
   before() {
     contentType = formats("json")
-    //requireLogin()
+    requireLogin()
   }
 
   options("/*") {

@@ -206,7 +206,7 @@
                 </li>
 
                 <li>
-                    <a href="configuration.html"><i class="fa fa-fw fa-dashboard"></i> Configuration</a>
+                    <a href="configuration.html"><i class="fa fa-fw fa-edit"></i> Setup</a>
                 </li>
             </ul>
         </div>
@@ -259,7 +259,7 @@
                             </div>
                         </div>
                         <a href="#">
-                            <div class="panel-footer">
+                            <div class="panel-footer pop" id="viewFCalls">
                                 <span class="pull-left">View Details</span>
                                 <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                                 <div class="clearfix"></div>
@@ -281,7 +281,7 @@
                             </div>
                         </div>
                         <a href="#">
-                            <div class="panel-footer">
+                            <div class="panel-footer pop" id="viewASR">
                                 <span class="pull-left">View Details</span>
                                 <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                                 <div class="clearfix"></div>
@@ -303,7 +303,7 @@
                             </div>
                         </div>
                         <a href="#">
-                            <div class="panel-footer">
+                             <div class="panel-footer pop" id="viewACD">
                                 <span class="pull-left">View Details</span>
                                 <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                                 <div class="clearfix"></div>
@@ -328,8 +328,8 @@
                         </div>
                         <a href="#">
                             <div class="panel-footer">
-                                <span class="pull-left">View Details</span>
-                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <span class="pull-left"></span>
+                                <span class="pull-right"><i class="fa fa-star"></i></span>
                                 <div class="clearfix"></div>
                             </div>
                         </a>
@@ -350,8 +350,8 @@
                         </div>
                         <a href="#">
                             <div class="panel-footer">
-                                <span class="pull-left">View Details</span>
-                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <span class="pull-left"></span>
+                                <span class="pull-right"><i class="fa fa-clock-o"></i></span>
                                 <div class="clearfix"></div>
                             </div>
                         </a>
@@ -372,8 +372,8 @@
                         </div>
                         <a href="#">
                             <div class="panel-footer">
-                                <span class="pull-left">View Details</span>
-                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <span class="pull-left"></span>
+                                <span class="pull-right"><i class="fa fa-users"></i></span>
                                 <div class="clearfix"></div>
                             </div>
                         </a>
@@ -394,8 +394,8 @@
                         </div>
                         <a href="#">
                             <div class="panel-footer">
-                                <span class="pull-left">View Details</span>
-                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <span class="pull-left"></span>
+                                <span class="pull-right"><i class="fa fa-building"></i></span>
                                 <div class="clearfix"></div>
                             </div>
                         </a>
@@ -424,7 +424,7 @@
 	
 	 <!-- Footer -->
     <div id="loginFooter" class="loginFooter footer clearfix ">
-        <div class="pull-left">&copy; 2015. Freeswitch monitoring by <a href="http://www.gnostix.eu" target="_blank">Gnostix</a></div>
+        <div class="pull-left">&copy; 2015. Freeswitch monitoring</div>
 
     </div>
     <!-- /footer -->
@@ -434,89 +434,66 @@
 
 <!-- /#wrapper -->
  <div class="container-fluid">
- <div title="Details" id="dialog" class="table-responsive dialog">
-                            <table class="table table-bordered table-hover table-striped" id="example">
+ <div title="Concurrent calls details" id="dialog" class="table-responsive dialog dialogFrame">
+                            <table class="table table-striped display compact" cellspacing="0"  id="example">
                                 <thead>
                                     <tr>
-                                        <th>Page</th>
-                                        <th>Visits</th>
-                                        <th>% New Visits</th>
-                                        <th>Revenue</th>
-                                    </tr>
+                                        <th>From user</th>
+                                        <th>To user</th>
+										<th>From User IP</th>
+										<th>To User IP</th>
+										<th>Answered Time</th>
+										<th>Hostname</th>
+                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>/index.html</td>
-                                        <td>1265</td>
-                                        <td>32.3%</td>
-                                        <td>$321.33</td>
-                                    </tr>
-                                     <tr>
-                                        <td>/index.html</td>
-                                        <td>1265</td>
-                                        <td>32.3%</td>
-                                        <td>$321.33</td>
-                                    </tr>
-									 <tr>
-                                        <td>/index.html</td>
-                                        <td>1265</td>
-                                        <td>32.3%</td>
-                                        <td>$321.33</td>
-                                    </tr>
-									 <tr>
-                                        <td>/index.html</td>
-                                        <td>1265</td>
-                                        <td>32.3%</td>
-                                        <td>$321.33</td>
-                                    </tr>
-									 <tr>
-                                        <td>/index.html</td>
-                                        <td>1265</td>
-                                        <td>32.3%</td>
-                                        <td>$321.33</td>
-                                    </tr>
-									<tr>
-                                        <td>/about.html</td>
-                                        <td>261</td>
-                                        <td>33.3%</td>
-                                        <td>$234.12</td>
-                                    </tr>
-                                    <tr>
-                                        <td>/sales.html</td>
-                                        <td>665</td>
-                                        <td>21.3%</td>
-                                        <td>$16.34</td>
-                                    </tr>
-                                    <tr>
-                                        <td>/blog.html</td>
-                                        <td>9516</td>
-                                        <td>89.3%</td>
-                                        <td>$1644.43</td>
-                                    </tr>
-                                    <tr>
-                                        <td>/404.html</td>
-                                        <td>23</td>
-                                        <td>34.3%</td>
-                                        <td>$23.52</td>
-                                    </tr>
-                                    <tr>
-                                        <td>/services.html</td>
-                                        <td>421</td>
-                                        <td>60.3%</td>
-                                        <td>$724.32</td>
-                                    </tr>
-                                    <tr>
-                                        <td>/blog/post.html</td>
-                                        <td>1233</td>
-                                        <td>93.2%</td>
-                                        <td>$126.34</td>
-                                    </tr>
+                                <tbody class="rows">
+                                  
                                 </tbody>
                             </table>
-                        </div>
+</div>
 
+<div title="Failed calls details" id="failedcallsdialog" class="table-responsive dialog dialogFrame">
+                            <table class="table table-striped display compact" cellspacing="0"  id="failedcallstable">
+                                <thead>
+                                    <tr>
+                                        <th>From user</th>
+                                        <th>To user</th>
+										<th>From User IP</th>
+										<th>Hangup Time</th>
+										<th>Hangup Cause</th>
+										<th>Hostname</th>
+                                     </tr>
+                                </thead>
+                                <tbody class="rows">
+                                  
+                                </tbody>
+                            </table>
+</div>
 
-
+<div title="ASR/ACD details" id="asracddialog" class="table-responsive dialog dialogFrame">
+                            <table class="table table-striped display compact" cellspacing="0"  id="asracdstable">
+                                <thead>
+                                    <tr>
+                                        <th>From user</th>
+                                        <th>To user</th>
+										<th>Read Codec</th>
+										<th>Write Codec</th>
+										<th>From User IP</th>
+										<th>To User IP</th>
+										<th>Caller Channel Answered Time</th>
+										<th>Caller Channel Hangup Time</th>
+										<th>Free SWITCH Hostname</th>
+										<th>FreeSWITCH IPv4</th>
+										<th>Hangup Cause</th>
+										<th>BillSec</th>
+										<th>RTP Quality %</th>
+                                     </tr>
+                                </thead>
+                                <tbody class="rows">
+                                  
+                                </tbody>
+                            </table>
+</div>
  <!-- jQuery -->
  <script src="js/jquery-1.9.0.js"></script>
 
@@ -544,27 +521,7 @@
 <!--datatble-->
 <script src="https://cdn.datatables.net/1.10.9/js/jquery.dataTables.min.js"></script>
 
-   
-<script>
-	$('#viewCCalls').click(function() {
-    $('#dialog').dialog('open');
-
-});
-
-
-
-jQuery(document).ready(function() {
- $('#example').DataTable();
-   $("#dialog").dialog({
-             minWidth: 700,
-			 maxHeight: 500,
-             autoOpen: false,
-			 modal:true
-           }); 
-}); 
  
-
-</script>
  
 </body>
 

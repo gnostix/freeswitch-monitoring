@@ -51,7 +51,7 @@ The application will try to connect to default hostname fs-instance.com and pass
 
 ### Demo live
 
-This is [FS-Moni](http://fs-moni.cloudapp.net:8080 "FS-Moni") demo app link.
+This is [FS-Moni](http://fs-moni.cloudapp.net:8080 "FS-Moni") demo app link. For login use credentials **user: admin** and **password: admin**
 
 ### Basic events arriving in the web socket
 

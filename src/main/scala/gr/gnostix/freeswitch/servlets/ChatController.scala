@@ -2,6 +2,7 @@ package org.scalatra.example.atmosphere
 
 import java.util.Date
 
+import gr.gnostix.api.auth.AuthenticationSupport
 import org.json4s.JsonDSL._
 import org.json4s.{JValue, DefaultFormats, Formats}
 import org.scalatra.atmosphere._
@@ -15,12 +16,15 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class ChatController extends ScalatraServlet 
   with ScalateSupport with JValueResult 
   with JacksonJsonSupport with SessionSupport
-  with AtmosphereSupport {
+  with AtmosphereSupport with AuthenticationSupport {
 
   implicit protected val jsonFormats: Formats = DefaultFormats
  // protected implicit lazy val jsonFormats: Formats = DefaultFormats
 
-
+  before() {
+    contentType = formats("json")
+    requireLogin()
+  }
 
 
   atmosphere("/") {
