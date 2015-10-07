@@ -28,6 +28,7 @@ with CorsSupport with FreeswitchopStack with AuthenticationSupport
 
   before() {
     contentType = formats("json")
+    requireLogin()
   }
 
   options("/*") {
