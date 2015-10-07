@@ -142,6 +142,11 @@ class CallActor extends Actor with ActorLogging {
           }
           context become idle(updatedActiveChannels)*/
 
+
+      // IF THE CALL IS OLDER THAN 6 HOURS THEN WE SHULD SEND IT IN THE COMPLETED CALLS
+      // THIS IS FOR THE CASES OF FREESWITCH RESTART WHEN WE ARE LEFT  WITH UNCOMPLETED CALLS..
+
+
     case x@_ =>
       log.info("---- call actor - I don't know this channel uuid " + x)
   }

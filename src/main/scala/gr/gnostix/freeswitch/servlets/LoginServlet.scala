@@ -6,7 +6,7 @@ import org.json4s.{JValue, Formats, DefaultFormats}
 import org.scalatra.{ScalatraServlet, CorsSupport}
 import org.scalatra.json.JacksonJsonSupport
 
-class CentralServlet
+class LoginServlet
 extends ScalatraServlet
 with JacksonJsonSupport
 with AuthenticationSupport
@@ -26,6 +26,8 @@ with FreeswitchopStack {
   }
 
   post("/login") {
+    logger.error("--------------> /login: wewewewewewewe: ")
+
     scentry.authenticate()
     if (isAuthenticated) {
       logger.info("--------------> /login: successful Id: " + user.userId)

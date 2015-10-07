@@ -12,11 +12,19 @@ object UserDao {
   val logger = LoggerFactory.getLogger(getClass)
 
   def getUserByUsername(username: String): Option[User] = {
-    Some(User(1, "alex", "1234"))
+    if (username == "admin"){
+      Some(User(1, "admin", "admin"))
+    } else {
+      None
+    }
   }
 
   def getUserById(userId: Int): Option[User] = {
-    Some(User(1, "alex", "1234"))
+    if (userId == 1){
+      Some(User(1, "admin", "admin"))
+    } else {
+      None
+    }
   }
 
 }
