@@ -54,6 +54,10 @@ $(document).ready ( function(){
                 // show any errors
                 // best to remove for production
                 console.log("on fail " + JSON.stringify(data));
+				if(data.status===401){
+					//alert(JSON.stringify(data));
+					window.location = "index.html";
+				}
             });
 			
 			
@@ -128,7 +132,11 @@ $(document).ready ( function(){
                     // best to remove for production
                     console.log("on fail " + JSON.stringify(data));
                     $( ".inputRes" ).replaceWith( data.message );
-                    $("#message").toggleClass('alert-info alert-success');
+                    $("#message").toggleClass('alert-info alert-danger');
+					if(data.status===401){
+					//alert(JSON.stringify(data));
+					window.location = "index.html";
+					}
                 });
 
             // stop the form from submitting the normal way and refreshing the page
@@ -192,6 +200,10 @@ function delete_user(ip)
             // show any errors
             // best to remove for production
             console.log("on fail " + JSON.stringify(data));
+			if(data.status===401){
+					//alert(JSON.stringify(data));
+					window.location = "index.html";
+			}
         });
 
 

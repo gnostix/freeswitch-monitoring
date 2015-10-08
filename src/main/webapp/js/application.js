@@ -22,8 +22,8 @@ $(function () {
 
     var request = {
 
-      //  url: "ws://fs-moni.cloudapp.net:8080/fs-moni/live/events",
-        url: "/fs-moni/live/events",
+       // url: "ws://fs-moni.cloudapp.net:8080/fs-moni/live/events",
+       url: "/fs-moni/live/events",
         //url: "the-chat",
         contentType: "application/json",
         logLevel: 'debug',
@@ -351,6 +351,10 @@ $(function () {
                 // best to remove for production
                 
                 console.log("on fail " + JSON.stringify(data));
+				if(data.status===401){
+					//alert(JSON.stringify(data));
+					window.location = "index.html";
+				}
             });
 			
 			
@@ -416,6 +420,10 @@ $(function () {
                 // best to remove for production
                 
                 console.log("on fail " + JSON.stringify(data));
+				if(data.status===401){
+					//alert(JSON.stringify(data));
+					window.location = "index.html";
+				}
             });
 			
 	  
@@ -552,6 +560,10 @@ $(function () {
                 // best to remove for production
                 pop = "JSON.stringify(data)";
                 console.log("on fail " + JSON.stringify(data));
+				if(data.status===401){
+					//alert(JSON.stringify(data));
+					window.location = "index.html";
+				}
             });
 
 
@@ -595,6 +607,10 @@ $(function () {
                 // best to remove for production
                 pop = "JSON.stringify(data)";
                 console.log("on fail " + JSON.stringify(data));
+				if(data.status===401){
+					//alert(JSON.stringify(data));
+					window.location = "index.html";
+				}
             });
 
 
@@ -640,6 +656,10 @@ $(function () {
                 // best to remove for production
                 pop = "JSON.stringify(data)";
                 console.log("on fail " + JSON.stringify(data));
+				if(data.status===401){
+					//alert(JSON.stringify(data));
+					window.location = "index.html";
+				}
             });
 
 
