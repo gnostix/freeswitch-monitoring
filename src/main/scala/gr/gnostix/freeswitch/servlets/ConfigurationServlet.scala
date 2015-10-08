@@ -4,16 +4,19 @@ import akka.actor.{ActorRef, ActorSystem}
 import gr.gnostix.api.auth.AuthenticationSupport
 import gr.gnostix.freeswitch.FreeswitchopStack
 import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetEslConnections, EslConnectionData, DelEslConnection}
+import gr.gnostix.freeswitch.actors.HeartBeat
+import gr.gnostix.freeswitch.actors.ServletProtocol.{ApiReply, ApiReplyData}
+
 // JSON-related libraries
 import org.json4s.{DefaultFormats, Formats}
 
 // JSON handling support from Scalatra
 import org.scalatra.json._
 
-import org.scalatra.{CorsSupport, FutureSupport, ScalatraServlet}
+import org.scalatra.{AsyncResult, CorsSupport, FutureSupport, ScalatraServlet}
 import akka.pattern.ask
 import akka.util.Timeout
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{Future, ExecutionContext}
 import scala.concurrent.duration._
 import scala.language.postfixOps
 /**
@@ -43,16 +46,40 @@ with CorsSupport with FreeswitchopStack with AuthenticationSupport
   post("/fs-node/conn-data"){
     log("------------- entering the configuration servlet ---------------- " + parsedBody )
     val eslConnectionData = parsedBody.extract[EslConnectionData]
-    myActor ? eslConnectionData
+    val data: Future[ApiReply] = (myActor ? eslConnectionData).mapTo[ApiReply]
+
+    new AsyncResult {
+      val is =
+        for {
+          dt <- data
+        } yield dt
+
+    }
   }
 
   delete("/fs-node/conn-data"){
     val delEslConnection = parsedBody.extract[DelEslConnection]
-    myActor ? delEslConnection
+    val data: Future[ApiReply] = (myActor ? delEslConnection).mapTo[ApiReply]
+
+    new AsyncResult {
+      val is =
+        for {
+          dt <- data
+        } yield dt
+
+    }
   }
 
   get("/fs-node/conn-data"){
-    myActor ? GetEslConnections
+    val data: Future[List[EslConnectionData]] = (myActor ? GetEslConnections).mapTo[List[EslConnectionData]]
+
+    new AsyncResult {
+      val is =
+        for {
+          dt <- data
+        } yield ApiReplyData(200, "All good ",dt)
+
+    }
   }
 
   error {

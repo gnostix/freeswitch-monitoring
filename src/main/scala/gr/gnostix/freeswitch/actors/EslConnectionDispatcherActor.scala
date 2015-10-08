@@ -35,7 +35,7 @@ class EslConnectionDispatcherActor(wSLiveEventsActor: ActorRef) extends Actor wi
           log info s"----> shutdown connection with connections: $newMap"
           actorConnections = newMap
           context become idle(newMap)
-          sender ! ApiReply(200, "connection terminated")
+          sender ! "connection terminated"
 
 
           case None => sender ! ApiReply(400, "this ip doesn't exists")
@@ -53,8 +53,8 @@ class EslConnectionDispatcherActor(wSLiveEventsActor: ActorRef) extends Actor wi
           connStatus.isConnected match {
             case true =>
               log info "----> connection succeded "
-              val resp = ApiReply(200, "Connection Ok")
-              wSLiveEventsActor ! resp
+              val resp = ApiReply(200, "Connection is up")
+              //wSLiveEventsActor ! resp
               //wSLiveEventsActor ! ActorsJsonProtocol.caseClassToJsonMessage(resp)
               sender ! resp
 
