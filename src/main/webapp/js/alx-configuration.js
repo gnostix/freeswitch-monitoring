@@ -22,12 +22,12 @@ $(document).ready ( function(){
                 //console.log("on success get connections json" + JSON.stringify(data));
 				 
 					//table.clear().draw();
-					if (data.length > 0) {
+					if (data.payload.length > 0) {
 						//var table = $('#table').DataTable();
-						console.log("LENGTH:"+data.length);
+						console.log("LENGTH:"+data.payload.length);
 					    $("#tableRow").show();
 
-                    $.each(data, function (i, n) {
+                    $.each(data.payload, function (i, n) {
                          console.log("Sensor Index: " + i + ", Sensor Name: " + n.ip );
 
                        
@@ -146,7 +146,7 @@ $(document).ready ( function(){
    // });
 
 
-});
+
 
 $('#table tbody').on( 'click', 'button', function() {
    // alert("The paragraph was tbody.");
@@ -209,3 +209,5 @@ function delete_user(ip)
 
 
 }
+
+});
