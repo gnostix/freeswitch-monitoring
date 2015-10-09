@@ -20,12 +20,13 @@ $(document).ready ( function(){
             .done(function (data) {
                 // log data to the console so we can see
                 //console.log("on success get connections json" + JSON.stringify(data));
-				 
+				 console.log("LENGTH:"+data.payload.length);
+					   console.log("payload:"+data.payload);
+					   
 					//table.clear().draw();
 					if (data.payload.length > 0) {
 						//var table = $('#table').DataTable();
-						console.log("LENGTH:"+data.payload.length);
-					    $("#tableRow").show();
+						 $("#tableRow").show();
 
                     $.each(data.payload, function (i, n) {
                          console.log("Sensor Index: " + i + ", Sensor Name: " + n.ip );
