@@ -25,7 +25,14 @@
 	<link href="https://cdn.datatables.net/1.10.9/css/jquery.dataTables.min.css" rel="stylesheet" >
 	
 	 <link href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css">
-	
+	 
+	 <!-- jQuery UI styles for uploading-->
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/dark-hive/jquery-ui.css" id="theme">
+
+<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+<link rel="stylesheet" href="css/upload/jquery.fileupload.css">
+<!--end uplaoding styles -->	
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -218,24 +225,40 @@
                         <i id="responseInput" class="fa fa-info-circle"></i>  <strong class="inputRes">Please enter connection credentials</strong></div>
 					</div>
 				  </div>
+				  
+				  <!-- The fileinput-button span is used to style the file input field as button -->
+		<span class="btn btn-success fileinput-button">
+			<i class="glyphicon glyphicon-plus"></i>
+        <span>Select files...</span>
+        <!-- The file input field used as target for the file upload widget -->
+        <input id="fileupload" type="file" name="filename">
+    </span>
+    <br>
+    <br>
+    <!-- The global progress bar -->
+    <div id="progress" class="progress">
+        <div class="progress-bar progress-bar-success"></div>
+    </div>
+    <!-- The container for the uploaded files -->
+    <div id="files" class="files"></div>
 			       
 				  <form role="form">
 				 <div class="row">
                     <div class="col-lg-4 text-center">
-                         <div class="panel panel-default">
-                                <input type="text" class="form-control" id="eslIPAddress" placeholder="IP Address">
+                         <div class="form-group has-feedback">
+                                <input type="text" class="form-control ghost-btn btn-white" id="eslIPAddress" placeholder="IP Address">
 						 </div>   
                         
                     </div>
                     <div class="col-lg-4 text-center">
-                        <div class="panel panel-default">
-                              <input type="number" class="form-control" id="eslPort" placeholder="Port">
+                        <div class="form-group has-feedback">
+                              <input type="number" class="form-control ghost-btn btn-white" id="eslPort" placeholder="Port">
                            
                         </div>
                     </div>
                     <div class="col-lg-4 text-center">
-                        <div class="panel panel-default">
-                           <input type="password" class="form-control" id="eslPassword" placeholder="Password">
+                        <div class="form-group has-feedback">
+                           <input type="password" class="form-control ghost-btn btn-white" id="eslPassword" placeholder="Password">
                          
                         </div>
                     </div>
@@ -299,7 +322,8 @@
  <!-- jQuery -->
  <script src="js/jquery-1.9.0.js"></script>
 
-    <script src="js/jquery.js"></script>
+  <!--  <script src="js/jquery.js"></script> -->
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 	<!-- Bootstrap Core JavaScript -->
 <script src="js/bootstrap.min.js"></script>
 
@@ -314,8 +338,38 @@
 <script src="https://cdn.datatables.net/1.10.9/js/jquery.dataTables.min.js"></script>
 <script src="js/alx-configuration.js"></script>
 
-
-
+<!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
+<script src="js/plugins/upload/vendor/jquery.ui.widget.js"></script>
+<!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+<script src="js/plugins/upload/jquery.iframe-transport.js"></script>
+<!-- The basic File Upload plugin -->
+<script src="js/plugins/upload/jquery.fileupload.js"></script>
+<script>
+/*jslint unparam: true */
+/*global window, $ */
+$(function () {
+    'use strict';
+    // Change this to the location of your server-side upload handler:
+    var url = '/configuration/dialcodes';
+    $('#fileupload').fileupload({
+        url: url,
+        dataType: 'json',
+        done: function (e, data) {
+            $.each(data.result.files, function (index, file) {
+                $('<p/>').text(file.name).appendTo('#files');
+            });
+        },
+        progressall: function (e, data) {
+            var progress = parseInt(data.loaded / data.total * 100, 10);
+            $('#progress .progress-bar').css(
+                'width',
+                progress + '%'
+            );
+        }
+    }).prop('disabled', !$.support.fileInput)
+        .parent().addClass($.support.fileInput ? undefined : 'disabled');
+});
+</script>
 </body>
 
 </html>

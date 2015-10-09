@@ -381,8 +381,8 @@ background: rgba(255, 255, 255, 0.9) !important;
 }
 
 .jumbotron {
-background-color: rgba(255, 255, 255, 0.1) !important;
-background: rgba(255, 255, 255, 0.1) !important;
+background-color: rgba(255, 255, 255, 0.2) !important;
+background: rgba(255, 255, 255, 0.2) !important;
 }
 
 #tablePanel {
@@ -402,4 +402,8 @@ input:-webkit-autofill:active {
     -webkit-text-fill-color: rgba(255, 255, 255, 0.9) !important;
 	 border-color: rgba(255, 255, 255, 0.9);
 	
+}
+
+.progress {
+background-color: transparent;
 }

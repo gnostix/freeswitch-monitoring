@@ -49,7 +49,7 @@ with CorsSupport with FreeswitchopStack with AuthenticationSupport
 
   post("/dialcodes"){
     log info " ----> entering dialcodes ..."
-    fileParams.get("dialcodesFile") match {
+    fileParams.get("filename") match {
       case Some(file) =>
         /*Ok(file.get(), Map(
           "Content-Type"        -> (file.contentType.getOrElse("application/octet-stream")),
