@@ -6,6 +6,8 @@ import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
 import akka.pattern.{ask, pipe}
 import akka.util.Timeout
+import gr.gnostix.freeswitch.actors.ActorsProtocol.GetACDAndRTPByCountry
+import gr.gnostix.freeswitch.model.{CompletedCallStatsByCountry, CompletedCallStats}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -19,8 +21,8 @@ case class HangupActor(hangupTime: Timestamp, callActor: ActorRef)
 
 class CompletedCallsActor extends Actor with ActorLogging {
 
-  import gr.gnostix.freeswitch.actors.ActorsProtocol._
   import context.dispatcher
+  import gr.gnostix.freeswitch.actors.ActorsProtocol._
 
   val Tick = "tick"
   implicit val timeout = Timeout(1 seconds) // needed for `?` below
@@ -37,8 +39,8 @@ class CompletedCallsActor extends Actor with ActorLogging {
       context become idle(newMap)
 
     case x @ GetCompletedCallsChannel =>
-      val f: List[Future[CallEnd]] = completedCalls.map{
-        case (a,y) => (y.callActor ? x).mapTo[CallEnd]
+      val f: List[Future[Option[CallEnd]]] = completedCalls.map{
+        case (a,y) => (y.callActor ? x).mapTo[Option[CallEnd]]
       }.toList
 
       Future.sequence(f) pipeTo sender
@@ -67,6 +69,20 @@ class CompletedCallsActor extends Actor with ActorLogging {
         case false =>
           val f: List[Future[CompletedCallStats]] = completedCalls.map{
             case (x,y) => (y.callActor ? GetACDAndRTP).mapTo[CompletedCallStats]
+          }.toList
+
+          //log info s"Completed calls Actor GetACDAndRTPForLast60Seconds , asking all call actors" + Future.sequence(f)
+          Future.sequence(f) pipeTo sender
+      }
+
+    case x@GetACDAndRTPByCountry =>
+      completedCalls.isEmpty match {
+        case true =>
+          //log info s"Completed calls Actor GetACDAndRTPForLast60Seconds | NO completedCalls: " + completedCalls
+          sender ! List()
+        case false =>
+          val f: List[Future[Option[CompletedCallStatsByCountry]]] = completedCalls.map{
+            case (x,y) => (y.callActor ? GetACDAndRTPByCountry).mapTo[Option[CompletedCallStatsByCountry]]
           }.toList
 
           //log info s"Completed calls Actor GetACDAndRTPForLast60Seconds , asking all call actors" + Future.sequence(f)

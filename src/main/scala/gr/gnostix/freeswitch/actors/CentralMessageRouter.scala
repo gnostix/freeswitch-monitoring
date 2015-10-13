@@ -3,12 +3,16 @@ package gr.gnostix.freeswitch.actors
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor.{Props, OneForOneStrategy, Actor, ActorLogging}
 import gr.gnostix.freeswitch.actors.ActorsProtocol._
+import gr.gnostix.freeswitch.actors.ServletProtocol.{ApiReplyError, ApiReplyData}
+import gr.gnostix.freeswitch.utilities.FileUtilities
 import org.scalatra.atmosphere.AtmosphereClient
+
+import scala.collection.SortedMap
 
 /**
  * Created by rebel on 23/8/15.
  */
-class CentralMessageRouter extends Actor with ActorLogging {
+class CentralMessageRouter(dialCodes: Map[String, SortedMap[String, String]]) extends Actor with ActorLogging {
 
   override val supervisorStrategy =
     OneForOneStrategy() {
@@ -22,6 +26,19 @@ class CentralMessageRouter extends Actor with ActorLogging {
   val eslConnectionDispatcherActor = context.actorOf(Props(new EslConnectionDispatcherActor(wsLiveEventsActor)), "eslConnectionDispatcherActor")
   val callRouterActor = context.actorOf(Props(new CallRouter(wsLiveEventsActor, completedCallsActor)), "callRouter")
   val basicStatsActor = context.actorOf(Props(new BasicStatsActor(callRouterActor, completedCallsActor, wsLiveEventsActor)), "basicStatsActor")
+
+  val dialCodesFile = FileUtilities.processResourcesCsvFile()
+  val dialCodesActor = dialCodesFile match {
+      case x: ApiReplyData =>
+        context.actorOf(Props(new DialCodesActor(x.payload.asInstanceOf[Map[String, SortedMap[String, String]]])), "dialCodesActor")
+      case x: ApiReplyError =>
+        wsLiveEventsActor ! x.message
+        context.actorOf(Props(new DialCodesActor(Map("default" -> scala.collection.SortedMap.empty[String, String]))), "dialCodesActor")
+      case _ =>
+        log warning "we don't understand the reply back from dial codes actor when trying to upload a file"
+        context.actorOf(Props(new DialCodesActor(Map("default" -> scala.collection.SortedMap.empty[String, String]))), "dialCodesActor")
+    }
+
 
   // start the first connection
   // eslConnectionDispatcherActor ! EslConnectionData("localhost", 8021, "ClueCon")
@@ -58,6 +75,9 @@ class CentralMessageRouter extends Actor with ActorLogging {
       eslConnectionDispatcherActor forward x
 
     case x@GetCompletedCalls =>
+      completedCallsActor forward x
+
+    case x@GetACDAndRTPByCountry =>
       completedCallsActor forward x
 
     case x@(GetLastHeartBeat | GetAllHeartBeat) =>
@@ -105,6 +125,18 @@ class CentralMessageRouter extends Actor with ActorLogging {
     case x@RemoveAtmoClientUuid(uuid) =>
       //log info "central actor received  RemoveAtmoClientUuid(uuid)"
       wsLiveEventsActor ! x
+
+    case x @ GetDialCodeList(fileName) =>
+      dialCodesActor forward x
+
+    case x @ DelDialCodeList(fileName) =>
+      dialCodesActor forward x
+
+    case x @ AddDialCodeList(filename, dialCodesS) =>
+      dialCodesActor forward x
+
+    case x @ GetAllDialCodeList =>
+      dialCodesActor forward x
 
     case x => log warning "I don't get this message!! " + x.toString
   }

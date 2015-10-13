@@ -22,7 +22,7 @@ class FailedCallsActor(wsLiveEventsActor: ActorRef) extends Actor with ActorLogg
     case x @ CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
     callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
     freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId, hangupDisposition, callDirection, mos,
-    pdd, ringTimeSec) =>
+    pdd, ringTimeSec, None, None) =>
 
     // the case where we get two FAILED call leg for the same call
     //{"eventName":"FAILED_CALL","fromUser":"0000000000","toUser":"19189898989","callUUID":"8315d80c-c404-4bcb-8612-94edb9863765","freeSWITCHIPv4":"10.143.0.54"}

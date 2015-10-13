@@ -10,6 +10,8 @@ import gr.gnostix.freeswitch.FreeswitchopStack
 import gr.gnostix.freeswitch.actors.ActorsProtocol._
 import gr.gnostix.freeswitch.actors.{BasicStatsTimeSeries, HeartBeat, CallEnd, CallNew}
 import gr.gnostix.freeswitch.actors.ServletProtocol.{ApiReply, ApiReplyData}
+import gr.gnostix.freeswitch.model.CompletedCallStatsByCountry
+import gr.gnostix.freeswitch.utilities.HelperFunctions
 import org.joda.time.DateTime
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json.JacksonJsonSupport
@@ -123,6 +125,21 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
 
     }
   }
+
+  //GetACDAndRTPByCountry
+  get("/completed/calls/country/acdrtp"){
+    val data: Future[List[Option[CompletedCallStatsByCountry]]] =
+      (myActor ? GetACDAndRTPByCountry).mapTo[List[Option[CompletedCallStatsByCountry]]]
+
+    new AsyncResult {
+      val is =
+        for {
+          dt <- data
+        } yield ApiReplyData(200,"all good", HelperFunctions.sortAcdByCountry(dt))
+
+    }
+  }
+
 
   get("/GetFailedCalls"){
     myActor ? GetFailedCalls

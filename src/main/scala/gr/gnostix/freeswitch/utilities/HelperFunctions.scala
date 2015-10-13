@@ -1,5 +1,7 @@
 package gr.gnostix.freeswitch.utilities
 
+import gr.gnostix.freeswitch.model.{CompletedCallStatsByCountryAcdRtpQuality, CompletedCallStatsByCountry}
+
 import scala.util.Random
 
 /**
@@ -7,6 +9,13 @@ import scala.util.Random
  */
 object HelperFunctions {
 
+  def sortAcdByCountry(li: List[Option[CompletedCallStatsByCountry]]) ={
+    li.flatten.groupBy(_.country).map{
+      case (c,v) =>
+        CompletedCallStatsByCountryAcdRtpQuality(c.get, v.head.prefix.get, v.map(_.acd).sum / v.size,
+          v.map(_.rtpQuality).sum / v.size, v.size)
+    }
+  }.toList
 
   def randomAlphaNumericString(length: Int): String = {
     val chars = ('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')

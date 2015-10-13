@@ -27,18 +27,20 @@ class EslEventRouter extends Actor with ActorLogging {
 
       getCallEventType(headers) match {
         case x @ CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
-        callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4, callDirection, pdd, ringTimeSec)
+        callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4, callDirection,
+        pdd, ringTimeSec, None, None)
           if callUUID != "_UNKNOWN" =>
           callRouterActor ! x
 
         case x@CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
-        callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4, callDirection, pdd, ringTimeSec) =>
+        callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4, callDirection,
+        pdd, ringTimeSec, None, None) =>
           log info "_UNKNOWN" + x.toString
 
         case x @ CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
         callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
         freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId, hangupDisposition, callDirection, mos,
-        pdd, ringTimeSec)
+        pdd, ringTimeSec, None, None)
           if x.callUUID != "_UNKNOWN" =>
           log info "-----> " + x.toString
           callRouterActor ! x
@@ -46,7 +48,7 @@ class EslEventRouter extends Actor with ActorLogging {
         case x@CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
         callerChannelCreatedTime, callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname,
         freeSWITCHIPv4, hangupCause, billSec, rtpQualityPerc, otherLegUniqueId, hangupDisposition, callDirection, mos,
-        pdd, ringTimeSec) =>
+        pdd, ringTimeSec, None, None) =>
           log info s"no uuid $uuid" + x.toString
 
         case x @ HeartBeat(eventType, eventInfo, uptimeMsec, sessionCount, sessionPerSecond, eventDateTimestamp,
@@ -145,7 +147,7 @@ class EslEventRouter extends Actor with ActorLogging {
 
         CallNew(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID,
           callerChannelCreatedTime, callerChannelAnsweredTime, freeSWITCHHostname, freeSWITCHIPv4,
-          callDirection, pdd, ringTimeSec)
+          callDirection, pdd, ringTimeSec, None, None)
 
       case "CHANNEL_HANGUP_COMPLETE" =>
         val otherLegUniqueId = headers get "Other-Leg-Unique-ID" getOrElse "_UNKNOWN"
@@ -163,7 +165,7 @@ class EslEventRouter extends Actor with ActorLogging {
         CallEnd(uuid, eventName, fromUser, toUser, readCodec, writeCodec, fromUserIP, toUserIP, callUUID, callerChannelCreatedTime,
           callerChannelAnsweredTime, callerChannelHangupTime, freeSWITCHHostname, freeSWITCHIPv4, hangupCause,
           billSec.toInt, rtpQualityPerc.toDouble, otherLegUniqueId, hangupDisposition, callDirection, mos.toDouble,
-          pdd, ringTimeSec)
+          pdd, ringTimeSec, None, None)
 
     }
 

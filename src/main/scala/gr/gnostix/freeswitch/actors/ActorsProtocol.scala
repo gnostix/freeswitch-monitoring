@@ -7,6 +7,8 @@ import scala.collection.JavaConverters._
 
 import org.freeswitch.esl.client.transport.event.EslEvent
 
+import scala.collection.SortedMap
+
 /**
  * Created by rebel on 23/8/15.
  */
@@ -83,9 +85,23 @@ object ActorsProtocol {
 
   case object GetACDAndRTP extends RouterRequest
 
+  case object GetACDAndRTPByCountry extends RouterRequest
+
   case class GetACDAndRTPByTime(lastCheck: Timestamp) extends RouterRequest
 
   case class AcdData(acd: Double) extends RouterResponse
+
+  case class GetNumberDialCode(number: String) extends RouterRequest
+
+  case class NumberDialCodeCountry(prefix: Option[String], country: Option[String]) extends RouterResponse
+
+  case class AddDialCodeList(fileName: String, dialCodes: SortedMap[String, String]) extends RouterRequest
+
+  case class DelDialCodeList(fileName: String) extends RouterRequest
+
+  case class GetDialCodeList(fileName: String) extends RouterRequest
+
+  case object GetAllDialCodeList extends RouterRequest
 
   case class AddAtmoClientUuid(uuid: String)
 
@@ -106,6 +122,7 @@ object ServletProtocol {
   sealed trait ApiResponse extends ApiProtocol
 
   case class ApiReply(status: Int, message: String) extends  ApiResponse
+  case class ApiReplyError(status: Int, message: String) extends  ApiResponse
   case class ApiReplyData(status: Int, message: String, payload: Any) extends  ApiResponse
 
 }

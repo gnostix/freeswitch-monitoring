@@ -35,7 +35,7 @@ class EslConnectionDispatcherActor(wSLiveEventsActor: ActorRef) extends Actor wi
           log info s"----> shutdown connection with connections: $newMap"
           actorConnections = newMap
           context become idle(newMap)
-          sender ! "connection terminated"
+          sender ! ApiReply(200,"connection terminated")
 
 
           case None => sender ! ApiReply(400, "this ip doesn't exists")

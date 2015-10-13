@@ -79,24 +79,25 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
     }
   }
 
-  val newChannelDiffCallIdA1 = CallNew("the-uuid-channel-a-1", "CHANNEL_ANSWER", "5003", "5004", "GSM", "GSM",
+  val newChannelDiffCallIdA1 = CallNew("the-uuid-channel-a-1", "CHANNEL_ANSWER", "5003", "00305004", "GSM", "GSM",
     "192.168.100.101", "192.168.100.102", "the-uuid-channel-a-1", Some(new Timestamp(System.currentTimeMillis())),
-    Some(new Timestamp(System.currentTimeMillis())), "Alex-Freeswitch", "10.10.10.10", "OUTBOUND", 2, 3)
+    Some(new Timestamp(System.currentTimeMillis())), "Alex-Freeswitch", "10.10.10.10", "OUTBOUND", 2, 3,Some("0030"), Some("Greece"))
 
-  val newChannelDiffCallIdA2 = CallNew("the-uuid-channel-a-2", "CHANNEL_ANSWER", "5003", "5004", "GSM", "GSM",
+  val newChannelDiffCallIdA2 = CallNew("the-uuid-channel-a-2", "CHANNEL_ANSWER", "00305003", "5004", "GSM", "GSM",
     "192.168.100.101", "192.168.100.102", "the-uuid-channel-a-1", Some(new Timestamp(System.currentTimeMillis())),
-    Some(new Timestamp(System.currentTimeMillis())), "Alex-Freeswitch", "10.10.10.10", "INBOUND", 2, 3)
+    Some(new Timestamp(System.currentTimeMillis())), "Alex-Freeswitch", "10.10.10.10", "INBOUND", 2, 3,Some("0030"), Some("Greece"))
 
 
-  val endChannelDiffCallIdA1 = CallEnd("the-uuid-channel-a-1", "CHANNEL_ANSWER", "5003", "5004", "GSM", "GSM",
+  val endChannelDiffCallIdA1 = CallEnd("the-uuid-channel-a-1", "CHANNEL_ANSWER", "5003", "00305004", "GSM", "GSM",
     "192.168.100.101", "192.168.100.102", "the-uuid-channel-a-1", Some(new Timestamp(System.currentTimeMillis())),
     Some(new Timestamp(System.currentTimeMillis())), new Timestamp(System.currentTimeMillis()),
-    "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 180, 100, "the-uuid-channel-a-2", "send_bye", "OUTBOUND", 2,3,3)
+    "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 180, 100, "the-uuid-channel-a-2", "send_bye", "OUTBOUND", 2,3,3,Some("0030"), Some("Greece"))
 
-  val endChannelDiffCallIdA2 = CallEnd("the-uuid-channel-a-2", "CHANNEL_ANSWER", "5003", "5004", "GSM", "GSM",
+  val endChannelDiffCallIdA2 = CallEnd("the-uuid-channel-a-2", "CHANNEL_ANSWER", "5003", "00305004", "GSM", "GSM",
     "192.168.100.101", "192.168.100.102", "call-uuid-other", Some(new Timestamp(System.currentTimeMillis())),
     Some(new Timestamp(System.currentTimeMillis())), new Timestamp(System.currentTimeMillis()),
-    "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 180, 100, "the-uuid-channel-a-1", "recv_bye", "OUTBOUND", 2,3,3)
+    "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 180, 100, "the-uuid-channel-a-1", "recv_bye", "OUTBOUND", 2,3,3
+    ,Some("0030"), Some("Greece"))
 
   "this test should" should {
     " create a new concurrent call and after call completion should ask for completed calls " in {
@@ -129,24 +130,28 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
     }
   }
 
-  val newChannelSameCallIDA1 = CallNew("the-uuid-channel-aa-1", "CHANNEL_ANSWER", "5001", "5002", "GSM", "GSM",
+  val newChannelSameCallIDA1 = CallNew("the-uuid-channel-aa-1", "CHANNEL_ANSWER", "5001", "00305002", "GSM", "GSM",
     "192.168.100.101", "192.168.100.102", "call-uuid", Some(new Timestamp(System.currentTimeMillis())),
-    Some(new Timestamp(System.currentTimeMillis())), "Alex-Freeswitch", "10.10.10.10", "OUTBOUND", 2, 3)
+    Some(new Timestamp(System.currentTimeMillis())), "Alex-Freeswitch", "10.10.10.10", "OUTBOUND", 2, 3
+    ,Some("0030"), Some("Greece"))
 
-  val newChannelSameCallIDA2 = CallNew("the-uuid-channel-aa-2", "CHANNEL_ANSWER", "5001", "5002", "GSM", "GSM",
+  val newChannelSameCallIDA2 = CallNew("the-uuid-channel-aa-2", "CHANNEL_ANSWER", "5001", "00305002", "GSM", "GSM",
     "192.168.100.101", "192.168.100.102", "call-uuid", Some(new Timestamp(System.currentTimeMillis())),
-    Some(new Timestamp(System.currentTimeMillis())), "Alex-Freeswitch", "10.10.10.10", "INBOUND", 2, 3)
+    Some(new Timestamp(System.currentTimeMillis())), "Alex-Freeswitch", "10.10.10.10", "INBOUND", 2, 3
+    ,Some("0030"), Some("Greece"))
 
 
-  val endChannelSameCallIDA1 = CallEnd("the-uuid-channel-aa-1", "CHANNEL_ANSWER", "5001", "5002", "GSM", "GSM",
-    "192.168.100.101", "192.168.100.102", "call-uuid", Some(new Timestamp(System.currentTimeMillis())),
-    Some(new Timestamp(System.currentTimeMillis())), new Timestamp(System.currentTimeMillis()),
-    "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 120, 100, "the-uuid-channel-a-2", "send_bye", "OUTBOUND", 2,3,3)
-
-  val endChannelSameCallIDA2 = CallEnd("the-uuid-channel-aa-2", "CHANNEL_ANSWER", "5001", "5002", "GSM", "GSM",
+  val endChannelSameCallIDA1 = CallEnd("the-uuid-channel-aa-1", "CHANNEL_ANSWER", "5001", "00305002", "GSM", "GSM",
     "192.168.100.101", "192.168.100.102", "call-uuid", Some(new Timestamp(System.currentTimeMillis())),
     Some(new Timestamp(System.currentTimeMillis())), new Timestamp(System.currentTimeMillis()),
-    "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 120, 100, "the-uuid-channel-a-1", "recv_bye", "INBOUND", 2,3,3)
+    "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 120, 100, "the-uuid-channel-a-2", "send_bye",
+    "OUTBOUND", 2,3,3,Some("0030"), Some("Greece"))
+
+  val endChannelSameCallIDA2 = CallEnd("the-uuid-channel-aa-2", "CHANNEL_ANSWER", "5001", "00305002", "GSM", "GSM",
+    "192.168.100.101", "192.168.100.102", "call-uuid", Some(new Timestamp(System.currentTimeMillis())),
+    Some(new Timestamp(System.currentTimeMillis())), new Timestamp(System.currentTimeMillis()),
+    "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 120, 100, "the-uuid-channel-a-1", "recv_bye",
+    "INBOUND", 2,3,3,Some("0030"), Some("Greece"))
 
   "this test should" should {
     " return acd = 2.5 min " in {
@@ -211,10 +216,11 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
     }
   }
 
-  val endChannelFailedCall = CallEnd("the-uuid-channel-aa-154545", "CHANNEL_ANSWER", "5001", "5002", "GSM", "GSM",
+  val endChannelFailedCall = CallEnd("the-uuid-channel-aa-154545", "CHANNEL_ANSWER", "5001", "00305002", "GSM", "GSM",
     "192.168.100.101", "192.168.100.102", "call-uuid-9898988", None,
     None, new Timestamp(System.currentTimeMillis()),
-    "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 120, 100, "the-uuid-channel-a-2767676", "send_bye", "OUTBOUND", 2,3,3)
+    "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 120, 100, "the-uuid-channel-a-2767676", "send_bye",
+    "OUTBOUND", 2,3,3,Some("0030"), Some("Greece"))
 
   "this test should" should {
     " return one item list of FailedCalls " in {
@@ -235,10 +241,11 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
     }
   }
 
-  val endChannelFailedCall2 = CallEnd("the-uuid-channel-aa-154545111", "CHANNEL_ANSWER", "5001", "5002", "GSM", "GSM",
+  val endChannelFailedCall2 = CallEnd("the-uuid-channel-aa-154545111", "CHANNEL_ANSWER", "5001", "00305002", "GSM", "GSM",
     "192.168.100.101", "192.168.100.102", "call-uuid-989811988", None,
     None, new Timestamp(System.currentTimeMillis()),
-    "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 120, 100, "the-uuid-channel-a-276117676", "send_bye", "OUTBOUND", 2,3,3)
+    "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 120, 100, "the-uuid-channel-a-276117676", "send_bye",
+    "OUTBOUND", 2,3,3,Some("0030"), Some("Greece"))
   "this test should" should {
     " return total FailedCalls " in {
       within(60000 millis) {
@@ -258,10 +265,11 @@ with WordSpecLike with Matchers with BeforeAndAfterAll {
     }
   }
 
-  val endChannelFailedCall3 = CallEnd("the-uuid-channel-aa-000121200000", "CHANNEL_ANSWER", "5001", "5002", "GSM", "GSM",
+  val endChannelFailedCall3 = CallEnd("the-uuid-channel-aa-000121200000", "CHANNEL_ANSWER", "5001", "00305002", "GSM", "GSM",
     "192.168.100.101", "192.168.100.102", "call-uuid-98989121288", None,
     None, new Timestamp(System.currentTimeMillis()),
-    "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 120, 100, "the-uuid-channel-a-27121267676", "send_bye", "OUTBOUND", 2,3,3)
+    "Alex-Freeswitch", "10.10.10.10", "NORMAL_CLEARING", 120, 100, "the-uuid-channel-a-27121267676", "send_bye",
+    "OUTBOUND", 2,3,3,Some("0030"), Some("Greece"))
 
   "this test should" should {
     " return the correct asr 40 " +

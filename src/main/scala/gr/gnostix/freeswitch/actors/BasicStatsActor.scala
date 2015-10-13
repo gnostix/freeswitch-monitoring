@@ -5,6 +5,7 @@ import java.sql.Timestamp
 import akka.actor.{ActorRef, Actor, ActorLogging}
 import akka.util.Timeout
 import gr.gnostix.freeswitch.actors.ActorsProtocol._
+import gr.gnostix.freeswitch.model.CompletedCallStats
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global

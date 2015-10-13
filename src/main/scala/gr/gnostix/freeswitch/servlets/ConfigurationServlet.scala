@@ -1,42 +1,45 @@
 package gr.gnostix.freeswitch.servlets
 
-import java.io.File
-
 import _root_.akka.actor.{ActorRef, ActorSystem}
 import gr.gnostix.api.auth.AuthenticationSupport
 import gr.gnostix.freeswitch.FreeswitchopStack
-import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetEslConnections, EslConnectionData, DelEslConnection}
-import gr.gnostix.freeswitch.actors.HeartBeat
-import gr.gnostix.freeswitch.actors.ServletProtocol.{ApiReply, ApiReplyData}
-import org.scalatra.servlet.{SizeConstraintExceededException, FileItem, MultipartConfig, FileUploadSupport}
+import gr.gnostix.freeswitch.actors.ActorsProtocol._
+import gr.gnostix.freeswitch.actors.ServletProtocol.{ApiReply, ApiReplyData, ApiReplyError}
+import gr.gnostix.freeswitch.utilities.FileUtilities
+import org.scalatra.servlet.{FileUploadSupport, MultipartConfig, SizeConstraintExceededException}
+
+import scala.collection.SortedMap
 
 // JSON-related libraries
+
 import org.json4s.{DefaultFormats, Formats}
 
 // JSON handling support from Scalatra
-import org.scalatra.json._
 
-import org.scalatra._
 import _root_.akka.pattern.ask
 import _root_.akka.util.Timeout
-import scala.concurrent.{Future, ExecutionContext}
+import org.scalatra._
+import org.scalatra.json._
+
 import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
+
 /**
  * Created by rebel on 17/9/15.
  */
-class ConfigurationServlet(system:ActorSystem, myActor:ActorRef) extends ScalatraServlet
+class ConfigurationServlet(system: ActorSystem, myActor: ActorRef) extends ScalatraServlet
 with FutureSupport with JacksonJsonSupport with FileUploadSupport
-with CorsSupport with FreeswitchopStack with AuthenticationSupport
-{
+with CorsSupport with FreeswitchopStack with AuthenticationSupport {
   implicit val timeout = new Timeout(10 seconds)
+
   protected implicit def executor: ExecutionContext = system.dispatcher
 
   before() {
     contentType = formats("json")
-//    requireLogin()
+    //    requireLogin()
   }
-  configureMultipartHandling(MultipartConfig(maxFileSize = Some(5*1024*1024)))
+  configureMultipartHandling(MultipartConfig(maxFileSize = Some(5 * 1024 * 1024)))
 
   options("/*") {
     response.setHeader("Access-Control-Allow-Headers", request.getHeader("Access-Control-Request-Headers"))
@@ -47,39 +50,85 @@ with CorsSupport with FreeswitchopStack with AuthenticationSupport
 
   // /configuration/*
 
-  post("/dialcodes"){
-    log info " ----> entering dialcodes ..."
+  get("/dialcodes") {
+    val data: Future[Set[String]] = (myActor ? GetAllDialCodeList).mapTo[Set[String]]
+
+    new AsyncResult {
+      val is =
+        for {
+          dt <- data
+        } yield  { ApiReplyData(200, "all good", dt) }
+
+    }
+  }
+
+  get("/dialcodes/:filename") {
+    val fileName = params("filename")
+    val data: Future[Option[SortedMap[String, String]]] = (myActor ? GetDialCodeList(fileName)).mapTo[Option[SortedMap[String, String]]]
+
+    new AsyncResult {
+      val is =
+        for {
+          dt <- data
+        } yield {
+          dt match {
+            case Some(dialC) => ApiReplyData(200, "all good", dialC)
+            case _ => response.sendError(400, s"No dial codes list with file name: $fileName")
+          }
+        }
+
+    }
+  }
+
+  post("/dialcodes/:fname") {
+    val fileName = params("fname")
+    log info s" ----> post entering dialcodes, filename: $fileName"
     fileParams.get("filename") match {
       case Some(file) =>
-        /*Ok(file.get(), Map(
-          "Content-Type"        -> (file.contentType.getOrElse("application/octet-stream")),
-          "Content-Disposition" -> ("attachment; filename=\"" + file.name + "\"")
-        ))*/
-        processFile(file)
+        FileUtilities.processCsvFileItem(fileName, file) match {
+          case x: ApiReplyError =>
+            response.sendError(x.status, x.message)
+
+          case x: ApiReplyData =>
+            // push the data to the actor
+            myActor ! AddDialCodeList(fileName, x.payload.asInstanceOf[Map[String, SortedMap[String, String]]].head._2)
+            ApiReplyData(200, x.message, s"lines parsed: ${x.payload.asInstanceOf[Map[String, SortedMap[String, String]]].last._2.size} ")
+
+          case x =>
+            log error s"we dont understand this reply "
+            response.sendError(400, "General error")
+        }
 
 
       case None =>
-        ApiReply(400, "No file selected!")
+        response.sendError(400, "No file selected!")
     }
 
   }
 
-  def processFile(file: FileItem): Map[String, Long] = {
-    var dialCodesMap = scala.collection.Map.empty[String, Long]
-    val csv = io.Source.createBufferedSource(file.getInputStream)
-    //val fileString =  new String(file.get)//..map(x => log info s" -----> file size: ${x}")
-    val lines = csv.getLines()
-    //log info "---lines size " + lines
-    for (l <- csv.getLines()){
-      //log info "---lines data " + l
-      val cols = l.split(";").map(_.trim)
-      dialCodesMap += (cols(0) -> cols(1).toLong)
+  delete("/dialcodes/:filename") {
+    // remove dialcodes from this file name
+    val fileName = params("filename")
+
+    val data: Future[ApiReply] = (myActor ? DelDialCodeList(fileName)).mapTo[ApiReply]
+
+    new AsyncResult {
+      val is =
+        for {
+          dt <- data
+        } yield {
+          dt.status match {
+            case 400 => response.sendError(400, dt.message)
+            case _ => dt
+          }
+        }
+
     }
-    dialCodesMap
+
   }
 
-  post("/fs-node/conn-data"){
-    log("------------- entering the configuration servlet ---------------- " + parsedBody )
+  post("/fs-node/conn-data") {
+    log("------------- entering the configuration servlet ---------------- " + parsedBody)
     val eslConnectionData = parsedBody.extract[EslConnectionData]
     val data: Future[ApiReply] = (myActor ? eslConnectionData).mapTo[ApiReply]
 
@@ -87,12 +136,17 @@ with CorsSupport with FreeswitchopStack with AuthenticationSupport
       val is =
         for {
           dt <- data
-        } yield dt
+        } yield {
+          dt.status match {
+            case 400 => response.sendError(400, dt.message)
+            case _ => dt
+          }
+        }
 
     }
   }
 
-  delete("/fs-node/conn-data"){
+  delete("/fs-node/conn-data") {
     val delEslConnection = parsedBody.extract[DelEslConnection]
     val data: Future[ApiReply] = (myActor ? delEslConnection).mapTo[ApiReply]
 
@@ -100,12 +154,17 @@ with CorsSupport with FreeswitchopStack with AuthenticationSupport
       val is =
         for {
           dt <- data
-        } yield dt
+        } yield {
+          dt.status match {
+            case 400 => response.sendError(400, dt.message)
+            case _ => dt
+          }
+        }
 
     }
   }
 
-  get("/fs-node/conn-data"){
+  get("/fs-node/conn-data") {
     log info "----> get esl connections ---"
     val data: Future[List[EslConnectionData]] = (myActor ? GetEslConnections).mapTo[List[EslConnectionData]]
 
@@ -113,7 +172,7 @@ with CorsSupport with FreeswitchopStack with AuthenticationSupport
       val is =
         for {
           dt <- data
-        } yield ApiReplyData(200, "All good ",dt)
+        } yield ApiReplyData(200, "All good ", dt)
 
     }
   }
