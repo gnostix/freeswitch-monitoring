@@ -95,9 +95,12 @@ class ChannelActor(channelStates: List[CallEventType]) extends Actor with ActorL
         case _ =>
       }
 
-    case x@GetConcurrentCallsChannel =>
+    case x@GetConcurrentCallsChannel(uuid) =>
       log info s"---------------> channel states ${channelStates}"
-      sender ! channelStates.head
+      (channelStates.head.asInstanceOf[CallNew].uuid == x.uuid) match {
+        case true => sender ! Some(channelStates.head)
+        case false => sender ! None
+      }
 
 /*
     case x@GetCompletedCallsChannel =>

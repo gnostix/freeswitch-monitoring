@@ -70,6 +70,8 @@ object ActorsProtocol {
 
   case object GetConcurrentCallsChannel extends RouterRequest
 
+  case class GetConcurrentCallsChannel(uuid: String) extends RouterRequest
+
   case object GetFailedCallsChannel extends RouterRequest
 
   case object GetCompletedCallsChannel extends RouterRequest

@@ -165,7 +165,8 @@ class CallActor extends Actor with ActorLogging {
       }
 
     case x @ GetConcurrentCallsChannel =>
-      activeChannels.head._2 forward x
+      activeChannels.head._2 forward GetConcurrentCallsChannel(uuidChannelA)
+
 
     case x @ GetCompletedCallsChannel =>
       endCallChannel match {

@@ -106,7 +106,7 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
   }
 
   get("/concurrent/calls/details"){
-    val data: Future[List[CallNew]] = (myActor ? GetConcurrentCallsChannel).mapTo[List[CallNew]]
+    val data: Future[List[Option[CallNew]]] = (myActor ? GetConcurrentCallsChannel).mapTo[List[Option[CallNew]]]
 
     new AsyncResult {
       val is =

@@ -158,8 +158,8 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
       }
 
     case x @ GetConcurrentCallsChannel =>
-      val f: List[Future[CallNew]] = activeCalls.map{
-        case (a,y) => (y ? x).mapTo[CallNew]
+      val f: List[Future[Option[CallNew]]] = activeCalls.map{
+        case (a,y) => (y ? x).mapTo[Option[CallNew]]
       }.toList
 
       Future.sequence(f) pipeTo sender
