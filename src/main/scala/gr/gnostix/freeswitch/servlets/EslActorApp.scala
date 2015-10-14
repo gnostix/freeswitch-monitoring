@@ -1,4 +1,23 @@
+/*
+ * Copyright (c) 2015 Alexandros Pappas p_alx hotmail com
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ *
+ */
+
 package gr.gnostix.freeswitch.servlets
+
 
 import java.sql.Timestamp
 
@@ -40,7 +59,7 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
 
   before() {
     contentType = formats("json")
-    requireLogin()
+    //requireLogin()
   }
 
   options("/*") {
@@ -129,13 +148,27 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
   //GetACDAndRTPByCountry
   get("/completed/calls/country/acdrtp"){
     val data: Future[List[Option[CompletedCallStatsByCountry]]] =
-      (myActor ? GetACDAndRTPByCountry).mapTo[List[Option[CompletedCallStatsByCountry]]]
+      (myActor ? GetBillSecAndRTPByCountry).mapTo[List[Option[CompletedCallStatsByCountry]]]
 
     new AsyncResult {
       val is =
         for {
           dt <- data
         } yield ApiReplyData(200,"all good", HelperFunctions.sortAcdByCountry(dt))
+
+    }
+  }
+
+  get("/completed/calls/country/asr"){
+    val fCalls: Future[List[CallEnd]] = (myActor ? GetFailedCalls).mapTo[List[CallEnd]]
+    val cCalls: Future[List[Option[CompletedCallStatsByCountry]]] = (myActor ? GetBillSecAndRTPByCountry).mapTo[List[Option[CompletedCallStatsByCountry]]]
+
+    new AsyncResult {
+      val is =
+        for {
+          fc <- fCalls
+          cc <- cCalls
+        } yield ApiReplyData(200,"all good", HelperFunctions.getAsrByCountry(cc, fc))
 
     }
   }

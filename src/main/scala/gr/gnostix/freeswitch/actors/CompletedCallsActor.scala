@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2015 Alexandros Pappas p_alx hotmail com
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ *
+ */
+
 package gr.gnostix.freeswitch.actors
 
 import java.sql.Timestamp
@@ -6,7 +24,7 @@ import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
 import akka.pattern.{ask, pipe}
 import akka.util.Timeout
-import gr.gnostix.freeswitch.actors.ActorsProtocol.GetACDAndRTPByCountry
+import gr.gnostix.freeswitch.actors.ActorsProtocol.GetBillSecAndRTPByCountry
 import gr.gnostix.freeswitch.model.{CompletedCallStatsByCountry, CompletedCallStats}
 
 import scala.concurrent.Future
@@ -75,14 +93,14 @@ class CompletedCallsActor extends Actor with ActorLogging {
           Future.sequence(f) pipeTo sender
       }
 
-    case x@GetACDAndRTPByCountry =>
+    case x@GetBillSecAndRTPByCountry =>
       completedCalls.isEmpty match {
         case true =>
           //log info s"Completed calls Actor GetACDAndRTPForLast60Seconds | NO completedCalls: " + completedCalls
           sender ! List()
         case false =>
           val f: List[Future[Option[CompletedCallStatsByCountry]]] = completedCalls.map{
-            case (x,y) => (y.callActor ? GetACDAndRTPByCountry).mapTo[Option[CompletedCallStatsByCountry]]
+            case (x,y) => (y.callActor ? GetBillSecAndRTPByCountry).mapTo[Option[CompletedCallStatsByCountry]]
           }.toList
 
           //log info s"Completed calls Actor GetACDAndRTPForLast60Seconds , asking all call actors" + Future.sequence(f)
