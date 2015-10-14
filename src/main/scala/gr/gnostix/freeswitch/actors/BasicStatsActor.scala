@@ -20,7 +20,7 @@ package gr.gnostix.freeswitch.actors
 
 import java.sql.Timestamp
 
-import akka.actor.{ActorRef, Actor, ActorLogging}
+import akka.actor.{Props, ActorRef, Actor, ActorLogging}
 import akka.util.Timeout
 import gr.gnostix.freeswitch.actors.ActorsProtocol._
 import gr.gnostix.freeswitch.model.CompletedCallStats
@@ -58,6 +58,11 @@ sealed trait CustomJobs
 case class StatsPerCustomer(ip: List[String], cliPrefixRegEx: Option[List[String]], desc: String) extends CustomJobs
 case class StatsPerProvider(ip: List[String], cliPrefixRegEx: Option[List[String]], desc: String) extends CustomJobs
 
+
+object BasicStatsActor {
+  def props(callRouterActor: ActorRef, completedCallsActor: ActorRef, wsLiveEventsActor: ActorRef): Props =
+    Props(new BasicStatsActor(callRouterActor, completedCallsActor, wsLiveEventsActor))
+}
 
 class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, wsLiveEventsActor: ActorRef)
   extends Actor with ActorLogging {

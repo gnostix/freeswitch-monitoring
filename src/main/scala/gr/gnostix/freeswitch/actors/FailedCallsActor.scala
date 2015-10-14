@@ -18,9 +18,10 @@
 
 package gr.gnostix.freeswitch.actors
 
-import akka.actor.{ActorRef, Actor, ActorLogging}
+import akka.actor.{Props, ActorRef, Actor, ActorLogging}
 import gr.gnostix.freeswitch.actors.ActorsProtocol._
 import org.scalatra.atmosphere.AtmosphereClient
+import scala.collection.SortedMap
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -30,6 +31,11 @@ import scala.language.postfixOps
  */
 
 case class TotalFailedCalls(failedCalls: Int)
+
+object FailedCallsActor {
+  def props(wsLiveEventsActor: ActorRef): Props =
+    Props(new FailedCallsActor(wsLiveEventsActor: ActorRef))
+}
 
 class FailedCallsActor(wsLiveEventsActor: ActorRef) extends Actor with ActorLogging {
 

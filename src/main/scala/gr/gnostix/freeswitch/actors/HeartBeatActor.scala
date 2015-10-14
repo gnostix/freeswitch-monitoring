@@ -18,7 +18,7 @@
 
 package gr.gnostix.freeswitch.actors
 
-import akka.actor.{Actor, ActorLogging, ActorRef}
+import akka.actor.{Props, Actor, ActorLogging, ActorRef}
 import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetAllHeartBeat, GetLastHeartBeat, InitializeDashboardHeartBeat}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -28,6 +28,11 @@ import scala.language.postfixOps
 /**
  * Created by rebel on 19/8/15.
  */
+
+object HeartBeatActor {
+  def props(wsLiveEventsActor: ActorRef): Props = Props(new HeartBeatActor(wsLiveEventsActor))
+}
+
 class HeartBeatActor(wsLiveEventsActor: ActorRef) extends Actor with ActorLogging {
 
   var heartBeats: List[HeartBeat] = List()

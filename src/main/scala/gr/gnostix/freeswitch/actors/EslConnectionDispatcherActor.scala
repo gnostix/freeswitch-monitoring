@@ -29,6 +29,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /**
  * Created by rebel on 27/8/15.
  */
+
+object EslConnectionDispatcherActor {
+  def props(wsLiveEventsActor: ActorRef): Props = Props(new EslConnectionDispatcherActor(wsLiveEventsActor))
+}
+
 class EslConnectionDispatcherActor(wSLiveEventsActor: ActorRef) extends Actor with ActorLogging {
 
   val Tick = "tick"

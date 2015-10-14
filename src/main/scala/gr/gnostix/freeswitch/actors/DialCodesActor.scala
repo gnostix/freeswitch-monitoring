@@ -18,7 +18,7 @@
 
 package gr.gnostix.freeswitch.actors
 
-import akka.actor.{Actor, ActorLogging}
+import akka.actor.{Props, ActorRef, Actor, ActorLogging}
 import gr.gnostix.freeswitch.actors.ActorsProtocol._
 import gr.gnostix.freeswitch.actors.ServletProtocol.{ApiReplyError, ApiReplyData, ApiReply}
 
@@ -27,6 +27,12 @@ import scala.collection.SortedMap
 /**
  * Created by rebel on 10/10/15.
  */
+
+object DialCodesActor {
+  def props(dialCodes: Map[String, SortedMap[String, String]]): Props =
+    Props(new DialCodesActor(dialCodes: Map[String, SortedMap[String, String]]))
+}
+
 class DialCodesActor(dialCodes: Map[String, SortedMap[String, String]]) extends Actor with ActorLogging {
 
   def idle(dialCodes: Map[String, SortedMap[String, String]]): Receive = {

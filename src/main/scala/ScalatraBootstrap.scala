@@ -47,7 +47,7 @@ class ScalatraBootstrap extends LifeCycle {
       Map("default" -> scala.collection.SortedMap.empty[String, String])
   }
 
-  val myRouter = system.actorOf(Props(new CentralMessageRouter(dialCodes)), "centralMessageRouter")
+  val myRouter = system.actorOf(Props(classOf[CentralMessageRouter], dialCodes), "centralMessageRouter")
 
   override def init(context: ServletContext) {
     context.mount(new ConfigurationServlet(system, myRouter)

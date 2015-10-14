@@ -25,11 +25,11 @@ import gr.gnostix.freeswitch.actors.ActorsProtocol._
  * Created by rebel on 7/8/15.
  */
 
-/*
-  object ChannelActor {
-    def props(channelA: CallNew): Props = Props(new CallActor(channelA))
-  }
-*/
+
+object ChannelActor {
+  def props(channelStates: List[CallEventType]): Props = Props(new ChannelActor(channelStates))
+}
+
 
 class ChannelActor(channelStates: List[CallEventType]) extends Actor with ActorLogging {
   //var channelStates: List[CallEventType] = List()
@@ -102,11 +102,11 @@ class ChannelActor(channelStates: List[CallEventType]) extends Actor with ActorL
         case false => sender ! None
       }
 
-/*
-    case x@GetCompletedCallsChannel =>
-      //log info s"channel actor channels $channelState and sending ${channelState.head}"
-      sender ! channelStates.last
-*/
+    /*
+        case x@GetCompletedCallsChannel =>
+          //log info s"channel actor channels $channelState and sending ${channelState.head}"
+          sender ! channelStates.last
+    */
 
     case _ => log info s"message  not understood on channelActor"
   }

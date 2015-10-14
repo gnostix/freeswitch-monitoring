@@ -19,7 +19,7 @@
 package gr.gnostix.freeswitch.actors
 
 import akka.actor.SupervisorStrategy.Restart
-import akka.actor.{Props, OneForOneStrategy, Actor, ActorLogging}
+import akka.actor._
 import gr.gnostix.freeswitch.actors.ActorsProtocol._
 import gr.gnostix.freeswitch.actors.ServletProtocol.{ApiReplyError, ApiReplyData}
 import gr.gnostix.freeswitch.utilities.FileUtilities
@@ -30,6 +30,12 @@ import scala.collection.SortedMap
 /**
  * Created by rebel on 23/8/15.
  */
+
+object CentralMessageRouter {
+  def props(dialCodes: Map[String, SortedMap[String, String]]): Props =
+    Props(new CentralMessageRouter(dialCodes: Map[String, SortedMap[String, String]]))
+}
+
 class CentralMessageRouter(dialCodes: Map[String, SortedMap[String, String]]) extends Actor with ActorLogging {
 
   override val supervisorStrategy =
@@ -40,10 +46,10 @@ class CentralMessageRouter(dialCodes: Map[String, SortedMap[String, String]]) ex
   // first we should start the WS actor, otherwise we get exception!!
   val wsLiveEventsActor = context.actorOf(Props[WSLiveEventsActor], "wsLiveEventsActor")
   val completedCallsActor = context.actorOf(Props[CompletedCallsActor], "completedCallsActor")
-  val heartBeatActor = context.actorOf(Props(new HeartBeatActor(wsLiveEventsActor)), "heartBeatActor")
-  val eslConnectionDispatcherActor = context.actorOf(Props(new EslConnectionDispatcherActor(wsLiveEventsActor)), "eslConnectionDispatcherActor")
-  val callRouterActor = context.actorOf(Props(new CallRouter(wsLiveEventsActor, completedCallsActor)), "callRouter")
-  val basicStatsActor = context.actorOf(Props(new BasicStatsActor(callRouterActor, completedCallsActor, wsLiveEventsActor)), "basicStatsActor")
+  val heartBeatActor = context.actorOf(Props(classOf[HeartBeatActor],wsLiveEventsActor), "heartBeatActor")
+  val eslConnectionDispatcherActor = context.actorOf(Props(classOf[EslConnectionDispatcherActor], wsLiveEventsActor), "eslConnectionDispatcherActor")
+  val callRouterActor = context.actorOf(Props(classOf[CallRouter], wsLiveEventsActor, completedCallsActor), "callRouter")
+  val basicStatsActor = context.actorOf(Props(classOf[BasicStatsActor], callRouterActor, completedCallsActor, wsLiveEventsActor), "basicStatsActor")
 
   val dialCodesFile = FileUtilities.processResourcesCsvFile()
   val dialCodesActor = dialCodesFile match {

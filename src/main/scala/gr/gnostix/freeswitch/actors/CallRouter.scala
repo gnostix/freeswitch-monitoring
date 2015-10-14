@@ -28,6 +28,11 @@ import scala.concurrent.duration._
 import scala.concurrent.Future
 
 
+object CallRouter {
+  def props(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef): Props =
+    Props(new CallRouter(wsLiveEventsActor, completedCallsActor))
+}
+
 class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) extends Actor with ActorLogging {
 
   import gr.gnostix.freeswitch.actors.ActorsProtocol._
@@ -41,7 +46,7 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
   implicit val timeout = Timeout(1 seconds) // needed for `?` below
 
   // create the FailedCallsActor in advance
-  val failedCallsActor = context.actorOf(Props(new FailedCallsActor(wsLiveEventsActor)), "failedCallsActor")
+  val failedCallsActor = context.actorOf(Props(classOf[FailedCallsActor],wsLiveEventsActor), "failedCallsActor")
 
   // get reference of CompletedCallsActor
   //val completedCallsActor = context.actorSelection("/user/centralMessageRouter/completedCallsActor")

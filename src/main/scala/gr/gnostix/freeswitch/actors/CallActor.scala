@@ -87,7 +87,7 @@ class CallActor extends Actor with ActorLogging {
               x
           }
 
-          val actor = context.actorOf(Props(new ChannelActor(List(newCall))), uuid)
+          val actor = context.actorOf(Props(classOf[ChannelActor],List(newCall)), uuid)
 
           context watch actor
           // log warning s"We create the actor Channel $uuid"
