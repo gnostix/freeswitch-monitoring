@@ -69,7 +69,7 @@ with CorsSupport with FreeswitchopStack with AuthenticationSupport {
   // /configuration/*
 
   get("/dialcodes") {
-    val data: Future[Set[String]] = (myActor ? GetAllDialCodeList).mapTo[Set[String]]
+    val data: Future[List[AllDialCodes]] = (myActor ? GetAllDialCodeList).mapTo[List[AllDialCodes]]
 
     new AsyncResult {
       val is =
