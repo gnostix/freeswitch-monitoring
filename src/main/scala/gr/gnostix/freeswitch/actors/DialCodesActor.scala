@@ -69,7 +69,7 @@ class DialCodesActor(dialCodes: Map[String, SortedMap[String, String]]) extends 
       }
 
     case x@GetAllDialCodeList =>
-      sender ! dialCodes.keys
+      sender ! dialCodes.map(d => AllDialCodes(d._1, d._2.size))
   }
 
   def receive: Receive =
