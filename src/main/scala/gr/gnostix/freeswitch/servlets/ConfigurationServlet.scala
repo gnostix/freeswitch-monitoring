@@ -98,19 +98,18 @@ with CorsSupport with FreeswitchopStack with AuthenticationSupport {
     }
   }
 
-  post("/dialcodes/:fname") {
-    val fileName = params("fname")
-    log info s" ----> post entering dialcodes, filename: $fileName"
+  post("/dialcodes") {
     fileParams.get("filename") match {
       case Some(file) =>
-        FileUtilities.processCsvFileItem(fileName, file) match {
+        log info s" ----> post entering dialcodes, filename: ${file.getName}, size:  ${file.getSize}"
+        FileUtilities.processCsvFileItem(file.getName, file) match {
           case x: ApiReplyError =>
             response.sendError(x.status, x.message)
 
           case x: ApiReplyData =>
             // push the data to the actor
-            myActor ! AddDialCodeList(fileName, x.payload.asInstanceOf[Map[String, SortedMap[String, String]]].head._2)
-            ApiReplyData(200, x.message, s"lines parsed: ${x.payload.asInstanceOf[Map[String, SortedMap[String, String]]].last._2.size} ")
+            myActor ! AddDialCodeList(file.getName, x.payload.asInstanceOf[Map[String, SortedMap[String, String]]].head._2)
+            ApiReplyData(200, x.message, x.payload.asInstanceOf[Map[String, SortedMap[String, String]]].last._2.size)
 
           case x =>
             log error s"we dont understand this reply "
