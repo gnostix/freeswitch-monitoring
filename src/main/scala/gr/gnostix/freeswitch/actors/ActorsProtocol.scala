@@ -123,6 +123,8 @@ object ActorsProtocol {
 
   case object GetAllDialCodeList extends RouterRequest
 
+  case class AllDialCodes(fileName: String, totalCodes: Int)
+
   case class AddAtmoClientUuid(uuid: String)
 
   case class RemoveAtmoClientUuid(uuid: String)
