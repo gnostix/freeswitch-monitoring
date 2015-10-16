@@ -39,9 +39,12 @@
     <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+	<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="images/favicon.ico" type="image/x-icon">
+	
+	<!--growl -->
+	<link rel="stylesheet" type="text/css" href="css/growl/jquery.gritter.css" />
 
-<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
-	<link rel="icon" href="images/favicon.ico" type="image/x-icon">	
 	<!--initialise values -->
  <script src="js/init.js"></script>
  <style type="text/css">
@@ -211,14 +214,14 @@
                   <li>
                         <a href="javascript:;" data-toggle="collapse" data-target="#demo"><i class="fa fa-fw fa-wrench"></i> SetUp<i class="fa fa-fw fa-caret-down"></i></a>
                         <ul id="demo" class="collapse">
-                            <li>
+                            <li class="active">
                                 <a href="setupProfile.html"><i class="fa fa-fw fa-edit"></i> Profile</a>
                             </li>
-                            <li class="active">
+                            <li>
                                <a href="configuration.html"><i class="fa fa-fw fa-retweet"></i> Connections</a>
                             </li>
                         </ul>
-                    </li>
+                   </li>
             </ul>
         </div>
         <!-- /.navbar-collapse -->
@@ -227,77 +230,43 @@
     <div id="page-wrapper">
 
         <div class="container-fluid">
-			
+			 <div class="jumbotron">
+			 <div id="header" class="round">
+ <h3 class="panel-title"><i class="fa fa-edit"></i> Dial Codes</h3>
+</div>
+</br>
+			 
+			 <div class="row">
+			 <div id="filecodes" class="col-lg-12 col-md-12" style="display:none">
+                       
+               </div>
+				    
+				</div>
+				<div id="fUpload" class="row" style="display:none">
+				   <div class="col-lg-2">
+					<!-- The fileinput-button span is used to style the file input field as button -->
+						<span class="btn btn-success fileinput-button">
+						<i class="glyphicon glyphicon-plus"></i>
+						<span>Select file...</span>
+						<!-- The file input field used as target for the file upload widget -->
+						<input id="fileupload" type="file" name="filename">
+						</span>
+					</div>
+					 <div class="col-lg-10">
+						<!-- The global progress bar -->
+						<div id="progress" class="progress">
+						<div class="progress-bar progress-bar-success"></div>
+						</div>
+						<!-- The container for the uploaded files -->
+						<div id="files" class="files"></div>
+						</div>   
+				</div>
+				
+				 
+				
+			</div>
             
-                <!-- Main jumbotron for a primary marketing message or call to action -->
-                <div class="jumbotron">
-				  <div class="row">
-				  <div class="col-lg-12">
-						<div id="message" class="alert alert-info alert-dismissable">
-                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                        <i id="responseInput" class="fa fa-info-circle"></i>  <strong class="inputRes">Please enter connection credentials</strong></div>
-					
-				  </div>
-				  
-						
-			       
-						<form role="form">
-						<div class="row">
-						<div class="col-lg-4 text-center">
-                         <div class="form-group has-feedback">
-                                <input type="text" class="form-control ghost-btn btn-white" id="eslIPAddress" placeholder="IP Address">
-						 </div>   
-                        
-						</div>
-						<div class="col-lg-4 text-center">
-                        <div class="form-group has-feedback">
-                              <input type="number" class="form-control ghost-btn btn-white" id="eslPort" placeholder="Port">
-                           
-                        </div>
-						</div>
-						<div class="col-lg-4 text-center">
-                        <div class="form-group has-feedback">
-                           <input type="password" class="form-control ghost-btn btn-white" id="eslPassword" placeholder="Password">
-                         
-                        </div>
-						</div>
-						</div>
-						<div class="form-group">
-                        <div class="pull-right">
-                            <button type="button"  id="eslConnForm" class="btn btn-primary">Login</button>
-                        </div>
-						</div>
-					
-					</br>
-					
-					   <div id="tableRow"class="row" style="display:none">
-							<div class="panel-heading">
-                                <h3 class="panel-title"><i class="fa fa-retweet"></i> Connections</h3>
-                            </div>
-							<div class="col-lg-12 text-center">
-							<div id="tablePanel">
-                                    <table id="table" class="table table-striped display compact" >
-                                        <thead>
-                                        <tr>
-                                            <th>IP</th>
-                                            <th>Port</th>
-                                            <th>Action</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-
-                                        </tbody>
-                                    </table>
-                                </div>
-							</div>
-							
-                        </div>
-				 </form>
-                  </div>
-                </div>
-
-            
-            <!-- /.row -->
+              
 
 
                 </form>
@@ -318,7 +287,43 @@
 
 </div>
 <!-- /#wrapper -->
-
+<div title="Country Codes Details" id="codesdialog" class="table-responsive dialog dialogFrame">
+                            <table class="table table-striped display compact" cellspacing="0"  id="codesTable">
+                                <thead>
+                                    <tr>
+									<th>Country</th>
+                                    <th>Prefix</th>
+									 </tr>
+                                </thead>
+                                <tbody class="rows">
+                                  
+                                </tbody>
+                            </table>
+</div>
+<!-- block element for fileuplaod-
+<script id="blockOfStuff" language="text">
+ <div class="panel panel-green">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-tasks fa-3x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right" id="fileDetails">
+                                        <div class="medium">120kb</div>
+                                        <div id="filenameText"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="#">
+                                <div class="panel-footer">
+                                    <span class="pull-left"><i class="fa fa-eye fa-2x viewFile"></i></span>
+                                    <span class="pull-right"><i class="fa fa-remove fa-2x deleteFile"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+  </div>
+  </script>
+-->
  <!-- jQuery -->
  <script src="js/jquery-1.9.0.js"></script>
 
@@ -336,7 +341,7 @@
 <!--datatble-->
 
 <script src="https://cdn.datatables.net/1.10.9/js/jquery.dataTables.min.js"></script>
-<script src="js/alx-configuration.js"></script>
+<script src="js/setupProfile.js"></script>
 
 <!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
 <script src="js/plugins/upload/vendor/jquery.ui.widget.js"></script>
@@ -345,6 +350,14 @@
 <!-- The basic File Upload plugin -->
 <script src="js/plugins/upload/jquery.fileupload.js"></script>
 
+<!--growl -->
+	
+<script type="text/javascript" src="js/plugins/growl/jquery.gritter.js"></script>
+<script>
+/*jslint unparam: true */
+/*global window, $ */
+
+</script>
 </body>
 
 </html>

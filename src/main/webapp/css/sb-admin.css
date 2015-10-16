@@ -34,7 +34,7 @@ body {
 
 @media(min-width:768px) {
     #wrapper {
-        padding-left: 125px;
+        padding-left: 155px;
     }
 
     #page-wrapper {
@@ -119,9 +119,9 @@ ul.alert-dropdown {
     .side-nav {
         position: fixed;
         top: 51px;
-        left: 125px;
-        width: 125px;
-        margin-left: -125px;
+        left: 155px;
+        width: 155px;
+        margin-left: -155px;
         border: none;
         border-radius: 0;
         overflow-y: auto;
@@ -132,7 +132,7 @@ ul.alert-dropdown {
     }
 
     .side-nav>li>a {
-        width: 125px;
+        width: 155px;
     }
 
     .side-nav li a:hover,
@@ -348,10 +348,17 @@ table.dataTable thead th, table.dataTable tfoot th {
 color: rgba(0, 0, 0, 0.8) !important;
 weight: 400 !important;
 font-size:11px;
+
+}
+
+table.dataTable.compact tbody th, table.dataTable.compact tbody td {
+vertical-align:middle;
+text-align:left;
 }
 
 table.dataTable {
 font-size:11px !important;
+ color:black;
 }
 
 .dataTables_wrapper .dataTables_info {
@@ -381,8 +388,8 @@ background: rgba(255, 255, 255, 0.9) !important;
 }
 
 .jumbotron {
-background-color: rgba(255, 255, 255, 0.2) !important;
-background: rgba(255, 255, 255, 0.2) !important;
+background-color: rgba(255, 255, 255, 0.3) !important;
+background: rgba(255, 255, 255, 0.3) !important;
 }
 
 #tablePanel {
@@ -406,4 +413,44 @@ input:-webkit-autofill:active {
 
 .progress {
 background-color: transparent;
+margin-top:5px;
 }
+
+.progress-bar-success, .btn-success {
+background-color:rgba(30,180,101,1)
+
+ }
+ 
+.filenameText {
+
+font-size:12px;
+}
+
+#selectIP {
+background-color:rgba(255, 255, 255, 0.9);
+}
+
+#fUpload {
+padding:15px;
+}
+
+div#header{
+ 
+  height: 40px;
+  background: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  padding: 5px;
+  padding:10px;
+  -moz-border-radius-topleft: 5px;
+-webkit-border-top-left-radius: 5px;
+ border-top-left-radius: 5px;
+-moz-border-radius-topright: 5px;
+-webkit-border-top-right-radius: 5px;
+border-top-right-radius: 5px;
+-moz-border-radius-bottomright: 5px;
+-webkit-border-bottom-right-radius: 5px;
+border-bottom-right-radius: 5px;
+
+
+}
+
