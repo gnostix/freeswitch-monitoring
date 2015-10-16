@@ -15,8 +15,11 @@
 
     <!-- Custom Fonts -->
     <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-
-
+	
+	<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="images/favicon.ico" type="image/x-icon">
+<!--initialise values -->
+ <script src="js/init.js"></script>
     <style type="text/css">
         #image {
             background-image: url(images/background.jpg);
@@ -98,13 +101,15 @@
 
     function loginUser() {
         console.log("loginUser");
+		//var path='http://fs-moni.cloudapp.net:8080';
+	  // var path='';
 
         var logindata = {
             'username': document.getElementById("username").value,
             'password': document.getElementById("password").value
         }
         $.ajax({
-            url: '/user/login',
+            url: path+'/user/login',
             type: 'POST',
             data: logindata,
             dataType: 'json',

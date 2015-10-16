@@ -3,7 +3,7 @@ $(function () {
 	
 	//paths for local tests and server
 	//var path='http://fs-moni.cloudapp.net:8080';
-	var path='';
+    //var path='';
 	
     var detect = $("#detect");
     var header = $('#header');
@@ -252,24 +252,35 @@ $(function () {
     });
 	
 	$('#viewASR').click(function () {
-        var table = $('#asracdstable').DataTable();
+        var table = $('#asrtable').DataTable();
 
         table.clear().draw();
 
-        getASRACDDetails(table);
+        getASRDetails(table);
         //open dialog
-        $('#asracddialog').dialog('open');
+        $('#asrdialog').dialog('open');
 
     });
 	
 	$('#viewACD').click(function () {
-        var table = $('#asracdstable').DataTable();
+        var table = $('#acdrtptable').DataTable();
 
         table.clear().draw();
 
-        getASRACDDetails(table);
+        getACDRTPDetails(table);
         //open dialog
-        $('#asracddialog').dialog('open');
+        $('#acdrtpdialog').dialog('open');
+
+    });
+	
+	$('#viewRTP').click(function () {
+        var table = $('#acdrtptable').DataTable();
+
+        table.clear().draw();
+
+        getACDRTPDetails(table);
+        //open dialog
+        $('#acdrtpdialog').dialog('open');
 
     });
 
@@ -467,7 +478,7 @@ $(function () {
 		*/
 		 // dialog properties
          $("#dialog").dialog({
-            minWidth: 800,
+            minWidth: 900,
             maxHeight: 600,
             autoOpen: false,
             modal: true
@@ -480,12 +491,77 @@ $(function () {
             modal: true
          });
 		
-		 $("#asracddialog").dialog({
+		 $("#asrdialog").dialog({
             minWidth: 1000,
             maxHeight: 600,
             autoOpen: false,
             modal: true
          });
+		 
+		 $("#acdrtpdialog").dialog({
+            minWidth: 1000,
+            maxHeight: 600,
+            autoOpen: false,
+            modal: true
+         });
+		 
+		 		 
+		 $.ajax({
+            type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
+           // url: '/configuration/fs-node/conn-data', // the url where we want to POST
+            url: path+'/configuration/fs-node/conn-data', // the url where we want to POST
+            //url: 'http://10.5.50.249:8080/configuration/fs-node/conn-data',
+			dataType: 'json', // what type of data do we expect back from the server
+            contentType: "application/json",
+            encode: true
+        })
+            // using the done promise callback
+            .done(function (data) {
+                // log data to the console so we can see
+                //console.log("on success get connections json" + JSON.stringify(data));
+				 console.log("LENGTH:"+data.payload.length);
+					   console.log("payload:"+data.payload);
+					   
+					//table.clear().draw();
+					if (data.payload.length > 1) {
+						// Get the raw DOM object for the select box
+						 $("#selectConnections").show();
+					var select = document.getElementById('selectIP');
+	
+					// Clear the old options
+					//select.options.length = 0;
+					
+					 $.each(data.payload, function (i, n) {
+                         console.log(" Index: " + i + ",  IP: " + n.ip );
+
+                       select.options.add(new Option(n.ip, n.ip));
+
+                    });
+
+
+                } else {
+					
+					 $("#selectConnections").hide();
+					 $("#oneConnection").text(data.payload[0].ip);
+					$("#oneConnection").show();
+				}
+
+
+            
+
+            })
+            // using the fail promise callback
+            .fail(function(data) {
+                // show any errors
+                // best to remove for production
+                console.log("on fail " + JSON.stringify(data));
+				if(data.status===401){
+					//alert(JSON.stringify(data));
+					window.location = "index.html";
+				}
+            });
+		 
+		 
 
     });
 
@@ -533,7 +609,8 @@ $(function () {
                         // '<td>'+n.fromUser+'</td>' +
                         // '<td>'+n.toUser+'</td></tr>');
                         // }
-                        table.row.add([n.fromUser, n.toUser, n.fromUserIP,n.toUserIP, convertMillisecondsToCustomFormat(Date.parse(n.callerChannelAnsweredTime)).clock, n.freeSWITCHHostname]).draw();
+						//console.log(convertMillisecondsToCustomFormat(Date.parse(n.callerChannelAnsweredTime)).clock);
+                        table.row.add([n.fromUser, n.toUser, n.fromUserIP,n.toUserIP,convertMillisecondsToCustomFormat(Date.parse(n.callerChannelAnsweredTime)).clock, n.freeSWITCHHostname, n.dialCode, n.country]).draw();
 
                     });
                 }
@@ -616,8 +693,8 @@ $(function () {
 
     }
 	
-	function getASRACDDetails(table) {
-        console.log("getASRACDDetails --------------------------------");
+	function getASRDetails(table) {
+        console.log("getASRDetails --------------------------------");
         var pop = "";
         var message = "";
         var formData = {
@@ -627,8 +704,62 @@ $(function () {
             type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
 
 
-           // url: '/actors/completed/calls/details', // the url where we want to POST
-            url: path+'/actors/completed/calls/details', // the url where we want to POST
+           // url: '/actors/completed/calls/country/asr', // the url where we want to POST
+            url: path+'/actors/completed/calls/country/asr', // the url where we want to POST
+
+
+            dataType: 'json', // what type of data do we expect back from the server
+            contentType: "application/json",
+            encode: true
+        })
+            // using the done promise callback
+            .done(function (result) {
+
+                if (result.payload.length > 0) {
+
+					 $.each(result.payload, function (i, n) {
+                        table.row.add([n.prefix, n.country, n.completedCallsNum, n.failedCallsNum, n.asr]).draw();
+
+                    });
+                   /*
+				   $.each(result.payload, function (i, n) {
+                        table.row.add([n.fromUser, n.toUser, n.readCodec, n.writeCodec, n.fromUserIP, n.toUserIP, +
+						convertMillisecondsToCustomFormat(Date.parse(n.callerChannelAnsweredTime)).clock,convertMillisecondsToCustomFormat(Date.parse(n.callerChannelHangupTime)).clock, +
+						n.freeSWITCHHostname, n.freeSWITCHIPv4, n.hangupCause, n.billSec, n.rtpQualityPerc]).draw();
+
+                    });
+					*/
+                }
+
+            })
+            // using the fail promise callback
+            .fail(function (data) {
+                // show any errors
+                // best to remove for production
+                pop = "JSON.stringify(data)";
+                console.log("on fail " + JSON.stringify(data));
+				if(data.status===401){
+					//alert(JSON.stringify(data));
+					window.location = "index.html";
+				}
+            });
+
+
+    }
+	
+	function getACDRTPDetails(table) {
+        console.log("getACDRTPDetails --------------------------------");
+        var pop = "";
+        var message = "";
+        var formData = {
+            "ip": ""
+        };
+        $.ajax({
+            type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
+
+
+           // url: '/actors/completed/calls/country/acdrtp', // the url where we want to POST
+            url: path+'/actors/completed/calls/country/acdrtp', // the url where we want to POST
 
 
             dataType: 'json', // what type of data do we expect back from the server
@@ -642,9 +773,7 @@ $(function () {
 
 
                     $.each(result.payload, function (i, n) {
-                        table.row.add([n.fromUser, n.toUser, n.readCodec, n.writeCodec, n.fromUserIP, n.toUserIP, +
-						convertMillisecondsToCustomFormat(Date.parse(n.callerChannelAnsweredTime)).clock,convertMillisecondsToCustomFormat(Date.parse(n.callerChannelHangupTime)).clock, +
-						n.freeSWITCHHostname, n.freeSWITCHIPv4, n.hangupCause, n.billSec, n.rtpQualityPerc]).draw();
+                        table.row.add([n.prefix, n.country, n.acd, n.rtpQuality, n.callsNum]).draw();
 
                     });
                 }

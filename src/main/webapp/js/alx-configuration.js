@@ -2,7 +2,7 @@ $(function () {
     "use strict";
 	//paths for local tests and server
 	//var path='http://fs-moni.cloudapp.net:8080';
-	var path='';
+	//var path='';
 
 $(document).ready ( function(){
 	var table = $('#table').DataTable();	 

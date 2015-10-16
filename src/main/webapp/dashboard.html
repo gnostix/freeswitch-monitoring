@@ -25,7 +25,8 @@
 	
 	 <link href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css">
 	
-
+<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="images/favicon.ico" type="image/x-icon">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -206,7 +207,18 @@
                 </li>
 
                 <li>
-                    <a href="configuration.html"><i class="fa fa-fw fa-edit"></i> Setup</a>
+				 <li>
+                        <a href="javascript:;" data-toggle="collapse" data-target="#demo"><i class="fa fa-fw fa-wrench"></i> SetUp<i class="fa fa-fw fa-caret-down"></i></a>
+                        <ul id="demo" class="collapse">
+                            <li>
+                                <a href="setupProfile.html"><i class="fa fa-fw fa-edit"></i> Profile</a>
+                            </li>
+                            <li>
+                               <a href="configuration.html"><i class="fa fa-fw fa-retweet"></i> Connections</a>
+                            </li>
+                        </ul>
+                    </li>
+                   
                 </li>
             </ul>
         </div>
@@ -218,9 +230,17 @@
     <div id="page-wrapper">
 
         <div class="container-fluid">
-
-          
-
+		<div class="form-group" id="selectConnections" style="display:none">
+                                <label>Select</label>
+                                <select class="form-control" id="selectIP">
+                                     <option value="">All Connections</option>
+                                </select>
+         </div>
+		 <div  id="oneConnection" style="display:none">
+           <div id="header" class="round">
+			 Dial Codes
+			</div>
+		</div>
 
             <div class="row">
                 <div class="col-lg-3 col-md-6">
@@ -327,9 +347,9 @@
                             </div>
                         </div>
                         <a href="#">
-                            <div class="panel-footer">
-                                <span class="pull-left"></span>
-                                <span class="pull-right"><i class="fa fa-star"></i></span>
+                            <div class="panel-footer pop" id="viewRTP">
+                                <span class="pull-left">View Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                                 <div class="clearfix"></div>
                             </div>
                         </a>
@@ -444,6 +464,8 @@
 										<th>To User IP</th>
 										<th>Answered Time</th>
 										<th>Hostname</th>
+										<th>Prefix</th>
+										<th>Country</th>
                                      </tr>
                                 </thead>
                                 <tbody class="rows">
@@ -470,23 +492,32 @@
                             </table>
 </div>
 
-<div title="ASR/ACD details" id="asracddialog" class="table-responsive dialog dialogFrame">
-                            <table class="table table-striped display compact" cellspacing="0"  id="asracdstable">
+<div title="ASR details" id="asrdialog" class="table-responsive dialog dialogFrame">
+                            <table class="table table-striped display compact" cellspacing="0"  id="asrtable">
                                 <thead>
                                     <tr>
-                                        <th>From user</th>
-                                        <th>To user</th>
-										<th>Read Codec</th>
-										<th>Write Codec</th>
-										<th>From User IP</th>
-										<th>To User IP</th>
-										<th>Caller Channel Answered Time</th>
-										<th>Caller Channel Hangup Time</th>
-										<th>Free SWITCH Hostname</th>
-										<th>FreeSWITCH IPv4</th>
-										<th>Hangup Cause</th>
-										<th>BillSec</th>
-										<th>RTP Quality %</th>
+                                        <th>Prefix</th>
+                                        <th>Country</th>
+										<th>Completed Calls #</th>
+										<th>Failed Calls #</th>
+										<th>ASR</th>
+									</tr>
+                                </thead>
+                                <tbody class="rows">
+                                  
+                                </tbody>
+                            </table>
+</div>
+
+<div title="ACD/RTP Quality details" id="acdrtpdialog" class="table-responsive dialog dialogFrame">
+                            <table class="table table-striped display compact" cellspacing="0"  id="acdrtptable">
+                                <thead>
+                                    <tr>
+                                        <th>Prefix</th>
+                                        <th>Country</th>
+										<th>ACD</th>
+										<th>RTP Quality</th>
+										<th>Calls Num</th>
                                      </tr>
                                 </thead>
                                 <tbody class="rows">
@@ -503,7 +534,8 @@
 
 <script src="http://code.jquery.com/ui/1.11.1/jquery-ui.min.js"></script>
 
-
+<!--initialise values -->
+ <script src="js/init.js"></script>
 <script src="js/jquery.atmosphere.js"></script>
 <script src="js/application.js"></script>
 <script src="js/charts.js"></script>
