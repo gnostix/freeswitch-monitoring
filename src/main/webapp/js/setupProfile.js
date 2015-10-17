@@ -84,11 +84,59 @@ $(document).on('click', '.viewFile', function(e) {
 	var r = $(this).closest('.panelFile').find('.filenameText');
  var link = $(this).parent().find('.filenameText').text();
 console.log(r.text()); //"Hello"
- var table = $('#codesTable').DataTable();
 
-        table.clear().draw();
 
-        getCodeDetails(table,r.text());
+$('#codesTable').DataTable( {
+    "ajax": {
+     "url":  path+'/configuration/dialcodes/'+r.text(),
+     "dataSrc": function ( json ) {
+	  // console.log(json.payload);
+      var arr = [];
+					// Now it can be used reliably with $.map()
+					$.map( json.payload, function( val, i ) {
+					//console.log("val:"+val+" ::i:"+i);
+					var m = {};
+					var a=[];
+					m.country=val;
+					m.code=i;
+					a.push(val,i);
+					arr.push(a);
+					});
+					
+					var j={
+						"data":arr
+					};
+					 console.log(j.data);
+       return j.data;
+      }
+    }
+} );
+
+/*
+//lazyloading
+ var table = $('#codesTable').DataTable( {
+        destroy: true,
+		"processing": true,
+        "serverSide": true,
+        "ajax": $.fn.dataTable.pipeline( {
+            url: path+'/configuration/dialcodes/'+r.text(),
+            "dataSrc" : "response.payload",
+			data: "payload",
+			"columns": [
+				{ "payload": "country" },
+				{ "payload": "code" }
+			    ]
+			//pages: 5 // number of pages to cache
+        } )
+		
+    } );
+*/	
+	
+//
+ //var table = $('#codesTable').DataTable();
+       // table.clear().draw();
+
+      //  getCodeDetails(table,r.text());
         //open dialog
         $('#codesdialog').dialog('open');
 });
