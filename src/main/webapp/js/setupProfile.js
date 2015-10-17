@@ -107,7 +107,7 @@ $('#codesTable').DataTable( {
 					var j={
 						"data":arr
 					};
-					 console.log(j.data);
+					// console.log(j.data);
        return j.data;
       }
     }
@@ -283,8 +283,9 @@ console.log("deleteFile::"+r.text()); //Hello"
 						 //hide upload
 						 // $("#fileUpload").hide();
                      });
-                  } else {
+                  } else if (data.payload.length ===1){
 					//show upload
+					 console.log("File: " + data.payload[0].totalCodes + ", "+"Name:"  +data.payload[0].fileName );
 						  $("#fUpload").show();
 						  $("#filecodes").show();
 						  var _innerHTML= '<div class="panelFile col-lg-3 col-md-3 default"><div class="panel ghost-btn btn-white">'+
@@ -294,8 +295,8 @@ console.log("deleteFile::"+r.text()); //Hello"
                                       '  <i class="fa fa-tasks fa-3x"></i>'+
                                    ' </div>'+
                                    ' <div class="col-xs-9 text-right" id="fileDetails">'+                                        
-                                    '<div class="medium">8789</div> '+
-                                    ' <div class="filenameText">def</div> '+
+                                    '<div class="medium">'+ data.payload[0].totalCodes +'</div> '+
+                                    ' <div class="filenameText">'+data.payload[0].fileName+'</div> '+
 								  '  </div>'+
                                ' </div>'+
                            ' </div>'+
