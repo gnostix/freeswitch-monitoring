@@ -610,7 +610,7 @@ $(function () {
                         // '<td>'+n.toUser+'</td></tr>');
                         // }
 						//console.log(convertMillisecondsToCustomFormat(Date.parse(n.callerChannelAnsweredTime)).clock);
-                        table.row.add([n.fromUser, n.toUser, n.fromUserIP,n.toUserIP,convertMillisecondsToCustomFormat(Date.parse(n.callerChannelAnsweredTime)).clock, n.freeSWITCHHostname, n.dialCode, n.country]).draw();
+                        table.row.add([n.fromUser, n.toUser, n.fromUserIP,n.toUserIP,convertMillisecondsToCustomFormat(Date.parse(n.callerChannelAnsweredTime)).clock, n.freeSWITCHHostname,n.country, n.dialCode]).draw();
 
                     });
                 }
@@ -718,7 +718,7 @@ $(function () {
                 if (result.payload.length > 0) {
 
 					 $.each(result.payload, function (i, n) {
-                        table.row.add([n.prefix, n.country, n.completedCallsNum, n.failedCallsNum, n.asr]).draw();
+                        table.row.add([n.country, n.prefix, n.completedCallsNum, n.failedCallsNum, n.asr]).draw();
 
                     });
                    /*
@@ -773,7 +773,7 @@ $(function () {
 
 
                     $.each(result.payload, function (i, n) {
-                        table.row.add([n.prefix, n.country, n.acd, n.rtpQuality, n.callsNum]).draw();
+                        table.row.add([n.country, n.prefix, n.acd, n.rtpQuality, n.callsNum]).draw();
 
                     });
                 }
