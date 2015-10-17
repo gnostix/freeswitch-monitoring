@@ -87,7 +87,8 @@ console.log(r.text()); //"Hello"
 
 
 $('#codesTable').DataTable( {
-    "ajax": {
+     "destroy": true,
+	 "ajax": {
      "url":  path+'/configuration/dialcodes/'+r.text(),
      "dataSrc": function ( json ) {
 	  // console.log(json.payload);
