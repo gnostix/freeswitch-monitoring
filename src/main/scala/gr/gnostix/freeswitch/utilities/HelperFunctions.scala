@@ -31,7 +31,7 @@ object HelperFunctions {
   def sortAcdByCountry(li: List[Option[CompletedCallStatsByCountry]]) ={
     li.flatten.groupBy(_.country).map{
       case (c,v) =>
-        CompletedCallStatsByCountryAcdRtpQuality(c.get, v.head.prefix.get,
+        CompletedCallStatsByCountryAcdRtpQuality(v.head.prefix.get, c.get,
           BigDecimal(v.map(_.billSec).sum.toDouble / v.size ).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble,
           BigDecimal(v.map(_.rtpQuality).sum.toDouble / v.size ).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble, v.size)
     }
@@ -45,9 +45,9 @@ object HelperFunctions {
         fCallsSizeByCountry match {
           case 0 =>
             // if the failed calls to this destination, is 0 then the ASR is 100%
-            CompletedCallStatsByCountryAsr(x.get, y.head.prefix.get, y.size, fCallsSizeByCountry,100)
+            CompletedCallStatsByCountryAsr(y.head.prefix.get, x.get, y.size, fCallsSizeByCountry,100)
 
-          case _ => CompletedCallStatsByCountryAsr(x.get, y.head.prefix.get, y.size, fCallsSizeByCountry,
+          case _ => CompletedCallStatsByCountryAsr(y.head.prefix.get, x.get, y.size, fCallsSizeByCountry,
             BigDecimal(y.size.toDouble / (fCallsSizeByCountry + y.size) * 100).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble)
         }
 

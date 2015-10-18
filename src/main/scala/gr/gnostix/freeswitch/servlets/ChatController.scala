@@ -39,9 +39,9 @@ class ChatController extends ScalatraServlet
   implicit protected val jsonFormats: Formats = DefaultFormats
  // protected implicit lazy val jsonFormats: Formats = DefaultFormats
 
-  before() {
+  before(){
     contentType = formats("json")
-   // requireLogin()
+    requireLogin()
   }
 
 

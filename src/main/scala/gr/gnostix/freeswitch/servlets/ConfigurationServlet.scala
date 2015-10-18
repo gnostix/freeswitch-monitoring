@@ -48,14 +48,15 @@ import scala.language.postfixOps
  */
 class ConfigurationServlet(system: ActorSystem, myActor: ActorRef) extends ScalatraServlet
 with FutureSupport with JacksonJsonSupport with FileUploadSupport
-with CorsSupport with FreeswitchopStack with AuthenticationSupport {
+with CorsSupport with FreeswitchopStack with AuthenticationSupport
+with GZipSupport {
   implicit val timeout = new Timeout(10 seconds)
 
   protected implicit def executor: ExecutionContext = system.dispatcher
 
   before() {
     contentType = formats("json")
-    //    requireLogin()
+    requireLogin()
   }
   configureMultipartHandling(MultipartConfig(maxFileSize = Some(5 * 1024 * 1024)))
 
