@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory
 /**
  * Created by rebel on 6/9/15.
  */
-case class User(userId: Int, username: String, var password: String)
+case class User(userId: Int, username: String, var password: String, firstName: String, lastName: String, company: String, role: String)
 
 object UserDao {
 
@@ -31,7 +31,7 @@ object UserDao {
 
   def getUserByUsername(username: String): Option[User] = {
     if (username == "admin"){
-      Some(User(1, "admin", "admin"))
+      Some(User(1, "admin", "admin", "Alex", "Kapas", "Fs-Moni", "admin"))
     } else {
       None
     }
@@ -39,7 +39,7 @@ object UserDao {
 
   def getUserById(userId: Int): Option[User] = {
     if (userId == 1){
-      Some(User(1, "admin", "admin"))
+      Some(User(1, "admin", "admin", "Alex", "Kapas", "Fs-Moni", "admin"))
     } else {
       None
     }
