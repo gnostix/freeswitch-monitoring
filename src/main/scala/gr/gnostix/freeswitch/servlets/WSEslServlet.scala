@@ -53,7 +53,7 @@ with CorsSupport {
 
   before() {
     contentType = formats("json")
-    requireLogin()
+    //requireLogin()
   }
 
   options("/*") {

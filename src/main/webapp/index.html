@@ -101,7 +101,7 @@
 
     function loginUser() {
         console.log("loginUser");
-		//var path='http://fs-moni.cloudapp.net:8080';
+		//var pathP='http://fs-moni.cloudapp.net:8080';
 	  // var path='';
 
         var logindata = {
@@ -117,8 +117,15 @@
         })
             //contentType: "application/json",
                 .done(function (data) {
-                    console.log("success:" + data);
-                    window.location = "dashboard.html";
+                    console.log("Login success:" + JSON.stringify(data));
+					//save to localstorage (maybe check to save on sessionstorage
+					// Store to local storage
+					localStorage.username = data.username;
+					localStorage.uid= data.userId;
+					localStorage.name = data.firstName+" "+data.lastName;
+					localStorage.company = data.company;
+					localStorage.role = data.role;
+					window.location = "dashboard.html";
                     //ajaxComplete(result, un);
                 })
                 .fail(function (data) {
