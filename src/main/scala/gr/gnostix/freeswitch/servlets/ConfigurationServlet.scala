@@ -56,7 +56,7 @@ with GZipSupport {
 
   before() {
     contentType = formats("json")
-    requireLogin()
+   // requireLogin()
   }
   configureMultipartHandling(MultipartConfig(maxFileSize = Some(5 * 1024 * 1024)))
 

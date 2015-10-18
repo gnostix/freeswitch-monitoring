@@ -312,6 +312,11 @@ $(function () {
 
 	
     jQuery(document).ready(function () {
+		
+		// Retrieve from localstorage username,etc
+		console.log("localStorage.user:"+localStorage.name);
+					document.getElementById("firstlastname").innerHTML = localStorage.name;
+                    
 
            //init results and charts
 	        $.ajax({
