@@ -392,12 +392,13 @@ background-color: rgba(255, 255, 255, 0.3) !important;
 background: rgba(255, 255, 255, 0.3) !important;
 }
 
-#tablePanel {
+#tableConnections {
  border: 2px solid;
   border-color: rgba(255, 255, 255, 0.9);	
   background-color: transparent;
   padding:10px;
   border-radius:5px;
+  font-size:12px !important;
 }
 
 /*css for changing autofill */
@@ -434,7 +435,7 @@ background-color:rgba(255, 255, 255, 0.9);
 padding:15px;
 }
 
-div#header{
+div#header, div#oneConnection{
  
   height: 40px;
   background: rgba(255, 255, 255, 0.8);
@@ -450,7 +451,24 @@ border-top-right-radius: 5px;
 -moz-border-radius-bottomright: 5px;
 -webkit-border-bottom-right-radius: 5px;
 border-bottom-right-radius: 5px;
-
+-moz-border-radius-bottomleft: 5px;
+-webkit-border-bottom-left-radius: 5px;
+border-bottom-left-radius: 5px;
 
 }
 
+button.dt-button, div.dt-button, a.dt-button {
+padding: 0.2em 0.7em !important;
+color: rgba(0, 0, 0, 0.4) !important;
+	border-color: rgba(0, 0, 0, 0.1) !important;
+	 border: 2px solid !important;
+	 border-radius:5px !important;
+}
+
+.dataTables_processing {
+color: rgba(0, 0, 0, 0.4) !important;
+}
+
+#datatables_buttons_info {
+z-index:10000 !important;
+}
