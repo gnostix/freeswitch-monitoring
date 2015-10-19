@@ -230,55 +230,56 @@ $(function () {
     
 
     $('#viewCCalls').click(function () {
-        var table = $('#example').DataTable();
+       // var table = $('#example').DataTable();
 
-        table.clear().draw();
+       // table.clear().draw();
 
-        getDetails(table);
+        getDetails("example");
         //open dialog
         $('#dialog').dialog('open');
     });
-
+	
+	
 
     $('#viewFCalls').click(function () {
-        var table = $('#failedcallstable').DataTable();
+       // var table = $('#failedcallstable').DataTable();
 
-        table.clear().draw();
+      //  table.clear().draw();
 
-        getFailedCallsDetails(table);
+        getFailedCallsDetails("failedcallstable");
         //open dialog
         $('#failedcallsdialog').dialog('open');
 
     });
 	
 	$('#viewASR').click(function () {
-        var table = $('#asrtable').DataTable();
+       // var table = $('#asrtable').DataTable();
 
-        table.clear().draw();
+      //  table.clear().draw();
 
-        getASRDetails(table);
+        getASRDetails("asrtable");
         //open dialog
         $('#asrdialog').dialog('open');
 
     });
 	
 	$('#viewACD').click(function () {
-        var table = $('#acdrtptable').DataTable();
+        //var table = $('#acdrtptable').DataTable();
 
-        table.clear().draw();
+       // table.clear().draw();
 
-        getACDRTPDetails(table);
+        getACDRTPDetails("acdrtptable");
         //open dialog
         $('#acdrtpdialog').dialog('open');
 
     });
 	
 	$('#viewRTP').click(function () {
-        var table = $('#acdrtptable').DataTable();
+       // var table = $('#acdrtptable').DataTable();
 
-        table.clear().draw();
+       // table.clear().draw();
 
-        getACDRTPDetails(table);
+        getACDRTPDetails("acdrtptable");
         //open dialog
         $('#acdrtpdialog').dialog('open');
 
@@ -313,8 +314,8 @@ $(function () {
 	
     jQuery(document).ready(function () {
 		
-		// Retrieve from localstorage username,etc
 		console.log("localStorage.user:"+localStorage.name);
+		// Retrieve from localstorage username,etc
 					document.getElementById("firstlastname").innerHTML = localStorage.name;
                     
 
@@ -571,7 +572,7 @@ $(function () {
     });
 
 
-    function getDetails(table) {
+   /*  function getDetails(table) {
         console.log("getDetails --------------------------------");
         var pop = "";
         var message = "";
@@ -621,15 +622,15 @@ $(function () {
                 }
 
 
-                /*
-                 $(jQuery.parseJSON(JSON.stringify(data))).each(function() {
+                
+                // $(jQuery.parseJSON(JSON.stringify(data))).each(function() {
 
                  //  console.log(this.ip + " - ---- -- " + this.port);
-                 $('#tableC > tbody:last').append('<tr><td>'+this.ip+'</td>' +
-                 '<td>'+this.port+'</td>' +
-                 '<td>'+JSON.stringify(data)+'</td></tr>');
-                 });
-                 */
+               //  $('#tableC > tbody:last').append('<tr><td>'+this.ip+'</td>' +
+               //  '<td>'+this.port+'</td>' +
+               //  '<td>'+JSON.stringify(data)+'</td></tr>');
+               //  });
+                 
                 //return pop;
                 //return message;
 
@@ -649,10 +650,53 @@ $(function () {
             });
 
 
+    } */
+	
+	
+	
+	function getDetails(table) {
+        console.log("getDetails --------------------------------");
+	
+	   $('#'+table).DataTable( {
+			"destroy": true,
+			"processing":true,
+			"dom": 'Bfrtip',
+			buttons: ['copyHtml5','excel', 'csvHtml5','pdfHtml5'],
+	        "ajax": {
+			          url: path+'/actors/concurrent/calls/details', // the url where we want to POST
+                     "dataSrc": function ( json ) {
+			        //console.log(json.payload);
+			         var arr = [];
+					
+					   if (json.payload.length > 0) {
+						    $.each(json.payload, function (i, n) {
+							
+							 var a=[];
+							
+							 a.push(n.fromUser, n.toUser, n.fromUserIP,n.toUserIP,convertMillisecondsToCustomFormat(Date.parse(n.callerChannelAnsweredTime)).clock, n.freeSWITCHHostname,n.country, n.dialCode);
+							 arr.push(a);
+					 	   });
+					   } 
+
+                   
+					
+					    var j={
+						"data":arr
+				     	};
+					   // console.log(j.data);
+			            return j.data;
+			         }
+			}
+		} );
+	   
+	     
+
     }
+	
+	
 
 
-    function getFailedCallsDetails(table) {
+    /* function getFailedCallsDetails(table) {
         console.log("getFailedCallsDetails --------------------------------");
         var pop = "";
         var message = "";
@@ -696,9 +740,48 @@ $(function () {
             });
 
 
+    } */
+	
+	function getFailedCallsDetails(table) {
+        console.log("getFailedCallsDetails --------------------------------");
+	
+	   $('#'+table).DataTable( {
+			"destroy": true,
+			"processing":true,
+			"dom": 'Bfrtip',
+			buttons: ['copyHtml5','excel', 'csvHtml5','pdfHtml5'],
+	        "ajax": {
+			         url: path+'/actors/failed/calls/details', // the url where we want to POST
+					"dataSrc": function ( json ) {
+			        // console.log(json.payload);
+			         var arr = [];
+					
+					   if (json.payload.length > 0) {
+						    $.each(json.payload, function (i, n) {
+							
+							 var a=[];
+							
+							 a.push(n.fromUser, n.toUser, n.fromUserIP, convertMillisecondsToCustomFormat(Date.parse(n.callerChannelHangupTime)).clock, n.hangupCause, n.freeSWITCHHostname);
+							 arr.push(a);
+					 	   });
+					   } 
+
+                   
+					
+					    var j={
+						"data":arr
+				     	};
+					   // console.log(j.data);
+			            return j.data;
+			         }
+			}
+		} );
+	   
+	     
+
     }
 	
-	function getASRDetails(table) {
+	/* function getASRDetails(table) {
         console.log("getASRDetails --------------------------------");
         var pop = "";
         var message = "";
@@ -726,14 +809,14 @@ $(function () {
                         table.row.add([n.country, n.prefix, n.completedCallsNum, n.failedCallsNum, n.asr]).draw();
 
                     });
-                   /*
-				   $.each(result.payload, function (i, n) {
-                        table.row.add([n.fromUser, n.toUser, n.readCodec, n.writeCodec, n.fromUserIP, n.toUserIP, +
-						convertMillisecondsToCustomFormat(Date.parse(n.callerChannelAnsweredTime)).clock,convertMillisecondsToCustomFormat(Date.parse(n.callerChannelHangupTime)).clock, +
-						n.freeSWITCHHostname, n.freeSWITCHIPv4, n.hangupCause, n.billSec, n.rtpQualityPerc]).draw();
+                   
+				 //  $.each(result.payload, function (i, n) {
+                       // table.row.add([n.fromUser, n.toUser, n.readCodec, n.writeCodec, n.fromUserIP, n.toUserIP, +
+					//	convertMillisecondsToCustomFormat(Date.parse(n.callerChannelAnsweredTime)).clock,convertMillisecondsToCustomFormat(Date.parse(n.callerChannelHangupTime)).clock, +
+					//	n.freeSWITCHHostname, n.freeSWITCHIPv4, n.hangupCause, n.billSec, n.rtpQualityPerc]).draw();
 
-                    });
-					*/
+                   // });
+					
                 }
 
             })
@@ -750,9 +833,48 @@ $(function () {
             });
 
 
+    } */
+	
+	function getASRDetails(table) {
+        console.log("getASRDetails --------------------------------");
+	
+	   $('#'+table).DataTable( {
+			"destroy": true,
+			"processing":true,
+			"dom": 'Bfrtip',
+			buttons: ['copyHtml5','excel', 'csvHtml5','pdfHtml5'],
+	        "ajax": {
+			         url: path+'/actors/completed/calls/country/asr', // the url where we want to POST
+					"dataSrc": function ( json ) {
+			        // console.log(json.payload);
+			         var arr = [];
+					
+					   if (json.payload.length > 0) {
+						    $.each(json.payload, function (i, n) {
+							
+							 var a=[];
+							
+							 a.push(n.country, n.prefix, n.completedCallsNum, n.failedCallsNum, n.asr);
+							 arr.push(a);
+					 	   });
+					   } 
+
+                   
+					
+					    var j={
+						"data":arr
+				     	};
+					   // console.log(j.data);
+			            return j.data;
+			         }
+			}
+		} );
+	   
+	     
+
     }
 	
-	function getACDRTPDetails(table) {
+	/* function getACDRTPDetails(table) {
         console.log("getACDRTPDetails --------------------------------");
         var pop = "";
         var message = "";
@@ -797,8 +919,46 @@ $(function () {
             });
 
 
+    } */
+	
+	function getACDRTPDetails(table) {
+        console.log("getACDRTPDetails --------------------------------");
+	
+	   $('#'+table).DataTable( {
+			"destroy": true,
+			"processing":true,
+			"dom": 'Bfrtip',
+			buttons: ['copyHtml5','excel', 'csvHtml5','pdfHtml5'],
+	        "ajax": {
+			       url: path+'/actors/completed/calls/country/acdrtp', // the url where we want to POST
+				  "dataSrc": function ( json ) {
+			        // console.log(json.payload);
+			         var arr = [];
+					
+					   if (json.payload.length > 0) {
+						    $.each(json.payload, function (i, n) {
+							
+							 var a=[];
+							
+							 a.push(n.country, n.prefix, n.acd, n.rtpQuality, n.callsNum);
+							 arr.push(a);
+					 	   });
+					   } 
+
+                   
+					
+					    var j={
+						"data":arr
+				     	};
+					   // console.log(j.data);
+			            return j.data;
+			         }
+			}
+		} );
+	   
+	     
+
     }
 
 
-})
-;
+});

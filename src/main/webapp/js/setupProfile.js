@@ -69,6 +69,22 @@ $(function () {
             //    $('<p/>').text(file.name).appendTo('#files');
           //  });
         },
+		error: function (e, data) {
+		console.log(":errrr::"+JSON.stringify(data));
+		$.gritter.add({
+				// (string | mandatory) the heading of the notification
+				title: "Error uploading file",
+				// (string | mandatory) the text inside the notification
+				text: data,
+				// (string | optional) the image to display on the left
+				image: 'images/growl/error.png',
+				// (bool | optional) if you want it to fade out on its own or just sit there
+				sticky: false,
+				//position: 'bottom-right',
+				// (int | optional) the time you want it to be alive for before fading out
+				time: ''
+			});
+		},
         progressall: function (e, data) {
             var progress = parseInt(data.loaded / data.total * 100, 10);
             $('#progress .progress-bar').css(
@@ -88,7 +104,12 @@ console.log(r.text()); //"Hello"
 
 $('#codesTable').DataTable( {
      "destroy": true,
-	 "ajax": {
+	 "processing":true,
+	 "dom": 'Bfrtip',
+     //"buttons": [ 'csv', 'excel', 'pdf'],
+	// buttons: true,
+	buttons: ['copyHtml5','excel', 'csvHtml5','pdfHtml5'],
+	"ajax": {
      "url":  path+'/configuration/dialcodes/'+r.text(),
      "dataSrc": function ( json ) {
 	  // console.log(json.payload);
@@ -112,6 +133,7 @@ $('#codesTable').DataTable( {
       }
     }
 } );
+
 
 /*
 //lazyloading

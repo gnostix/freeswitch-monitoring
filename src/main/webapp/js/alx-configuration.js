@@ -5,7 +5,7 @@ $(function () {
 	//var path='';
 
 $(document).ready ( function(){
-	var table = $('#table').DataTable();	 
+	var table = $('#tableConnections').DataTable();	 
 		 
 		$.ajax({
             type: 'GET', // define the type of HTTP verb we want to use (POST for our form)
@@ -55,6 +55,19 @@ $(document).ready ( function(){
                 // show any errors
                 // best to remove for production
                 console.log("on fail " + JSON.stringify(data));
+				$.gritter.add({
+					// (string | mandatory) the heading of the notification
+					title: "ERROR",
+					// (string | mandatory) the text inside the notification
+					text: data.message,
+					// (string | optional) the image to display on the left
+					image: 'images/growl/error.png',
+					// (bool | optional) if you want it to fade out on its own or just sit there
+					sticky: false,
+					//position: 'bottom-right',
+					// (int | optional) the time you want it to be alive for before fading out
+					time: ''
+					});
 				if(data.status===401){
 					//alert(JSON.stringify(data));
 					window.location = "index.html";
@@ -102,13 +115,27 @@ $(document).ready ( function(){
                         //this removes a class name
                         //$(".form-horizontal").remove();
                         //this replace text in a  class
-                        $( ".inputRes" ).replaceWith( data.message);
+                       // $( ".inputRes" ).replaceWith( data.message);
                         //this changes the class
-                        $("#message").toggleClass('alert-info alert-success');
+                      //  $("#message").toggleClass('alert-info alert-success');
                       //  $('#table > tbody:last').append('<tr><td>'+formData.ip+'</td><td>'+formData.port+'</td><td><button type="button" class="btn btn-danger remove" onclick ="delete_user($(this),\''+formData.ip+'\')">Delete</button></td></tr>');
+						$.gritter.add({
+					// (string | mandatory) the heading of the notification
+					title: "Success!",
+					// (string | mandatory) the text inside the notification
+					text: data.message,
+					// (string | optional) the image to display on the left
+					image: 'images/growl/confirm.png',
+					// (bool | optional) if you want it to fade out on its own or just sit there
+					sticky: false,
+					//position: 'bottom-right',
+					// (int | optional) the time you want it to be alive for before fading out
+					time: ''
+					});
+						
 						
 						if($('#tableRow').css('display') == 'none') {
-						var table = $('#table').DataTable();
+						var table = $('#tableConnections').DataTable();
 						 $("#tableRow").show();
 					    //table.clear().draw();
 						  table.row.add([formData.ip, formData.port,'<button type="button"  class="btn btn-danger remove">Delete</button>']).draw();
@@ -119,9 +146,23 @@ $(document).ready ( function(){
                         //this removes a class name
                         //$(".form-horizontal").remove();
                         //this replace text in a  class
-                        $( ".inputRes" ).replaceWith( data.message);
+                       // $( ".inputRes" ).replaceWith( data.message);
                         //this changes the class
-                        $("#message").toggleClass('alert-info alert-danger');
+                       // $("#message").toggleClass('alert-info alert-danger');
+						
+						$.gritter.add({
+					// (string | mandatory) the heading of the notification
+					title: "ERROR",
+					// (string | mandatory) the text inside the notification
+					text: data.message,
+					// (string | optional) the image to display on the left
+					image: 'images/growl/error.png',
+					// (bool | optional) if you want it to fade out on its own or just sit there
+					sticky: false,
+					//position: 'bottom-right',
+					// (int | optional) the time you want it to be alive for before fading out
+					time: ''
+					});
 
                     }
 
@@ -132,8 +173,23 @@ $(document).ready ( function(){
 					// show any errors
                     // best to remove for production
                     console.log("on fail " + JSON.stringify(data));
-                    $( ".inputRes" ).replaceWith( data.message );
-                    $("#message").toggleClass('alert-info alert-danger');
+                    //$( ".inputRes" ).replaceWith( data.message );
+                   // $("#message").toggleClass('alert-info alert-danger');
+					
+					$.gritter.add({
+					// (string | mandatory) the heading of the notification
+					title: "ERROR",
+					// (string | mandatory) the text inside the notification
+					text: data.statusText,
+					// (string | optional) the image to display on the left
+					image: 'images/growl/error.png',
+					// (bool | optional) if you want it to fade out on its own or just sit there
+					sticky: false,
+					//position: 'bottom-right',
+					// (int | optional) the time you want it to be alive for before fading out
+					time: ''
+					});
+					
 					if(data.status===401){
 					//alert(JSON.stringify(data));
 					window.location = "index.html";
@@ -149,9 +205,9 @@ $(document).ready ( function(){
 
 
 
-$('#table tbody').on( 'click', 'button', function() {
+$('#tableConnections tbody').on( 'click', 'button', function() {
    // alert("The paragraph was tbody.");
-	var table = $('#table').DataTable();
+	var table = $('#tableConnections').DataTable();
 	//get the ip to delete
 	var data = table.row( $(this).parents('tr') ).data();
        // alert( data[0]);
@@ -201,6 +257,19 @@ function delete_user(ip)
             // show any errors
             // best to remove for production
             console.log("on fail " + JSON.stringify(data));
+			$.gritter.add({
+					// (string | mandatory) the heading of the notification
+					title: "ERROR",
+					// (string | mandatory) the text inside the notification
+					text: data.message,
+					// (string | optional) the image to display on the left
+					image: 'images/growl/error.png',
+					// (bool | optional) if you want it to fade out on its own or just sit there
+					sticky: false,
+					//position: 'bottom-right',
+					// (int | optional) the time you want it to be alive for before fading out
+					time: ''
+					});
 			if(data.status===401){
 					//alert(JSON.stringify(data));
 					window.location = "index.html";

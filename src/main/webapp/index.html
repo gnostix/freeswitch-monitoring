@@ -18,6 +18,9 @@
 	
 	<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
 	<link rel="icon" href="images/favicon.ico" type="image/x-icon">
+	<!--growl -->
+	<link rel="stylesheet" type="text/css" href="css/growl/jquery.gritter.css" />
+
 <!--initialise values -->
  <script src="js/init.js"></script>
     <style type="text/css">
@@ -95,6 +98,14 @@
     <!-- /footer -->
 </div>
 
+<!-- jQuery -->
+<script src="js/jquery.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="js/bootstrap.min.js"></script>
+
+<!--growl -->	
+<script type="text/javascript" src="js/plugins/growl/jquery.gritter.js"></script>
 
 <script>
 
@@ -130,6 +141,22 @@
                 })
                 .fail(function (data) {
                     console.log("error:" + data.responseText);
+					//growl message
+
+				$.gritter.add({
+					// (string | mandatory) the heading of the notification
+					title: "ERROR",
+					// (string | mandatory) the text inside the notification
+					text: data.responseText,
+					// (string | optional) the image to display on the left
+					image: 'images/growl/error.png',
+					// (bool | optional) if you want it to fade out on its own or just sit there
+					sticky: false,
+					//position: 'bottom-right',
+					// (int | optional) the time you want it to be alive for before fading out
+					time: ''
+				});
+
                     //te(data, un);
                 })
 
@@ -157,14 +184,6 @@
 <!-- /login wrapper -->
 
 
-<!-- jQuery -->
-<script src="js/jquery.js"></script>
-
-<!-- Bootstrap Core JavaScript -->
-<script src="js/bootstrap.min.js"></script>
-
-<!-- Morris Charts JavaScript -->
-<script src="js/plugins/morris/raphael.min.js"></script>
 
 
 </body>

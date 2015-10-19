@@ -42,6 +42,9 @@
 
 <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
 	<link rel="icon" href="images/favicon.ico" type="image/x-icon">	
+	
+<!--growl -->
+	<link rel="stylesheet" type="text/css" href="css/growl/jquery.gritter.css" />
 	<!--initialise values -->
  <script src="js/init.js"></script>
  <style type="text/css">
@@ -268,15 +271,16 @@
                         </div>
 						</div>
 					
-					</br>
+					</br></br>
 					
 					   <div id="tableRow"class="row" style="display:none">
-							<div class="panel-heading">
-                                <h3 class="panel-title"><i class="fa fa-retweet"></i> Connections</h3>
-                            </div>
+							 <div id="header" class="round">
+								<h3 class="panel-title"><i class="fa fa-retweet"></i> Connections</h3>
+							</div>
+							</br>
 							<div class="col-lg-12 text-center">
 							<div id="tablePanel">
-                                    <table id="table" class="table table-striped display compact" >
+                                    <table id="tableConnections" class="table table-striped display compact" >
                                         <thead>
                                         <tr>
                                             <th>IP</th>
@@ -345,6 +349,8 @@
 <!-- The basic File Upload plugin -->
 <script src="js/plugins/upload/jquery.fileupload.js"></script>
 
+<!--growl -->	
+<script type="text/javascript" src="js/plugins/growl/jquery.gritter.js"></script>
 </body>
 
 </html>
