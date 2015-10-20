@@ -69,8 +69,9 @@ class EslEventRouter extends Actor with ActorLogging {
         pdd, ringTimeSec, None, None) =>
           log info s"no uuid $uuid" + x.toString
 
-        case x @ HeartBeat(eventType, eventInfo, uptimeMsec, sessionCount, sessionPerSecond, eventDateTimestamp,
-        idleCPU, sessionPeakMax, sessionPeakMaxFiveMin, freeSWITCHHostname, freeSWITCHIPv4, upTime) =>
+        case x @ HeartBeat(eventType, eventInfo, uptimeMsec, concurrentCalls, sessionPerSecond, eventDateTimestamp,
+        idleCPU, callsPeakMax, sessionPeakMaxFiveMin, freeSWITCHHostname, freeSWITCHIPv4, upTime, maxAllowedCalls) =>
+          log info "-----> " + x.toString
 
           heartBeatActor ! x
 
@@ -193,7 +194,10 @@ class EslEventRouter extends Actor with ActorLogging {
     //val uuid = "_UNKNOWN"
     val eventInfo = headers get "Event-Info" getOrElse "_UNKNOWN"
     val upTime = headers get "Up-Time" getOrElse "_UNKNOWN"
-    val sessionCount = headers get "Session-Count" getOrElse "0"
+    val concurrentCalls = headers get "Session-Count" getOrElse "0" match {
+      case "0" => 0
+      case x => x.toInt / 2
+    }
     val sessionPerSecond = headers get "Session-Per-Sec" getOrElse "0"
     val cpuUsage = 100 - (headers get "Idle-CPU" getOrElse "0").toDouble
     val sessionPeakMax = headers get "Session-Peak-Max" getOrElse "0"
@@ -201,15 +205,24 @@ class EslEventRouter extends Actor with ActorLogging {
     val freeSWITCHHostname = headers get "FreeSWITCH-Hostname" getOrElse "0"
     val freeSWITCHIPv4 = headers get "FreeSWITCH-IPv4" getOrElse "0"
     val uptimeMsec = headers get "Uptime-msec" getOrElse "0"
+    val maxAllowedCalls = headers get "Max-Sessions" getOrElse "0" match {
+      case "0" => 0
+      case x => x.toInt / 2
+    }
+    val callsPeakMax = headers get "Session-Peak-Max" getOrElse "0" match {
+      case "0" => 0
+      case x => x.toInt / 2
+    } //each call has two sessions so we divide them by 2
 
     val eventDateTimestamp =  headers get "Event-Date-timestamp" getOrElse "0" match {
       case "0" => new Timestamp(System.currentTimeMillis) // if the call failed this value would be 0 but we need the time that the call failed
       case x => new Timestamp(x.toLong / 1000)
     }
 
-    HeartBeat("HEARTBEAT", eventInfo, uptimeMsec.toLong, sessionCount.toInt, sessionPerSecond.toInt,
+    HeartBeat("HEARTBEAT", eventInfo, uptimeMsec.toLong, concurrentCalls.toInt, sessionPerSecond.toInt,
       eventDateTimestamp, BigDecimal(cpuUsage).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble,
-      sessionPeakMax.toInt, sessionPeakMaxFiveMin.toInt, freeSWITCHHostname, freeSWITCHIPv4, upTime)
+      callsPeakMax.toInt/2, sessionPeakMaxFiveMin.toInt, freeSWITCHHostname, freeSWITCHIPv4, upTime,
+      maxAllowedCalls.toInt/2)
   }
 
 def getPDD(varProgressEpoch: Long, varStartStamp: Long): Float = {

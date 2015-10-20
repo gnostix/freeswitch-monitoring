@@ -18,6 +18,8 @@
 
 package gr.gnostix.freeswitch.actors
 
+import java.sql.Timestamp
+
 import akka.actor.{Props, Actor, ActorLogging, ActorRef}
 import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetAllHeartBeat, GetLastHeartBeat, InitializeDashboardHeartBeat}
 
@@ -38,10 +40,11 @@ class HeartBeatActor(wsLiveEventsActor: ActorRef) extends Actor with ActorLoggin
   var heartBeats: List[HeartBeat] = List()
 
   val Tick = "tick"
+  val AvgHeartbeat = "avgHeartbeat"
 
   def receive: Receive = {
-    case x @ HeartBeat(eventType, eventInfo, uptimeMsec, sessionCount, sessionPerSecond, eventDateTimestamp, cpuUsage,
-    sessionPeakMax, sessionPeakMaxFiveMin, freeSWITCHHostname, freeSWITCHIPv4, upTime) =>
+    case x @ HeartBeat(eventType, eventInfo, uptimeMsec, concurrentCalls, sessionPerSecond, eventDateTimestamp,
+    idleCPU, callsPeakMax, sessionPeakMaxFiveMin, freeSWITCHHostname, freeSWITCHIPv4, upTime, maxAllowedCalls) =>
       heartBeats ::= x
       //AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.heartbeatToJson(x))
       wsLiveEventsActor ! x
@@ -62,12 +65,43 @@ class HeartBeatActor(wsLiveEventsActor: ActorRef) extends Actor with ActorLoggin
       heartBeats = getLastsHeartBeats
       //log info "Tick coming .. " + heartBeats.size
 
+      /*AvgHeartBeat(eventName: String, uptimeMsec: Long, concurrentCalls: Int, sessionPerSecond: Int,
+        eventDateTimestamp: Timestamp, cpuUsage: Double, callsPeakMax: Int, sessionPeakMaxFiveMin: Int,
+        maxAllowedCalls: Int)
+      */
+    case AvgHeartbeat =>
+      val averageHeartBeatStats = heartBeats.take(10).groupBy(_.freeSWITCHHostname).map{
+        case (x,y) => y.sortWith( (leftD, rightD) => leftD.eventDateTimestamp.after(rightD.eventDateTimestamp) ).head
+      }.toList
+
+      averageHeartBeatStats match {
+        case Nil => // do nothing
+        case x =>  // do nothing becase we already send the HeartBeat for this FS node
+        case x :: xs =>
+          val avgHeartBeat = AvgHeartBeat("AVG_HEARTBEAT",
+          averageHeartBeatStats.map(_.uptimeMsec).sum / averageHeartBeatStats.size,
+          averageHeartBeatStats.map(_.concurrentCalls).sum,
+          averageHeartBeatStats.map(_.sessionPerSecond).sum / averageHeartBeatStats.size,
+          new Timestamp(System.currentTimeMillis),
+          averageHeartBeatStats.map(_.cpuUsage).sum / averageHeartBeatStats.size,
+          averageHeartBeatStats.map(_.callsPeakMax).sum / averageHeartBeatStats.size,
+          averageHeartBeatStats.map(_.sessionPeakMaxFiveMin).sum / averageHeartBeatStats.size,
+          averageHeartBeatStats.map(_.maxAllowedCalls).sum)
+
+          wsLiveEventsActor ! avgHeartBeat
+      }
   }
 
   context.system.scheduler.schedule(10000 milliseconds,
     1200000 milliseconds,
     self,
     Tick)
+
+  context.system.scheduler.schedule(10000 milliseconds,
+    60000 milliseconds,
+    self,
+    AvgHeartbeat)
+
 
   def getLastsHeartBeats = {
     heartBeats.take(1000)

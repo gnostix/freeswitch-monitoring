@@ -28,9 +28,15 @@ sealed trait EventType {
   def eventName: String
 }
 
-case class HeartBeat(eventName: String, eventInfo: String, uptimeMsec: Long, sessionCount: Int,
-                     sessionPerSecond: Int, eventDateTimestamp: Timestamp, cpuUsage: Double, sessionPeakMax: Int,
-                     sessionPeakMaxFiveMin: Int, freeSWITCHHostname: String, freeSWITCHIPv4: String, upTime: String)
+case class HeartBeat(eventName: String, eventInfo: String, uptimeMsec: Long, concurrentCalls: Int,
+                     sessionPerSecond: Int, eventDateTimestamp: Timestamp, cpuUsage: Double, callsPeakMax: Int,
+                     sessionPeakMaxFiveMin: Int, freeSWITCHHostname: String, freeSWITCHIPv4: String, upTime: String,
+                     maxAllowedCalls: Int)
+  extends EventType
+
+case class AvgHeartBeat(eventName: String, uptimeMsec: Long, concurrentCalls: Int, sessionPerSecond: Int,
+                        eventDateTimestamp: Timestamp, cpuUsage: Double, callsPeakMax: Int, sessionPeakMaxFiveMin: Int,
+                        maxAllowedCalls: Int)
   extends EventType
 
 
@@ -43,16 +49,16 @@ sealed trait CallEventType extends EventType {
 case class CallNew(uuid: String, eventName: String, fromUser: String, toUser: String, readCodec: String, writeCodec: String,
                    fromUserIP: String, toUserIP: String, callUUID: String, callerChannelCreatedTime: Option[Timestamp],
                    callerChannelAnsweredTime: Option[Timestamp], freeSWITCHHostname: String, freeSWITCHIPv4: String,
-                    callDirection: String, pdd: Float, ringingSec: Float, dialCode: Option[String], country: Option[String])
+                   callDirection: String, pdd: Float, ringingSec: Float, dialCode: Option[String], country: Option[String])
   extends CallEventType
 
 
 case class CallEnd(uuid: String, eventName: String, fromUser: String, toUser: String, readCodec: String, writeCodec: String,
                    fromUserIP: String, toUserIP: String, callUUID: String, callerChannelCreatedTime: Option[Timestamp],
                    callerChannelAnsweredTime: Option[Timestamp], callerChannelHangupTime: Timestamp,
-                   freeSWITCHHostname: String, freeSWITCHIPv4: String, hangupCause: String,  billSec: Int,
+                   freeSWITCHHostname: String, freeSWITCHIPv4: String, hangupCause: String, billSec: Int,
                    rtpQualityPerc: Double, otherLegUniqueId: String, hangupDisposition: String, callDirection: String,
-                    mos: Double, pdd: Float, ringingSec: Float, dialCode: Option[String], country: Option[String])
+                   mos: Double, pdd: Float, ringingSec: Float, dialCode: Option[String], country: Option[String])
   extends CallEventType
 
 case class FailedCall(eventName: String, fromUser: String, toUser: String, callUUID: String, freeSWITCHIPv4: String)
