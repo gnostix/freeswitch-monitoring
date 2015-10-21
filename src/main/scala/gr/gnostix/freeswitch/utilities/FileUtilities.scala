@@ -39,16 +39,30 @@ object FileUtilities {
 
     chkFile.size match {
       case 0 =>
-        // proccess file  country,code
+        // without header ,proccess file  country,code
         itr2.toList.map {
           l => val cols = if (l.contains(";")) l.split(";").map(_.trim) else l.split(",").map(_.trim)
             dialCodesMap += (cols(1) -> cols(0))
         }
         csv.close()
         ApiReplyData(200, "File uploaded successfully", Map(fileName -> dialCodesMap))
+
+      case 1 if(chkFile.head == 1) =>
+        // with header ,proccess file  country,code
+      itr2.toList.tail.map {
+          l => val cols = if (l.contains(";")) l.split(";").map(_.trim) else l.split(",").map(_.trim)
+            dialCodesMap += (cols(1) -> cols(0))
+        }
+        csv.close()
+        ApiReplyData(200, "File uploaded successfully", Map(fileName -> dialCodesMap))
+
       case _ => // errors in file
         csv.close()
-        ApiReplyError(400, s"Error in lines: ${chkFile.mkString}")
+        chkFile.head match {
+          case 1 => ApiReplyError(400, s"Error in lines: ${chkFile.tail.mkString(",")}")
+          case _ => ApiReplyError(400, s"Error in lines: ${chkFile.mkString(",")}")
+        }
+
     }
 
   }
