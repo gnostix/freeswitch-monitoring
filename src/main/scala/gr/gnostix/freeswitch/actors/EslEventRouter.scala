@@ -194,21 +194,30 @@ class EslEventRouter extends Actor with ActorLogging {
     //val uuid = "_UNKNOWN"
     val eventInfo = headers get "Event-Info" getOrElse "_UNKNOWN"
     val upTime = headers get "Up-Time" getOrElse "_UNKNOWN"
+
+    val sessionPerSecond = headers get "Session-Per-Sec" getOrElse "0"
+    val cpuUsage = 100 - (headers get "Idle-CPU" getOrElse "0").toDouble
+    val sessionPeakMax = headers get "Session-Peak-Max" getOrElse "0"
+    val freeSWITCHHostname = headers get "FreeSWITCH-Hostname" getOrElse "0"
+    val freeSWITCHIPv4 = headers get "FreeSWITCH-IPv4" getOrElse "0"
+    val uptimeMsec = headers get "Uptime-msec" getOrElse "0"
+
     val concurrentCalls = headers get "Session-Count" getOrElse "0" match {
       case "0" => 0
       case x => x.toInt / 2
     }
-    val sessionPerSecond = headers get "Session-Per-Sec" getOrElse "0"
-    val cpuUsage = 100 - (headers get "Idle-CPU" getOrElse "0").toDouble
-    val sessionPeakMax = headers get "Session-Peak-Max" getOrElse "0"
-    val sessionPeakMaxFiveMin = headers get "Session-Peak-FiveMin" getOrElse "0"
-    val freeSWITCHHostname = headers get "FreeSWITCH-Hostname" getOrElse "0"
-    val freeSWITCHIPv4 = headers get "FreeSWITCH-IPv4" getOrElse "0"
-    val uptimeMsec = headers get "Uptime-msec" getOrElse "0"
+
+    val sessionPeakMaxFiveMin = headers get "Session-Peak-FiveMin" getOrElse "0" match {
+      case "0" => 0
+      case x => x.toInt / 2
+    }
+
+
     val maxAllowedCalls = headers get "Max-Sessions" getOrElse "0" match {
       case "0" => 0
       case x => x.toInt / 2
     }
+    
     val callsPeakMax = headers get "Session-Peak-Max" getOrElse "0" match {
       case "0" => 0
       case x => x.toInt / 2
@@ -221,8 +230,8 @@ class EslEventRouter extends Actor with ActorLogging {
 
     HeartBeat("HEARTBEAT", eventInfo, uptimeMsec.toLong, concurrentCalls.toInt, sessionPerSecond.toInt,
       eventDateTimestamp, BigDecimal(cpuUsage).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble,
-      callsPeakMax.toInt/2, sessionPeakMaxFiveMin.toInt, freeSWITCHHostname, freeSWITCHIPv4, upTime,
-      maxAllowedCalls.toInt/2)
+      callsPeakMax.toInt, sessionPeakMaxFiveMin.toInt, freeSWITCHHostname, freeSWITCHIPv4, upTime,
+      maxAllowedCalls.toInt)
   }
 
 def getPDD(varProgressEpoch: Long, varStartStamp: Long): Float = {

@@ -28,6 +28,10 @@ import scala.util.Random
  */
 object HelperFunctions {
 
+  def roundDouble(number: Double): Double = {
+    BigDecimal(number).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+  }
+
   def sortAcdByCountry(li: List[Option[CompletedCallStatsByCountry]]) ={
     li.flatten.groupBy(_.country).map{
       case (c,v) =>

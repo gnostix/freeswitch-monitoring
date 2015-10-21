@@ -22,6 +22,7 @@ import java.sql.Timestamp
 
 import akka.actor.{Props, Actor, ActorLogging, ActorRef}
 import gr.gnostix.freeswitch.actors.ActorsProtocol.{GetAllHeartBeat, GetLastHeartBeat, InitializeDashboardHeartBeat}
+import gr.gnostix.freeswitch.utilities.HelperFunctions
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -43,50 +44,51 @@ class HeartBeatActor(wsLiveEventsActor: ActorRef) extends Actor with ActorLoggin
   val AvgHeartbeat = "avgHeartbeat"
 
   def receive: Receive = {
-    case x @ HeartBeat(eventType, eventInfo, uptimeMsec, concurrentCalls, sessionPerSecond, eventDateTimestamp,
+    case x@HeartBeat(eventType, eventInfo, uptimeMsec, concurrentCalls, sessionPerSecond, eventDateTimestamp,
     idleCPU, callsPeakMax, sessionPeakMaxFiveMin, freeSWITCHHostname, freeSWITCHIPv4, upTime, maxAllowedCalls) =>
       heartBeats ::= x
       //AtmosphereClient.broadcast("/fs-moni/live/events", ActorsJsonProtocol.heartbeatToJson(x))
       wsLiveEventsActor ! x
-      //wsLiveEventsActor ! ActorsJsonProtocol.heartbeatToJson(x)
-      //log info "broadcasted HeartBeat to WS"
+    //wsLiveEventsActor ! ActorsJsonProtocol.heartbeatToJson(x)
+    //log info "broadcasted HeartBeat to WS"
 
     case x@InitializeDashboardHeartBeat =>
       sender ! heartBeats.take(30)
 
-    case x @ GetLastHeartBeat =>
+    case x@GetLastHeartBeat =>
       log info "-----------> ask for last heartbeat"
       sender ! heartBeats.headOption.getOrElse(None)
 
-    case x @ GetAllHeartBeat =>
+    case x@GetAllHeartBeat =>
       sender ! heartBeats
 
     case Tick =>
       heartBeats = getLastsHeartBeats
-      //log info "Tick coming .. " + heartBeats.size
+    //log info "Tick coming .. " + heartBeats.size
 
-      /*AvgHeartBeat(eventName: String, uptimeMsec: Long, concurrentCalls: Int, sessionPerSecond: Int,
-        eventDateTimestamp: Timestamp, cpuUsage: Double, callsPeakMax: Int, sessionPeakMaxFiveMin: Int,
-        maxAllowedCalls: Int)
-      */
+    /*AvgHeartBeat(eventName: String, uptimeMsec: Long, concurrentCalls: Int, sessionPerSecond: Int,
+      eventDateTimestamp: Timestamp, cpuUsage: Double, callsPeakMax: Int, sessionPeakMaxFiveMin: Int,
+      maxAllowedCalls: Int)
+    */
     case AvgHeartbeat =>
-      val averageHeartBeatStats = heartBeats.take(10).groupBy(_.freeSWITCHHostname).map{
-        case (x,y) => y.sortWith( (leftD, rightD) => leftD.eventDateTimestamp.after(rightD.eventDateTimestamp) ).head
+      val averageHeartBeatStats = heartBeats.take(10).groupBy(_.freeSWITCHHostname).map {
+        case (x, y) => y.sortWith((leftD, rightD) => leftD.eventDateTimestamp.after(rightD.eventDateTimestamp)).head
       }.toList
 
-      averageHeartBeatStats match {
-        case Nil => // do nothing
-        case x =>  // do nothing becase we already send the HeartBeat for this FS node
-        case x :: xs =>
+      averageHeartBeatStats.size match {
+        case x if (x <= 1) => // do nothing becase we already send the HeartBeat for this FS node
+        case x if (x > 1) =>
           val avgHeartBeat = AvgHeartBeat("AVG_HEARTBEAT",
-          averageHeartBeatStats.map(_.uptimeMsec).sum / averageHeartBeatStats.size,
-          averageHeartBeatStats.map(_.concurrentCalls).sum,
-          averageHeartBeatStats.map(_.sessionPerSecond).sum / averageHeartBeatStats.size,
-          new Timestamp(System.currentTimeMillis),
-          averageHeartBeatStats.map(_.cpuUsage).sum / averageHeartBeatStats.size,
-          averageHeartBeatStats.map(_.callsPeakMax).sum / averageHeartBeatStats.size,
-          averageHeartBeatStats.map(_.sessionPeakMaxFiveMin).sum / averageHeartBeatStats.size,
-          averageHeartBeatStats.map(_.maxAllowedCalls).sum)
+            HelperFunctions.roundDouble(averageHeartBeatStats.map(_.uptimeMsec).sum / averageHeartBeatStats.size.toDouble),
+            averageHeartBeatStats.map(_.concurrentCalls).sum,
+            HelperFunctions.roundDouble(averageHeartBeatStats.map(_.sessionPerSecond).sum / averageHeartBeatStats.size.toDouble),
+            new Timestamp(System.currentTimeMillis),
+            HelperFunctions.roundDouble(averageHeartBeatStats.map(_.cpuUsage).sum / averageHeartBeatStats.size.toDouble),
+            averageHeartBeatStats.sortBy(_.callsPeakMax).last.callsPeakMax,
+            averageHeartBeatStats.sortBy(_.sessionPeakMaxFiveMin).last.sessionPeakMaxFiveMin,
+            averageHeartBeatStats.map(_.maxAllowedCalls).sum)
+
+          log info s"-----> $avgHeartBeat"
 
           wsLiveEventsActor ! avgHeartBeat
       }

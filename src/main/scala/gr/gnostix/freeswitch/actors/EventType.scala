@@ -34,9 +34,9 @@ case class HeartBeat(eventName: String, eventInfo: String, uptimeMsec: Long, con
                      maxAllowedCalls: Int)
   extends EventType
 
-case class AvgHeartBeat(eventName: String, uptimeMsec: Long, concurrentCalls: Int, sessionPerSecond: Int,
-                        eventDateTimestamp: Timestamp, cpuUsage: Double, callsPeakMax: Int, sessionPeakMaxFiveMin: Int,
-                        maxAllowedCalls: Int)
+case class AvgHeartBeat(eventName: String, avgUptimeMsec: Double, totalConcurrentCalls: Int, avgSessionPerSecond: Double,
+                        eventDateTimestamp: Timestamp, avgCpuUsage: Double, callsPeakMax: Int, maxSessionPeakMaxFiveMin: Int,
+                        totalMaxAllowedCalls: Int)
   extends EventType
 
 
