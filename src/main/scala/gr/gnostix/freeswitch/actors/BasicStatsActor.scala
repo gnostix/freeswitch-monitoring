@@ -129,8 +129,6 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
   }
 
 
-
-
   def getSwitchUniqueIPs(concCalls: List[Option[CallNew]], failedCalls: List[CallEnd],
                          compCalls: List[CompletedCallStatsByIP]): List[SwitchIpHostname] = {
 
@@ -138,9 +136,13 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
       failedCalls.groupBy(_.freeSWITCHIPv4).map(ip => SwitchIpHostname(ip._2.head.freeSWITCHIPv4, ip._2.head.freeSWITCHHostname)).toList :::
       compCalls.groupBy(_.ipAddress).map(ip => SwitchIpHostname(ip._2.head.ipAddress, ip._2.head.hostname)).toList
 
-    log info s"the hosts: $hosts"
+    val uniqueHosts = hosts.groupBy(_.ip).map {
+      case (ip, uH) => uH.head
+    }.toList
 
-    hosts
+    log info s"the hosts: $uniqueHosts"
+
+    uniqueHosts
   }
 
 
@@ -150,7 +152,6 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
       case x if (x == 0) => List() // no switch available so do nothing
       case x if (x == 1) => // for one switch just send the plain data..
         // when we checked last about these data
-        lastBasicStatsTickTime = new Timestamp(System.currentTimeMillis)
         val bsStats = getBasicStatsSeriesByIp(concCalls.flatten, failedCalls, compCalls, switchUniqueIPs.headOption)
         List(bsStats)
 
@@ -172,7 +173,7 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
         val avgBS = getBasicStatsSeriesByIp(concCalls.flatten, failedCalls, compCalls, None)
         // when we checked last about these data
 
-          basicStatsPerIP :+ avgBS
+        basicStatsPerIP :+ avgBS
       }
 
     }
@@ -186,10 +187,12 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
 
     val asr = compCallsByIPSorted.size match {
       case 0 => 0
-      case _ => failedCallsByIP.size match {
-        case 0 => 100
-        case _ => BigDecimal(compCallsByIPSorted.size.toDouble / (compCallsByIPSorted.size + failedCallsByIP.size) * 100).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-      }
+      case _ =>
+        log info s" ------> switchUniqueIPHost ${switchUniqueIPHost.headOption.get}"
+        failedCallsByIP.size match {
+          case 0 => 100
+          case _ => BigDecimal(compCallsByIPSorted.size.toDouble / (compCallsByIPSorted.size + failedCallsByIP.size) * 100).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+        }
     }
 
     val acd = compCallsByIPSorted.size match {

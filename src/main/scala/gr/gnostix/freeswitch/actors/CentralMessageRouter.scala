@@ -65,7 +65,7 @@ class CentralMessageRouter(dialCodes: Map[String, SortedMap[String, String]]) ex
 
 
   // start the first connection
-  // eslConnectionDispatcherActor ! EslConnectionData("localhost", 8021, "ClueCon")
+  //eslConnectionDispatcherActor ! EslConnectionData("localhost", 8022, "ClueCon")
    eslConnectionDispatcherActor ! EslConnectionData("192.168.1.128", 8021, "ClueCon")
 
   eslConnectionDispatcherActor ! EslConnectionData("fs-instance.com", 8021, "ClueCon")
