@@ -64,6 +64,7 @@ class WSLiveEventsActor extends Actor with ActorLogging {
       log info s"removing client with uuid ${x.uuid} and client id list $atmoClientsUuid"
 
     case x: BasicStatsCalls =>
+      log info "OutboundMessage coming .. " + x.eventName
       atmoClientsUuid.size match {
         case 0 => log info "do nothing.. no connected clients.."
         case _ =>

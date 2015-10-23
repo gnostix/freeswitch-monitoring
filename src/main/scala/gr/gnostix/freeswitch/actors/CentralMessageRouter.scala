@@ -112,6 +112,9 @@ class CentralMessageRouter(dialCodes: Map[String, SortedMap[String, String]]) ex
       // api calls asking for data
       callRouterActor forward x
 
+    case x @ GetConcurrentCallsChannelByIpPrefix(ip, prefix) =>
+      callRouterActor forward x
+
     case x@(GetBasicStatsTimeSeries) =>
       // api calls asking for data
       basicStatsActor forward x

@@ -52,7 +52,9 @@ object ActorsProtocol {
 
   case object GetTotalConcurrentCalls extends RouterRequest
 
-  case class ConcurrentCallsNum(calls: Int) extends RouterRequest
+  case class ConcurrentCallsNum(calls: Int) extends RouterResponse
+
+  case class ConcurrentCallsChannels(calls: List[CallNew]) extends RouterResponse
 
   case object GetTotalFailedCalls extends RouterRequest
 
@@ -72,7 +74,13 @@ object ActorsProtocol {
 
   case class GetConcurrentCallsChannel(uuid: String) extends RouterRequest
 
+  case class GetConcurrentCallsChannelByIpPrefix(ip: Option[String], prefix: Option[String]) extends RouterRequest
+
   case object GetFailedCallsChannel extends RouterRequest
+
+  case class GetFailedCallsChannelByTime(time: Timestamp) extends RouterRequest
+
+  case class GetFailedCallsChannelByIp(ip: String) extends RouterRequest
 
   case object GetCompletedCallsChannel extends RouterRequest
 

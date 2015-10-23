@@ -29,7 +29,7 @@ import gr.gnostix.freeswitch.FreeswitchopStack
 import gr.gnostix.freeswitch.actors.ActorsProtocol._
 import gr.gnostix.freeswitch.actors.{BasicStatsTimeSeries, HeartBeat, CallEnd, CallNew}
 import gr.gnostix.freeswitch.actors.ServletProtocol.{ApiReply, ApiReplyData}
-import gr.gnostix.freeswitch.model.CompletedCallStatsByCountry
+import gr.gnostix.freeswitch.model.{IpPrefix, CompletedCallStatsByCountryByIP}
 import gr.gnostix.freeswitch.utilities.HelperFunctions
 import org.joda.time.DateTime
 import org.json4s.{DefaultFormats, Formats}
@@ -105,8 +105,24 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
     myActor ? GetTotalConcurrentCalls
   }
 
+
   get("/concurrent/calls/details"){
     val data: Future[List[Option[CallNew]]] = (myActor ? GetConcurrentCallsChannel).mapTo[List[Option[CallNew]]]
+
+    new AsyncResult {
+      val is =
+        for {
+          dt <- data
+        } yield ApiReplyData(200,"all good", dt)
+
+    }
+  }
+
+  post("/concurrent/calls/details"){
+    val callsChannelByIpPrefix = parsedBody.extract[GetConcurrentCallsChannelByIpPrefix]
+
+    val data: Future[List[Option[CallNew]]] =
+      (myActor ? callsChannelByIpPrefix).mapTo[List[Option[CallNew]]]
 
     new AsyncResult {
       val is =
@@ -133,6 +149,19 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
     }
   }
 
+  get("/failed/calls/details/:ip"){
+    val ipAddress = params("ip")
+    val data: Future[List[CallEnd]] = (myActor ? GetFailedCallsChannelByIp(ipAddress)).mapTo[List[CallEnd]]
+
+    new AsyncResult {
+      val is =
+        for {
+          dt <- data
+        } yield ApiReplyData(200,"all good", dt)
+
+    }
+  }
+
   get("/completed/calls/details"){
     val data: Future[List[CallEnd]] = (myActor ? GetCompletedCallsChannel).mapTo[List[CallEnd]]
 
@@ -147,8 +176,8 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
 
   //GetACDAndRTPByCountry
   get("/completed/calls/country/acdrtp"){
-    val data: Future[List[Option[CompletedCallStatsByCountry]]] =
-      (myActor ? GetBillSecAndRTPByCountry).mapTo[List[Option[CompletedCallStatsByCountry]]]
+    val data: Future[List[Option[CompletedCallStatsByCountryByIP]]] =
+      (myActor ? GetBillSecAndRTPByCountry).mapTo[List[Option[CompletedCallStatsByCountryByIP]]]
 
     new AsyncResult {
       val is =
@@ -161,7 +190,7 @@ class EslActorApp(system:ActorSystem, myActor:ActorRef)
 
   get("/completed/calls/country/asr"){
     val fCalls: Future[List[CallEnd]] = (myActor ? GetFailedCalls).mapTo[List[CallEnd]]
-    val cCalls: Future[List[Option[CompletedCallStatsByCountry]]] = (myActor ? GetBillSecAndRTPByCountry).mapTo[List[Option[CompletedCallStatsByCountry]]]
+    val cCalls: Future[List[Option[CompletedCallStatsByCountryByIP]]] = (myActor ? GetBillSecAndRTPByCountry).mapTo[List[Option[CompletedCallStatsByCountryByIP]]]
 
     new AsyncResult {
       val is =

@@ -23,7 +23,7 @@ import java.sql.Timestamp
 import akka.actor.{Props, ActorRef, Actor, ActorLogging}
 import akka.util.Timeout
 import gr.gnostix.freeswitch.actors.ActorsProtocol._
-import gr.gnostix.freeswitch.model.CompletedCallStats
+import gr.gnostix.freeswitch.model.CompletedCallStatsByIP
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -36,16 +36,14 @@ import scala.util.{Failure, Success}
  * Created by rebel on 17/8/15.
  */
 
-sealed trait BasicStatsCalls
+sealed trait BasicStatsCalls {
+  def eventName: String
+}
 
-case class ConcurrentCallsTimeSeries(dateTime: Timestamp, concCallsNum: Int) extends BasicStatsCalls
-
-case class FailedCallsTimeSeries(dateTime: Timestamp, failedCallsNum: Int) extends BasicStatsCalls
-
-case class ACDTimeSeries(dateTime: Timestamp, acd: Int) extends BasicStatsCalls
+case class SwitchIpHostname(ip: String, host: String)
 
 case class BasicStatsTimeSeries(eventName: String, dateTime: Timestamp, concCallsNum: Int, failedCallsNum: Int,
-                                acd: Double, asr: Double, rtpQualityAvg: Double) extends BasicStatsCalls
+                                acd: Double, asr: Double, rtpQualityAvg: Double, ipAddress: Option[String], hostname: Option[String]) extends BasicStatsCalls
 
 case class CustomStatsPerCustomerTimeSeries(dateTime: Timestamp, concCallsNum: Int, failedCallsNum: Int, acd: Int, asr: Double,
                                             rtpQualityAvg: Double, ip: List[String], cliPrefixRegEx: Option[List[String]])
@@ -56,6 +54,7 @@ sealed trait CustomJobs
 //object CustomJob extends CustomJobs
 
 case class StatsPerCustomer(ip: List[String], cliPrefixRegEx: Option[List[String]], desc: String) extends CustomJobs
+
 case class StatsPerProvider(ip: List[String], cliPrefixRegEx: Option[List[String]], desc: String) extends CustomJobs
 
 
@@ -70,21 +69,21 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
   implicit val timeout = Timeout(1 seconds)
 
   val BASIC_STATS = "BASIC_STATS"
+  val AVG_BASIC_STATS = "AVG_BASIC_STATS"
   val BasicStatsTick = "BasicStatsTick"
   val Tick = "Tick"
   var lastBasicStatsTickTime = new Timestamp(System.currentTimeMillis)
   var basicStats: List[BasicStatsTimeSeries] = List()
   var customStatsPerCust: List[CustomStatsPerCustomerTimeSeries] = List()
   var customJobs: List[StatsPerCustomer] = List()
-  var totalOfLastValueFailedCalls = 0
 
   def receive: Receive = {
 
     case BasicStatsTick =>
-      val conCallsT: Future[ConcurrentCallsNum] = (callRouterActor ? GetTotalConcurrentCalls).mapTo[ConcurrentCallsNum]
-      val failedCallsT: Future[TotalFailedCalls] = (callRouterActor ? GetTotalFailedCalls).mapTo[TotalFailedCalls]
-      val completedCallsStatsT: Future[List[CompletedCallStats]] =
-        (completedCallsActor ? GetACDAndRTPByTime(lastBasicStatsTickTime)).mapTo[List[CompletedCallStats]]
+      val conCallsT: Future[List[Option[CallNew]]] = (callRouterActor ? GetConcurrentCallsChannel).mapTo[List[Option[CallNew]]]
+      val failedCallsT: Future[List[CallEnd]] = (callRouterActor ? GetFailedCallsChannelByTime(lastBasicStatsTickTime)).mapTo[List[CallEnd]]
+      val completedCallsStatsT: Future[List[CompletedCallStatsByIP]] =
+        (completedCallsActor ? GetACDAndRTPByTime(lastBasicStatsTickTime)).mapTo[List[CompletedCallStatsByIP]]
 
       // acd = sum of minutes devided by the number of calls
       // asr = the % of devide the successfully completed calls by the total number of calls and then multiply by 100
@@ -93,41 +92,29 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
         r2 <- failedCallsT
         r3 <- completedCallsStatsT
       } yield {
-          r3.isEmpty match {
-            case true =>
-              //log info s"------> response from BasicStatsTick failed calls ${r2.failedCalls} - totalOfLastValueFailedCalls ${totalOfLastValueFailedCalls}"
-              (BasicStatsTimeSeries(BASIC_STATS, new Timestamp(System.currentTimeMillis), r1.calls, r2.failedCalls - totalOfLastValueFailedCalls, 0, 0, 0),r2.failedCalls)
-            case false => {
-              log info s"------> response from BasicStatsTick failed calls ${r2.failedCalls - totalOfLastValueFailedCalls} - completed calls ${r3.size}"
-              val r3Sorted = r3.sortWith { (leftE, rightE) => leftE.callerChannelHangupTime.before(rightE.callerChannelHangupTime) }
-              val asr = BigDecimal(r3Sorted.size.toDouble / (r3Sorted.size + (r2.failedCalls - totalOfLastValueFailedCalls)) * 100).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-                log info s" ------> acd r3Sorted sum ${r3Sorted.map(x => x.acd).sum / r3Sorted.size} and size ${r3Sorted.size}"
-              val acd = BigDecimal((r3Sorted.map(x => x.acd).sum / r3Sorted.size) / 60.toDouble).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble //seconds to minutes
-              val rtpQ = r3Sorted.map(x => x.rtpQuality).sum / r3Sorted.size.toDouble
-              lastBasicStatsTickTime = r3Sorted.reverse.head.callerChannelHangupTime
+          val switchUniqueIPs = getSwitchUniqueIPs(r1, r2, r3)
+          val basicStatsSeriesToSend = extractBasicTimeSeries(r1, r2, r3, switchUniqueIPs)
 
-              (BasicStatsTimeSeries(BASIC_STATS, new Timestamp(System.currentTimeMillis), r1.calls, r2.failedCalls - totalOfLastValueFailedCalls, acd, asr, rtpQ),r2.failedCalls)
-            }
-
-          }
+          basicStatsSeriesToSend
 
         }
-      //${r3.size} failed calls: ${r2.failedCalls}"
 
       response.onComplete {
         case Success(x) =>
           //log info "------> response from BasicStatsTick"
-          wsLiveEventsActor ! x._1
+          x.asInstanceOf[List[BasicStatsTimeSeries]].map {
+            bStats =>
+              log info s"---> Bstats: $bStats"
+              wsLiveEventsActor ! bStats
+          }
+
           //wsLiveEventsActor ! ActorsJsonProtocol.caseClassToJsonMessage(x._1)
-          basicStats ::= x._1
-          totalOfLastValueFailedCalls = x._2
+          basicStats :::= x.asInstanceOf[List[BasicStatsTimeSeries]]
           log info s"---------> the asr data completed Calls: "
 
         case Failure(e) => log warning "BasicStatsTick failed in response " + e.getMessage
       }
 
-//    case x@StatsPerCustomer(_, _) =>
-//      customJobs ::= x
 
     case Tick =>
       basicStats = getRetentionedBasicStats
@@ -141,8 +128,96 @@ class BasicStatsActor(callRouterActor: ActorRef, completedCallsActor: ActorRef, 
     case x => log info "basic stats actor: I don't know this message " + x.toString
   }
 
+
+
+
+  def getSwitchUniqueIPs(concCalls: List[Option[CallNew]], failedCalls: List[CallEnd],
+                         compCalls: List[CompletedCallStatsByIP]): List[SwitchIpHostname] = {
+
+    val hosts = concCalls.flatten.groupBy(_.freeSWITCHIPv4).map(ip => SwitchIpHostname(ip._2.head.freeSWITCHIPv4, ip._2.head.freeSWITCHHostname)).toList :::
+      failedCalls.groupBy(_.freeSWITCHIPv4).map(ip => SwitchIpHostname(ip._2.head.freeSWITCHIPv4, ip._2.head.freeSWITCHHostname)).toList :::
+      compCalls.groupBy(_.ipAddress).map(ip => SwitchIpHostname(ip._2.head.ipAddress, ip._2.head.hostname)).toList
+
+    log info s"the hosts: $hosts"
+
+    hosts
+  }
+
+
+  def extractBasicTimeSeries(concCalls: List[Option[CallNew]], failedCalls: List[CallEnd], compCalls: List[CompletedCallStatsByIP],
+                             switchUniqueIPs: List[SwitchIpHostname]): List[BasicStatsTimeSeries] = {
+    switchUniqueIPs.size match {
+      case x if (x == 0) => List() // no switch available so do nothing
+      case x if (x == 1) => // for one switch just send the plain data..
+        // when we checked last about these data
+        lastBasicStatsTickTime = new Timestamp(System.currentTimeMillis)
+        val bsStats = getBasicStatsSeriesByIp(concCalls.flatten, failedCalls, compCalls, switchUniqueIPs.headOption)
+        List(bsStats)
+
+      case x if (x > 1) => {
+        // for many switches configured we do the following steps..
+        // first send for each  Switch IP address
+        val basicStatsPerIP = switchUniqueIPs.map {
+          c => {
+            val concCallsByIP = concCalls.flatten.filter(_.freeSWITCHIPv4 == c)
+            val failedCallsByIP = failedCalls.filter(_.freeSWITCHIPv4 == c)
+            val compCallsByIP = compCalls.filter(_.ipAddress == c)
+
+            // get the basic stats time serie for this ip
+            getBasicStatsSeriesByIp(concCallsByIP, failedCallsByIP, compCallsByIP, Some(c))
+          }
+        }
+
+        // here send the average for all Switches
+        val avgBS = getBasicStatsSeriesByIp(concCalls.flatten, failedCalls, compCalls, None)
+        // when we checked last about these data
+
+          basicStatsPerIP :+ avgBS
+      }
+
+    }
+  }
+
+
+  def getBasicStatsSeriesByIp(concCallsByIP: List[CallNew], failedCallsByIP: List[CallEnd], compCalls: List[CompletedCallStatsByIP],
+                              switchUniqueIPHost: Option[SwitchIpHostname]): BasicStatsTimeSeries = {
+
+    val compCallsByIPSorted = compCalls.sortWith { (leftE, rightE) => leftE.callerChannelHangupTime.after(rightE.callerChannelHangupTime) }
+
+    val asr = compCallsByIPSorted.size match {
+      case 0 => 0
+      case _ => failedCallsByIP.size match {
+        case 0 => 100
+        case _ => BigDecimal(compCallsByIPSorted.size.toDouble / (compCallsByIPSorted.size + failedCallsByIP.size) * 100).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+      }
+    }
+
+    val acd = compCallsByIPSorted.size match {
+      case 0 => 0
+      case _ =>
+        // update last check time for Stats
+        lastBasicStatsTickTime = compCallsByIPSorted.head.callerChannelHangupTime
+        BigDecimal((compCallsByIPSorted.map(x => x.acd).sum / compCallsByIPSorted.size) / 60.toDouble).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble //seconds to minutes
+    }
+
+    val rtpQ = compCallsByIPSorted.size match {
+      case 0 => 0
+      case _ =>
+        log info s" ------> acd r3Sorted sum ${compCallsByIPSorted.map(x => x.acd).sum / compCallsByIPSorted.size} and size ${compCallsByIPSorted.size} and failedalls size ${failedCallsByIP}"
+        compCallsByIPSorted.map(x => x.rtpQuality).sum / compCallsByIPSorted.size.toDouble
+    }
+
+    switchUniqueIPHost match {
+      case Some(dt) => BasicStatsTimeSeries(BASIC_STATS, new Timestamp(System.currentTimeMillis), concCallsByIP.size, failedCallsByIP.size, acd, asr, rtpQ, Some(dt.ip), Some(dt.host))
+      case None => BasicStatsTimeSeries(AVG_BASIC_STATS, new Timestamp(System.currentTimeMillis), concCallsByIP.size, failedCallsByIP.size, acd, asr, rtpQ, None, None)
+    }
+
+
+  }
+
+
   context.system.scheduler.schedule(10000 milliseconds,
-    60000 milliseconds,
+    20000 milliseconds,
     self,
     BasicStatsTick)
 

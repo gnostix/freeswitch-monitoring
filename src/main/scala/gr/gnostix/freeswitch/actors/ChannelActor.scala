@@ -77,7 +77,7 @@ class ChannelActor(channelStates: List[CallEventType]) extends Actor with ActorL
                 c.hangupDisposition, c.callDirection, c.mos, c.pdd, c.ringingSec, x.prefix, x.country)
             } else c
 
-          case x => x
+          case ev => ev
         }
       }
       context become idle(newList)
@@ -96,11 +96,38 @@ class ChannelActor(channelStates: List[CallEventType]) extends Actor with ActorL
       }
 
     case x@GetConcurrentCallsChannel(uuid) =>
-      log info s"---------------> channel states ${channelStates}"
+      //log info s"---------------> channel states ${channelStates}"
+      //log info "channel actor got event GetConcurrentCallsChannel"
       (channelStates.head.asInstanceOf[CallNew].uuid == x.uuid) match {
-        case true => sender ! Some(channelStates.head)
+        case true =>
+          //log info "call router got event GetConcurrentCallsChannel TRUE"
+          sender ! Some(channelStates.head)
         case false => sender ! None
       }
+
+
+    case x@GetConcurrentCallsChannelByIpPrefix(ip, prefix) =>
+      ip match {
+        case None => prefix match {
+          case None => sender ! Some(channelStates.head)
+          case Some(pr) =>
+            if (channelStates.head.toUser.startsWith(pr)) sender ! Some(channelStates.head) else sender ! None
+        }
+
+        case Some(ipAddr) => prefix match {
+          case None => if (channelStates.head.freeSWITCHIPv4 == ipAddr) {
+            sender ! Some(channelStates.head)
+          } else {
+            sender ! None
+          }
+          case Some(pr) =>
+            if (channelStates.head.toUser.startsWith(pr) && channelStates.head.freeSWITCHIPv4 == ipAddr) {
+              sender ! Some(channelStates.head)
+            } else sender ! None
+        }
+
+      }
+
 
     /*
         case x@GetCompletedCallsChannel =>

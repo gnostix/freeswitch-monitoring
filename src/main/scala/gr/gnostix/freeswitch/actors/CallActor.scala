@@ -25,7 +25,7 @@ import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
 import gr.gnostix.freeswitch.actors.ActorsProtocol._
-import gr.gnostix.freeswitch.model.{CompletedCallStatsByCountry, CompletedCallStats}
+import gr.gnostix.freeswitch.model.{CompletedCallStatsByCountryByIP, CompletedCallStatsByIP}
 import org.scalatra.atmosphere.AtmosphereClient
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -165,7 +165,12 @@ class CallActor extends Actor with ActorLogging {
       }
 
     case x @ GetConcurrentCallsChannel =>
+      //log info "call actor got event GetConcurrentCallsChannel"
       activeChannels.head._2 forward GetConcurrentCallsChannel(uuidChannelA)
+
+
+    case x @ GetConcurrentCallsChannelByIpPrefix(ip, prefix) =>
+      activeChannels.head._2 forward x
 
 
     case x @ GetCompletedCallsChannel =>
@@ -182,7 +187,7 @@ class CallActor extends Actor with ActorLogging {
       endCallChannel match {
         case Some(a) =>
           //log info s"--------> CallActor on CompletedCalls: $a"
-          sender ! CompletedCallStats(a.billSec, a.rtpQualityPerc, a.callerChannelHangupTime)
+          sender ! CompletedCallStatsByIP(a.billSec, a.rtpQualityPerc, a.callerChannelHangupTime, a.freeSWITCHIPv4, a.freeSWITCHHostname)
         case None => log warning "-----> ignore GetACDLastFor60Seconds.. channel empty!!"
       }
 
@@ -192,7 +197,7 @@ class CallActor extends Actor with ActorLogging {
         case Some(a) =>
           //log info s"--------> CallActor on CompletedCalls: $a"
           a.dialCode match {
-            case Some(code) => sender ! Some(CompletedCallStatsByCountry(a.dialCode, a.country, a.billSec, a.rtpQualityPerc, a.callerChannelHangupTime))
+            case Some(code) => sender ! Some(CompletedCallStatsByCountryByIP(a.dialCode, a.country, a.billSec, a.rtpQualityPerc, a.callerChannelHangupTime, a.freeSWITCHIPv4, a.freeSWITCHHostname))
             case None => sender ! None
           }
         case None => log warning "-----> ignore GetACDAndRTPByCountry.. channel empty!!"
