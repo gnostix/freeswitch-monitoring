@@ -37,8 +37,39 @@ $(function () {
 	//var url = '/configuration/dialcodes';
 	var url = path+'/configuration/dialcodes';
     $('#fileupload').fileupload({
-        url: url,
-		 acceptFileTypes: '/(\.|\/)(png)$/i',
+        add: function(e, data) {
+                var uploadErrors = [];
+                var acceptFileTypes =  /(\.|\/)(ms-excel|txt|xlsx?|ods)$/i;
+				//console.log(acceptFileTypes);
+				//console.log(data.originalFiles[0]['type']);
+                if(data.originalFiles[0]['type'].length && !acceptFileTypes.test(data.originalFiles[0]['type'])) {
+					
+                    uploadErrors.push('Not an accepted file type');
+                }
+                if(data.originalFiles[0]['size'].length && data.originalFiles[0]['size'] > 5000000) {
+                    uploadErrors.push('Filesize is too big');
+                }
+                if(uploadErrors.length > 0) {
+                    //alert(uploadErrors.join("\n"));
+					$.gritter.add({
+				// (string | mandatory) the heading of the notification
+				title: 'Error!',
+				// (string | mandatory) the text inside the notification
+				text: uploadErrors.join("\n"),
+				// (string | optional) the image to display on the left
+				image: 'images/growl/error.png',
+				// (bool | optional) if you want it to fade out on its own or just sit there
+				sticky: false,
+				//position: 'bottom-right',
+				// (int | optional) the time you want it to be alive for before fading out
+				time: ''
+				});
+                } else {
+                    data.submit();
+                }
+        },
+		url: url,
+		acceptFileTypes: /(\.|\/)(csv|zip|xlsx?|ods)$/i,
     // The maximum allowed file size in bytes:
 		maxFileSize: 1000000, // 1 MB
         dataType: 'json',
@@ -86,7 +117,8 @@ $(function () {
 			});
 		},
         progressall: function (e, data) {
-            var progress = parseInt(data.loaded / data.total * 100, 10);
+           // console.log(":progressall::"+JSON.stringify(data));
+			var progress = parseInt(data.loaded / data.total * 100, 10);
             $('#progress .progress-bar').css(
                 'width',
                 progress + '%'
@@ -105,10 +137,10 @@ console.log(r.text()); //"Hello"
 $('#codesTable').DataTable( {
      "destroy": true,
 	 "processing":true,
-	 "dom": 'Bfrtip',
+	 "dom": 'Bfrltip',
      //"buttons": [ 'csv', 'excel', 'pdf'],
 	// buttons: true,
-	buttons: ['copyHtml5','excel', 'csvHtml5','pdfHtml5'],
+	buttons: ['excel', 'csvHtml5','pdfHtml5'],
 	"ajax": {
      "url":  path+'/configuration/dialcodes/'+r.text(),
      "dataSrc": function ( json ) {
@@ -294,7 +326,7 @@ console.log("deleteFile::"+r.text()); //Hello"
                            ' </div>'+
                            ' <a href="#">'+
                               '  <div class="panel-footer">'+
-                                  '  <span class="pull-left"><i class="fa fa-eye fa-2x viewFile"></i></span>'+
+                                  '  <span class="pull-left"><i class="fa fa-eye fa-2x viewFile"><code class="aFile">Active file</code></i></span>'+
                                    ' <span class="pull-right"><i class="fa fa-times-circle-o fa-2x deleteFile"></i></span>'+
                                    ' <div class="clearfix"></div>'+
                                 '</div>'+
@@ -324,7 +356,7 @@ console.log("deleteFile::"+r.text()); //Hello"
                            ' </div>'+
                            ' <a href="#">'+
                               '  <div class="panel-footer">'+
-                                  '  <span class="pull-left"><i class="fa fa-eye fa-2x viewFile"></i></span>'+
+                                  '  <span class="pull-left"><i class="fa fa-eye fa-2x viewFile"><code class="aFile">Active file</code></i></span>'+
                                   ' <div class="clearfix"></div>'+
                                 '</div>'+
                             '</a>'+
