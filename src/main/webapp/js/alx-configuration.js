@@ -36,7 +36,9 @@ $(document).ready ( function(){
 
 
                     });
-                }
+                   } else {
+					   $("#inputCredentials").show();
+				   }
 
 
                /*  $("#message").toggleClass('alert-info alert-success');
