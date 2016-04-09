@@ -23,6 +23,7 @@ import gr.gnostix.freeswitch.actors.ActorsProtocol._
 import org.scalatra.atmosphere.AtmosphereClient
 import scala.collection.SortedMap
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
@@ -114,6 +115,17 @@ class FailedCallsActor(wsLiveEventsActor: ActorRef) extends Actor with ActorLogg
           }
 
         case None => //do nothing
+      }
+
+    case x @ GetFailedCallsChannelByTime(t) =>
+      failedCalls.isEmpty match {
+        case true =>
+           sender ! List()
+        case false =>
+          val act = failedCalls.filter(s => s.callerChannelHangupTime.after(t))
+
+          sender ! act
+
       }
 
 

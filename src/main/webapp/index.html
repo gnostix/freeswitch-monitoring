@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
-    <title>Freeswitch Monitoring Gnostix Platform</title>
+    <title>Freeswitch Monitoring Platform</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -136,6 +136,8 @@
 					localStorage.name = data.firstName+" "+data.lastName;
 					localStorage.company = data.company;
 					localStorage.role = data.role;
+					//init dashboard for all connections
+					sessionStorage.connection="all";
 					window.location = "dashboard.html";
                     //ajaxComplete(result, un);
                 })

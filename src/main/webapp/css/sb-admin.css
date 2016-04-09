@@ -418,9 +418,16 @@ margin-top:5px;
 }
 
 .progress-bar-success, .btn-success {
-background-color:rgba(30,180,101,1)
-
+background-color:rgba(0,156,216,0.9) ;
+border-color: rgba(0,156,236, 1);
  }
+ 
+.btn-success:hover,
+.btn-success:active {
+
+  background-color:rgba(0,156,286,0.9) ;
+border-color: rgba(0,156,236, 1);
+}
  
 .filenameText {
 
@@ -471,4 +478,18 @@ color: rgba(0, 0, 0, 0.4) !important;
 
 #datatables_buttons_info {
 z-index:10000 !important;
+}
+
+.highcharts-background {
+background-color:rgba(255, 255, 255, 0.9) !important;
+}
+
+.arc-gauge-text { font-size: 25px; font-weight: 100; position: absolute; width: 100%; text-align: center; top: 58px; }
+.arc-gauge-text .small { font-size: 16px; font-weight: 200; color: #666; }
+.aFile {
+font-size: 16px; font-weight: 200; color: rgba(80, 220, 180, 0.8);
+}
+
+.panel-footer {
+background-color:rgba(245,245,245,0.95);
 }

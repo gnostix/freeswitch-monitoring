@@ -19,7 +19,7 @@
 package gr.gnostix.freeswitch.utilities
 
 import gr.gnostix.freeswitch.actors.CallEnd
-import gr.gnostix.freeswitch.model.{CompletedCallStatsByCountryAsr, CompletedCallStatsByCountryAcdRtpQuality, CompletedCallStatsByCountry}
+import gr.gnostix.freeswitch.model.{CompletedCallStatsByCountryAsrByIP, CompletedCallStatsByCountryAcdRtpQualityByIP, CompletedCallStatsByCountryByIP}
 
 import scala.util.Random
 
@@ -32,16 +32,17 @@ object HelperFunctions {
     BigDecimal(number).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
   }
 
-  def sortAcdByCountry(li: List[Option[CompletedCallStatsByCountry]]) ={
+  def sortAcdByCountry(li: List[Option[CompletedCallStatsByCountryByIP]]) ={
     li.flatten.groupBy(_.country).map{
       case (c,v) =>
-        CompletedCallStatsByCountryAcdRtpQuality(v.head.prefix.get, c.get,
+        CompletedCallStatsByCountryAcdRtpQualityByIP(v.head.prefix.get, c.get,
           BigDecimal(v.map(_.billSec).sum.toDouble / v.size ).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble,
-          BigDecimal(v.map(_.rtpQuality).sum.toDouble / v.size ).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble, v.size)
+          BigDecimal(v.map(_.rtpQuality).sum.toDouble / v.size ).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble,
+          v.size, v.head.ipAddress, v.head.hostname)
     }
   }.toList //BigDecimal( ).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
 
-  def getAsrByCountry(compCallsStats: List[Option[CompletedCallStatsByCountry]], failedCalls: List[CallEnd]) = {
+  def getAsrByCountry(compCallsStats: List[Option[CompletedCallStatsByCountryByIP]], failedCalls: List[CallEnd]) = {
     compCallsStats.flatten.groupBy(_.country).map{
       case (x,y) =>
         val fCallsSizeByCountry = failedCalls.filter(_.country == x).size
@@ -49,10 +50,11 @@ object HelperFunctions {
         fCallsSizeByCountry match {
           case 0 =>
             // if the failed calls to this destination, is 0 then the ASR is 100%
-            CompletedCallStatsByCountryAsr(y.head.prefix.get, x.get, y.size, fCallsSizeByCountry,100)
+            CompletedCallStatsByCountryAsrByIP(y.head.prefix.get, x.get, y.size, fCallsSizeByCountry,100,y.head.ipAddress, y.head.hostname)
 
-          case _ => CompletedCallStatsByCountryAsr(y.head.prefix.get, x.get, y.size, fCallsSizeByCountry,
-            BigDecimal(y.size.toDouble / (fCallsSizeByCountry + y.size) * 100).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble)
+          case _ => CompletedCallStatsByCountryAsrByIP(y.head.prefix.get, x.get, y.size, fCallsSizeByCountry,
+            BigDecimal(y.size.toDouble / (fCallsSizeByCountry + y.size) * 100).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble,
+            y.head.ipAddress, y.head.hostname)
         }
 
     }
@@ -83,4 +85,6 @@ object HelperFunctions {
   def doublePrecision1(num: Double): Double = {
     BigDecimal(num).setScale(1, BigDecimal.RoundingMode.HALF_UP).toDouble
   }
+
+  def isStrEmpty(x: String) = x != null && x.trim.nonEmpty
 }

@@ -43,6 +43,8 @@ case class AvgHeartBeat(eventName: String, avgUptimeMsec: Double, totalConcurren
 sealed trait CallEventType extends EventType {
   def fromUser: String
 
+  def freeSWITCHIPv4: String
+
   def toUser: String
 }
 

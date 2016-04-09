@@ -27,7 +27,7 @@ $(document).ready ( function(){
 					if (data.payload.length > 0) {
 						//var table = $('#table').DataTable();
 						 $("#tableRow").show();
-
+						$("#inputCredentials").hide();
                     $.each(data.payload, function (i, n) {
                          console.log("Sensor Index: " + i + ", Sensor Name: " + n.ip );
 
@@ -36,7 +36,9 @@ $(document).ready ( function(){
 
 
                     });
-                }
+                   } else {
+					   $("#inputCredentials").show();
+				   }
 
 
                /*  $("#message").toggleClass('alert-info alert-success');
@@ -137,8 +139,13 @@ $(document).ready ( function(){
 						if($('#tableRow').css('display') == 'none') {
 						var table = $('#tableConnections').DataTable();
 						 $("#tableRow").show();
+						 $("#inputCredentials").hide();
 					    //table.clear().draw();
 						  table.row.add([formData.ip, formData.port,'<button type="button"  class="btn btn-danger remove">Delete</button>']).draw();
+						
+						} else {
+							var table = $('#tableConnections').DataTable();
+						    table.row.add([formData.ip, formData.port,'<button type="button"  class="btn btn-danger remove">Delete</button>']).draw();
 						
 						}
                     } else if(data.status===400){
@@ -151,17 +158,17 @@ $(document).ready ( function(){
                        // $("#message").toggleClass('alert-info alert-danger');
 						
 						$.gritter.add({
-					// (string | mandatory) the heading of the notification
-					title: "ERROR",
-					// (string | mandatory) the text inside the notification
-					text: data.message,
-					// (string | optional) the image to display on the left
-					image: 'images/growl/error.png',
-					// (bool | optional) if you want it to fade out on its own or just sit there
-					sticky: false,
-					//position: 'bottom-right',
-					// (int | optional) the time you want it to be alive for before fading out
-					time: ''
+					 // (string | mandatory) the heading of the notification
+					 title: "ERROR",
+					 // (string | mandatory) the text inside the notification
+					 text: data.message,
+					 // (string | optional) the image to display on the left
+					 image: 'images/growl/error.png',
+					 // (bool | optional) if you want it to fade out on its own or just sit there
+					 sticky: false,
+					 //position: 'bottom-right',
+					 // (int | optional) the time you want it to be alive for before fading out
+					 time: ''
 					});
 
                     }
@@ -211,12 +218,13 @@ $('#tableConnections tbody').on( 'click', 'button', function() {
 	//get the ip to delete
 	var data = table.row( $(this).parents('tr') ).data();
        // alert( data[0]);
+	   delete_user(data[0])
 	table.row( $(this).parents('tr') ).remove().draw();
 	var info = table.page.info();
 	var count = info.recordsTotal;
 	if(count===0) {
 		$("#tableRow").hide();
-		delete_user(data[0])
+		$("#inputCredentials").show();
 	}
 	//alert(info);
 	//number of rows

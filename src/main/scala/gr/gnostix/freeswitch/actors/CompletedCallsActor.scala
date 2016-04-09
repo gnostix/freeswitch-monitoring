@@ -25,7 +25,7 @@ import akka.actor._
 import akka.pattern.{ask, pipe}
 import akka.util.Timeout
 import gr.gnostix.freeswitch.actors.ActorsProtocol.GetBillSecAndRTPByCountry
-import gr.gnostix.freeswitch.model.{CompletedCallStatsByCountry, CompletedCallStats}
+import gr.gnostix.freeswitch.model.{CompletedCallStatsByCountryByIP, CompletedCallStatsByIP}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -71,8 +71,8 @@ class CompletedCallsActor extends Actor with ActorLogging {
           sender ! List()
         case false =>
           val act = completedCalls.map(x => x._2).filter(s => s.hangupTime.after(t))
-          val f: List[Future[CompletedCallStats]] = act.map{
-           case a => (a.callActor ? GetACDAndRTP).mapTo[CompletedCallStats]
+          val f: List[Future[CompletedCallStatsByIP]] = act.map{
+           case a => (a.callActor ? GetACDAndRTP).mapTo[CompletedCallStatsByIP]
           }.toList
 
           //log info s"Completed calls Actor GetACDAndRTPForLast60Seconds , asking all call actors" + Future.sequence(f)
@@ -85,8 +85,8 @@ class CompletedCallsActor extends Actor with ActorLogging {
           //log info s"Completed calls Actor GetACDAndRTPForLast60Seconds | NO completedCalls: " + completedCalls
           sender ! List()
         case false =>
-          val f: List[Future[CompletedCallStats]] = completedCalls.map{
-            case (x,y) => (y.callActor ? GetACDAndRTP).mapTo[CompletedCallStats]
+          val f: List[Future[CompletedCallStatsByIP]] = completedCalls.map{
+            case (x,y) => (y.callActor ? GetACDAndRTP).mapTo[CompletedCallStatsByIP]
           }.toList
 
           //log info s"Completed calls Actor GetACDAndRTPForLast60Seconds , asking all call actors" + Future.sequence(f)
@@ -99,8 +99,8 @@ class CompletedCallsActor extends Actor with ActorLogging {
           //log info s"Completed calls Actor GetACDAndRTPForLast60Seconds | NO completedCalls: " + completedCalls
           sender ! List()
         case false =>
-          val f: List[Future[Option[CompletedCallStatsByCountry]]] = completedCalls.map{
-            case (x,y) => (y.callActor ? GetBillSecAndRTPByCountry).mapTo[Option[CompletedCallStatsByCountry]]
+          val f: List[Future[Option[CompletedCallStatsByCountryByIP]]] = completedCalls.map{
+            case (x,y) => (y.callActor ? GetBillSecAndRTPByCountry).mapTo[Option[CompletedCallStatsByCountryByIP]]
           }.toList
 
           //log info s"Completed calls Actor GetACDAndRTPForLast60Seconds , asking all call actors" + Future.sequence(f)

@@ -139,6 +139,9 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
     case x @ GetFailedCallsAnalysis(fromNumberOfDigits, toNumberOfDigits) =>
       failedCallsActor forward x
 
+    case x @ GetFailedCallsChannelByTime(t) =>
+      failedCallsActor forward x
+
     case x@GetCallInfo(callUuid) =>
       (activeCalls get callUuid) match {
         case None =>
@@ -163,6 +166,7 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
       }
 
     case x @ GetConcurrentCallsChannel =>
+      log info "call router got event GetConcurrentCallsChannel"
       val f: List[Future[Option[CallNew]]] = activeCalls.map{
         case (a,y) => (y ? x).mapTo[Option[CallNew]]
       }.toList
@@ -172,6 +176,14 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
 
     case x @ GetFailedCallsChannel =>
       failedCallsActor forward x
+
+    case x @ GetConcurrentCallsChannelByIpPrefix(ip, prefix) =>
+      val f: List[Future[Option[CallNew]]] = activeCalls.map{
+        case (a,y) => (y ? x).mapTo[Option[CallNew]]
+      }.toList
+
+      Future.sequence(f) pipeTo sender
+
 
     case CallTerminated(callEnd) =>
       val completedCall = activeCalls.filter(_._2 == sender())
@@ -196,8 +208,8 @@ class CallRouter(wsLiveEventsActor: ActorRef, completedCallsActor: ActorRef) ext
           context become idle(newMap)
     */
 
-    case _ =>
-      log.info("---- I don't know this event")
+    case x =>
+      log.info("---- I don't know this event: " + x.toString)
   }
 
   def receive: Receive =

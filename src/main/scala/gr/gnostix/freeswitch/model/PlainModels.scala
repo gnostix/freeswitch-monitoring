@@ -23,8 +23,8 @@ import java.sql.Timestamp
 /**
  * Created by rebel on 13/10/15.
  */
-case class CompletedCallStats(acd: Int, rtpQuality: Double, callerChannelHangupTime: Timestamp)
-case class CompletedCallStatsByCountry(prefix: Option[String], country: Option[String], billSec: Int, rtpQuality: Double, callerChannelHangupTime: Timestamp)
-case class CompletedCallStatsByCountryAcdRtpQuality(prefix: String, country: String, acd: Double, rtpQuality: Double, callsNum: Int)
-case class CompletedCallStatsByCountryAsr(prefix: String, country: String, completedCallsNum: Int, failedCallsNum: Int, asr: Double)
-
+case class CompletedCallStatsByIP(acd: Int, rtpQuality: Double, callerChannelHangupTime: Timestamp, ipAddress: String, hostname: String)
+case class CompletedCallStatsByCountryByIP(prefix: Option[String], country: Option[String], billSec: Int, rtpQuality: Double, callerChannelHangupTime: Timestamp, ipAddress: String, hostname: String)
+case class CompletedCallStatsByCountryAcdRtpQualityByIP(prefix: String, country: String, acd: Double, rtpQuality: Double, callsNum: Int, ipAddress: String, hostname: String)
+case class CompletedCallStatsByCountryAsrByIP(prefix: String, country: String, completedCallsNum: Int, failedCallsNum: Int, asr: Double, ipAddress: String, hostname: String)
+case class IpPrefix(ip: String, prefix: String)

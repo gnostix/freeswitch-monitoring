@@ -1,6 +1,6 @@
 $(function () {
     "use strict";
-	
+	console.log("IP NAME"+sessionStorage.connection);
 	//paths for local tests and server
 	//var path='http://fs-moni.cloudapp.net:8080';
     //var path='';
@@ -18,11 +18,16 @@ $(function () {
     var subSocket;
 //  var transport = 'long-polling';
     var transport = 'websocket';
+	
+	//change dashboard on change options
+	$("#selectConnections").change(function() {
+    //alert($(this).find("option:selected").text()+' clicked!');
+	});
 
 
     var request = {
 
-       // url: "ws://fs-moni.cloudapp.net:8080/fs-moni/live/events",
+        //url: "ws://fs-moni.cloudapp.net:8080/fs-moni/live/events",
        url: "/fs-moni/live/events",
         //url: "the-chat",
         contentType: "application/json",
@@ -67,7 +72,7 @@ $(function () {
             //get the chart by id
             var chartBasic = $('#basicstats').highcharts();
             //get series by id
-            var concurrentCalls = chartBasic.get('concurrentCalls');
+            var concurrentCallsChart = chartBasic.get('concurrentCalls');
             var failedCalls = chartBasic.get('failedCalls');
 
             //get the chart by id
@@ -82,20 +87,21 @@ $(function () {
           //  console.log("EVENTNAME:::::" + json.eventName);
 
             if (json.eventName === "HEARTBEAT") {
-                $("#upTime").text(convertMillisecondsToDigitalClock(json.uptimeMsec).clock);
+               // console.log("HEARTBEAT"+JSON.stringify(json));
+				$("#upTime").text(convertMillisecondsToDigitalClock(json.uptimeMsec).clock);
                 $("#sessionPerSecond").text(json.sessionPerSecond);
                 $("#cpuUsage").text(json.cpuUsage + '%');
                 // Add points to graphs
                 cpuUsage.addPoint([Date.parse(json.eventDateTimestamp), json.cpuUsage]);
 
             } else if (json.eventName === "BASIC_STATS") {
-               // console.log("--------------ADDING BASIC STATS");
-                $("#concCallsNum").text(json.concCallsNum);
+                //console.log("BASIC_STATS"+json.eventName);
+				 $("#concCallsNum").text(json.concurrentCalls);
                 $("#failedCallsNum").text(json.failedCallsNum);
                 $("#acd").text(json.acd);
                 $("#asr").text(json.asr);
                 $("#rtpQualityAvg").text(json.rtpQualityAvg);
-
+				updateGauges(json.concCallsNum);
                 // Add points to graphs
                 asr.addPoint([Date.parse(json.dateTime), json.asr]);
                 acd.addPoint([Date.parse(json.dateTime), json.acd]);
@@ -104,16 +110,20 @@ $(function () {
                 //add points to graph
                 //var milliSeconds = Date.parse(json.dateTime);
                 //console.log("adding basic:"+milliSeconds);
-                concurrentCalls.addPoint([Date.parse(json.dateTime), json.concCallsNum]);
+                concurrentCallsChart.addPoint([Date.parse(json.dateTime), json.concCallsNum]);
                 failedCalls.addPoint([Date.parse(json.dateTime), json.failedCallsNum]);
             } else if (json.eventName === "CHANNEL_HANGUP_COMPLETE") {
-                var currentValue = $("#concCallsNum").text();
+               // console.log("CHANNEL_HANGUP_COMPLETE::"+json.eventName);
+				var currentValue = $("#concCallsNum").text();
                 var newValue = parseInt(currentValue) - 1;
                 $("#concCallsNum").text(newValue);
+				updateGauges(newValue);
             } else if (json.eventName === "CHANNEL_ANSWER") {
-                var currentValue = $("#concCallsNum").text();
+              //  console.log("json.eventName"+JSON.stringify(json));
+				var currentValue = $("#concCallsNum").text();
                 var newValue = parseInt(currentValue) + 1;
                 $("#concCallsNum").text(newValue);
+				updateGauges(newValue);
             } else if (json.eventName === "FAILED_CALL") {
                 var currentValue = $("#failedCallsNum").text();
                 var newValue = parseInt(currentValue) + 1;
@@ -126,6 +136,20 @@ $(function () {
             //console.log('e:::::::::::::: ', e);
             return;
         }
+		
+		//check concurrent calls 
+		 var currentConcurrent = parseInt($("#concCallsNum").text());
+		 if(currentConcurrent>45 && currentConcurrent<=48) {
+			 //change fonr to orange
+			 $("#concCallsNum").css('color', 'orange');
+		 } else if(currentConcurrent>48 && currentConcurrent<=500) {
+			 //change fonr to red
+			 $("#concCallsNum").css('color', 'red');
+		 } else if(currentConcurrent<=45) {
+			 //change font to red
+			$("#concCallsNum").css('color', 'rgba(255, 255, 255, 0.9)');
+		 }
+                
     };
 
     request.onClose = function (rs) {
@@ -313,6 +337,31 @@ $(function () {
 
 	
     jQuery(document).ready(function () {
+		/*
+		$('#gauge').arcGauge({
+   colors: {
+      0:    '#003366', // 0%
+      0.25: '#33cc00', // 25%
+      0.5:  '#ffff66', // 50%
+      0.75: '#ff9966', // 75%
+      0.9:  '#ff3333'  // 90%
+   },
+   onchange: function (value) {
+      $('.arc-gauge-text .value').text(value);
+    }
+   });
+
+
+setInterval(function () {
+   var gauge = $('.arc-gauge-7')[0];
+   // get current value + 25
+   var value = gauge.get() + 25;
+   // overflow check
+   if (value > 100) value = 0;
+   // set the value
+   gauge.set(value);
+}, 2000);
+*/
 		
 		console.log("localStorage.user:"+localStorage.name);
 		// Retrieve from localstorage username,etc
@@ -343,7 +392,8 @@ $(function () {
            
                
 				 if (result.payload.length > 0) {
-	
+					createGauge("t2","T2",0,result.payload[0].maxAllowedCalls,0,145,-12);
+				 
 					//add last value on container
 					 $("#upTime").text(convertMillisecondsToDigitalClock(result.payload[0].uptimeMsec).clock);
 					 $("#sessionPerSecond").text(result.payload[0].sessionPerSecond);
@@ -405,11 +455,13 @@ $(function () {
 
               
 			 if (result.payload.length > 0) {
-				$("#concCallsNum").text(result.payload[0].concCallsNum);
-				$("#failedCallsNum").text(result.payload[0].failedCallsNum);
-				$("#acd").text(result.payload[0].acd);
-				$("#asr").text(result.payload[0].asr);
-				$("#rtpQualityAvg").text(result.payload[0].rtpQualityAvg);
+				 // console.log("result.payload:::::::::::;"+JSON.stringify(result.payload));
+				  updateGauges(result.payload[0].concCallsNum);
+				 $("#concCallsNum").text(result.payload[0].concCallsNum);
+				 $("#failedCallsNum").text(result.payload[0].failedCallsNum);
+				 $("#acd").text(result.payload[0].acd);
+				 $("#asr").text(result.payload[0].asr);
+				 $("#rtpQualityAvg").text(result.payload[0].rtpQualityAvg);
 
                     $.each(result.payload, function (i, n) {
                         // console.log("Sensor Index: " + i + ", cpu usage: " + n.cpuUsage );
@@ -660,8 +712,8 @@ $(function () {
 	   $('#'+table).DataTable( {
 			"destroy": true,
 			"processing":true,
-			"dom": 'Bfrtip',
-			buttons: ['copyHtml5','excel', 'csvHtml5','pdfHtml5'],
+			"dom": 'Bfrltip',
+			buttons: ['excel', 'csvHtml5','pdfHtml5'],
 	        "ajax": {
 			          url: path+'/actors/concurrent/calls/details', // the url where we want to POST
                      "dataSrc": function ( json ) {
@@ -748,8 +800,8 @@ $(function () {
 	   $('#'+table).DataTable( {
 			"destroy": true,
 			"processing":true,
-			"dom": 'Bfrtip',
-			buttons: ['copyHtml5','excel', 'csvHtml5','pdfHtml5'],
+			"dom": 'Bfrltip',
+			buttons: ['excel', 'csvHtml5','pdfHtml5'],
 	        "ajax": {
 			         url: path+'/actors/failed/calls/details', // the url where we want to POST
 					"dataSrc": function ( json ) {
@@ -841,8 +893,8 @@ $(function () {
 	   $('#'+table).DataTable( {
 			"destroy": true,
 			"processing":true,
-			"dom": 'Bfrtip',
-			buttons: ['copyHtml5','excel', 'csvHtml5','pdfHtml5'],
+			"dom": 'Bfrltip',
+			buttons: ['excel', 'csvHtml5','pdfHtml5'],
 	        "ajax": {
 			         url: path+'/actors/completed/calls/country/asr', // the url where we want to POST
 					"dataSrc": function ( json ) {
@@ -927,8 +979,8 @@ $(function () {
 	   $('#'+table).DataTable( {
 			"destroy": true,
 			"processing":true,
-			"dom": 'Bfrtip',
-			buttons: ['copyHtml5','excel', 'csvHtml5','pdfHtml5'],
+			"dom": 'Bfrltip',
+			buttons: ['excel', 'csvHtml5','pdfHtml5'],
 	        "ajax": {
 			       url: path+'/actors/completed/calls/country/acdrtp', // the url where we want to POST
 				  "dataSrc": function ( json ) {
