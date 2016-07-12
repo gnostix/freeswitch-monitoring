@@ -493,3 +493,37 @@ font-size: 16px; font-weight: 200; color: rgba(80, 220, 180, 0.8);
 .panel-footer {
 background-color:rgba(245,245,245,0.95);
 }
+
+.feedback { 
+  width: 146px !important; 
+  position: fixed !important; 
+  top: 50% !important; 
+  left: -49px !important;
+  z-index: 999 !important;
+  transform: rotate(-90deg);
+  -webkit-transform: rotate(-90deg); 
+  -moz-transform: rotate(-90deg); 
+  -o-transform: rotate(-90deg); 
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+    -webkit-box-shadow: rgba(255, 255, 255, 0.25) 1px 1px 1px inset, rgba(0, 0, 0, 0.5) 0px 1px 2px;
+    box-shadow: rgba(255, 255, 255, 0.25) 1px 1px 1px inset, rgba(0, 0, 0, 0.5) 0px 1px 2px;
+    border-radius: 4px;
+}
+
+.feedback a { 
+  display: block; 
+  background: rgba(34,37,89,0.9); 
+  /*height: 15px; 
+  width: 72px; */
+  padding: 6px 12px;
+  color: #fff; 
+  font-size: 17px; 
+  text-decoration: none; 
+  text-align: center;
+  border-radius: 5px;
+  
+}
+
+.feedback a:hover { 
+  background: rgba(32,38,100,0.9); 
+}
