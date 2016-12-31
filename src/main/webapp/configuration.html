@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-   <title>Freeswitch Monitoring Platform</title>
+    <title>Freeswitch Monitoring Platform</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -18,21 +18,21 @@
     <link href="css/sb-admin.css" rel="stylesheet">
 
 
-
     <!-- Custom Fonts -->
     <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-<!--datatable-->
-	<link href="https://cdn.datatables.net/1.10.9/css/jquery.dataTables.min.css" rel="stylesheet" >
-	
-	 <link href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css">
-	 
-	 <!-- jQuery UI styles for uploading-->
-<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/dark-hive/jquery-ui.css" id="theme">
+    <!--datatable-->
+    <link href="https://cdn.datatables.net/1.10.9/css/jquery.dataTables.min.css" rel="stylesheet">
 
-<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
-<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
-<link rel="stylesheet" href="css/upload/jquery.fileupload.css">
-<!--end uplaoding styles -->	
+    <link href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css">
+
+    <!-- jQuery UI styles for uploading-->
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/dark-hive/jquery-ui.css"
+          id="theme">
+
+    <!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+    <!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+    <link rel="stylesheet" href="css/upload/jquery.fileupload.css">
+    <!--end uplaoding styles -->
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -40,50 +40,51 @@
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 
-<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
-	<link rel="icon" href="images/favicon.ico" type="image/x-icon">	
-	
-<!--growl -->
-	<link rel="stylesheet" type="text/css" href="css/growl/jquery.gritter.css" />
-	<!--initialise values -->
- <script src="js/init.js"></script>
- <style type="text/css">
-     
-	    
-	#page-wrapper { 
-            background-image: url(images/background.jpg); 
-			/* Set rules to fill background */
-			
-             /* Background image is centered vertically and horizontally at all times */
-  background-position: center center !important;
-  
-  /* Background image doesn't tile */
-  background-repeat: no-repeat !important;
-  
-  /* Background image is fixed in the viewport so that it doesn't move when 
-     the content's height is greater than the image's height */
-  background-attachment: fixed !important;
-  
-  /* This is what makes the background image rescale based
-     on the container's size */
-  background-size: cover !important;
-  
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+
+    <!--growl -->
+    <link rel="stylesheet" type="text/css" href="css/growl/jquery.gritter.css"/>
+    <!--initialise values -->
+    <script src="js/init.js"></script>
+    <style type="text/css">
+
+
+        #page-wrapper {
+            background-image: url(images/background.jpg);
+            /* Set rules to fill background */
+
+            /* Background image is centered vertically and horizontally at all times */
+            background-position: center center !important;
+
+            /* Background image doesn't tile */
+            background-repeat: no-repeat !important;
+
+            /* Background image is fixed in the viewport so that it doesn't move when
+               the content's height is greater than the image's height */
+            background-attachment: fixed !important;
+
+            /* This is what makes the background image rescale based
+               on the container's size */
+            background-size: cover !important;
+
         }
+
         @media only screen and (max-width: 320px) {
-            #page-wrapper { 
-                background-image: url(images/background.jpg); 
-                 background-size: cover !important;
+            #page-wrapper {
+                background-image: url(images/background.jpg);
+                background-size: cover !important;
             }
         }
 
-         @media only screen and (max-width: 720px) {
-            #page-wrapper { 
-                background-image: url(images/background.jpg); 
-                 background-size: cover !important;
+        @media only screen and (max-width: 720px) {
+            #page-wrapper {
+                background-image: url(images/background.jpg);
+                background-size: cover !important;
             }
         }
-	
-      
+
+
     </style>
 </head>
 
@@ -94,7 +95,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div class="feedback">
-                <a href="mailto:p_alx@hotmail.com">Send us your Feedback</a>
+            <a href="mailto:p_alx@hotmail.com">Send us your Feedback</a>
         </div>
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
@@ -109,7 +110,8 @@
         <!-- Top Menu Items -->
         <ul class="nav navbar-right top-nav">
             <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-envelope"></i> <b class="caret"></b></a>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-envelope"></i> <b
+                        class="caret"></b></a>
                 <ul class="dropdown-menu message-dropdown">
                     <li class="message-preview">
                         <a href="#">
@@ -162,7 +164,8 @@
                 </ul>
             </li>
             <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> <b class="caret"></b></a>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> <b
+                        class="caret"></b></a>
                 <ul class="dropdown-menu alert-dropdown">
                     <li>
                         <a href="#">Alert Name <span class="label label-default">Alert Badge</span></a>
@@ -189,7 +192,8 @@
                 </ul>
             </li>
             <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> John Smith <b class="caret"></b></a>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> John Smith <b
+                        class="caret"></b></a>
                 <ul class="dropdown-menu">
                     <li>
                         <a href="#"><i class="fa fa-fw fa-user"></i> Profile</a>
@@ -214,17 +218,18 @@
                     <a href="dashboard.html"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
                 </li>
 
-                  <li>
-                        <a href="javascript:;" data-toggle="collapse" data-target="#demo"><i class="fa fa-fw fa-wrench"></i> SetUp<i class="fa fa-fw fa-caret-down"></i></a>
-                        <ul id="demo" class="collapse">
-                            <li>
-                                <a href="setupProfile.html"><i class="fa fa-fw fa-edit"></i> Profile</a>
-                            </li>
-                            <li class="active">
-                               <a href="configuration.html"><i class="fa fa-fw fa-retweet"></i> Connections</a>
-                            </li>
-                        </ul>
-                    </li>
+                <li>
+                    <a href="javascript:;" data-toggle="collapse" data-target="#demo"><i class="fa fa-fw fa-wrench"></i>
+                        SetUp<i class="fa fa-fw fa-caret-down"></i></a>
+                    <ul id="demo" class="collapse">
+                        <li>
+                            <a href="setupProfile.html"><i class="fa fa-fw fa-edit"></i> Profile</a>
+                        </li>
+                        <li class="active">
+                            <a href="configuration.html"><i class="fa fa-fw fa-retweet"></i> Connections</a>
+                        </li>
+                    </ul>
+                </li>
             </ul>
         </div>
         <!-- /.navbar-collapse -->
@@ -233,105 +238,110 @@
     <div id="page-wrapper">
 
         <div class="container-fluid">
-			
-            
-                <!-- Main jumbotron for a primary marketing message or call to action -->
-                <div class="jumbotron">
-				  <div class="row">
-				  <div class="col-lg-12">
-						<div id="message" class="alert alert-info alert-dismissable">
-                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                        <i id="responseInput" class="fa fa-info-circle"></i>  <strong class="inputRes">Please enter connection credentials</strong></div>
-					
-				  </div>
-				  <br/>
-						
-			       
-						<form role="form">
-						<div class="row" id="inputCredentials" style="display:none">
-						 <div class="col-lg-4 text-center">
-                         <div class="form-group has-feedback">
-                                <input type="text" class="form-control ghost-btn btn-white" id="eslIPAddress" placeholder="IP Address">
-						 </div>   
-                        
-						 </div>
-						 <div class="col-lg-4 text-center">
-                         <div class="form-group has-feedback">
-                              <input type="number" class="form-control ghost-btn btn-white" id="eslPort" placeholder="Port">
-                           
-                         </div>
-						 </div>
-						 <div class="col-lg-4 text-center">
-                         <div class="form-group has-feedback">
-                           <input type="password" class="form-control ghost-btn btn-white" id="eslPassword" placeholder="Password">
-                         
-                         </div>
-						 </div>
-						 
-						 <div class="form-group">
-                         <div class="pull-right">
-                            <button type="button"  id="eslConnForm" class="btn btn-primary">Login</button>
-                         </div>
-						 </div>
-						</div>
-					</br></br>
-					
-					   <div id="tableRow"class="row" style="display:none">
-							 <div id="header" class="round">
-								<h3 class="panel-title"><i class="fa fa-retweet"></i> Connections</h3>
-							</div>
-							</br>
-							<div class="col-lg-12 text-center">
-							<div id="tablePanel">
-                                    <table id="tableConnections" class="table table-striped display compact" >
-                                        <thead>
-                                        <tr>
-                                            <th>IP</th>
-                                            <th>Port</th>
-                                            <th>Action</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
 
-                                        </tbody>
-                                    </table>
+
+            <!-- Main jumbotron for a primary marketing message or call to action -->
+            <div class="jumbotron">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div id="message" class="alert alert-info alert-dismissable">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                            <i id="responseInput" class="fa fa-info-circle"></i> <strong class="inputRes">Please enter
+                            connection credentials</strong></div>
+
+                    </div>
+                    <br/>
+
+
+                    <form role="form">
+                        <div class="row" id="inputCredentials" style="display:none">
+                            <div class="col-lg-4 text-center">
+                                <div class="form-group has-feedback">
+                                    <input type="text" class="form-control ghost-btn btn-white" id="eslIPAddress"
+                                           placeholder="IP Address">
                                 </div>
-							</div>
-							
+
+                            </div>
+                            <div class="col-lg-4 text-center">
+                                <div class="form-group has-feedback">
+                                    <input type="number" class="form-control ghost-btn btn-white" id="eslPort"
+                                           placeholder="Port">
+
+                                </div>
+                            </div>
+                            <div class="col-lg-4 text-center">
+                                <div class="form-group has-feedback">
+                                    <input type="password" class="form-control ghost-btn btn-white" id="eslPassword"
+                                           placeholder="Password">
+
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="pull-right">
+                                    <button type="button" id="eslConnForm" class="btn btn-primary">Login</button>
+                                </div>
+                            </div>
                         </div>
-				 </form>
-                  </div>
+                        </br></br>
+
+
+                    </form>
+                    <div id="tableRow" class="row" style="display:none">
+                        <div id="header" class="round">
+                            <h3 class="panel-title"><i class="fa fa-retweet"></i> Connections</h3>
+                        </div>
+                        </br>
+                        <div class="col-lg-12 text-center">
+                            <div id="tablePanel">
+                                <table id="tableConnections" class="table table-striped display compact">
+                                    <thead>
+                                    <tr>
+                                        <th>IP</th>
+                                        <th>Port</th>
+                                        <th>Action</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
+            </div>
 
-            
+
             <!-- /.row -->
 
 
-                </form>
-            </div>
-            </div>
-            <!-- /.row -->
-		 <!-- Footer -->
+            </form>
+        </div>
+    </div>
+    <!-- /.row -->
+    <!-- Footer -->
     <div id="loginFooter" class="loginFooter footer clearfix ">
         <div class="pull-left">&copy; 2015. Freeswitch monitoring</div>
 
     </div>
     <!-- /footer -->
-        </div>
-        <!-- /.container-fluid -->
+</div>
+<!-- /.container-fluid -->
 
-    </div>
-    <!-- /#page-wrapper -->
+</div>
+<!-- /#page-wrapper -->
 
 </div>
 <!-- /#wrapper -->
 
- <!-- jQuery -->
- <script src="js/jquery-1.9.0.js"></script>
+<!-- jQuery -->
+<script src="js/jquery-1.9.0.js"></script>
 
-  <!--  <script src="js/jquery.js"></script> -->
- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-	<!-- Bootstrap Core JavaScript -->
+<!--  <script src="js/jquery.js"></script> -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<!-- Bootstrap Core JavaScript -->
 <script src="js/bootstrap.min.js"></script>
 
 <script src="http://code.jquery.com/ui/1.11.1/jquery-ui.min.js"></script>
@@ -352,7 +362,7 @@
 <!-- The basic File Upload plugin -->
 <script src="js/plugins/upload/jquery.fileupload.js"></script>
 
-<!--growl -->	
+<!--growl -->
 <script type="text/javascript" src="js/plugins/growl/jquery.gritter.js"></script>
 </body>
 
