@@ -26,7 +26,7 @@ $(function () {
         contentType: "application/json",
         logLevel: 'debug',
         transport: transport,
-        trackMessageLength : true,
+        // trackMessageLength : true,
         reconnectInterval : 5000,
         fallbackTransport: 'long-polling'
     };
