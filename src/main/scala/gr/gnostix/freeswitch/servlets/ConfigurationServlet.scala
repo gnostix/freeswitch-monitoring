@@ -49,7 +49,7 @@ import scala.language.postfixOps
 class ConfigurationServlet(system: ActorSystem, myActor: ActorRef) extends ScalatraServlet
 with FutureSupport with JacksonJsonSupport with FileUploadSupport
 with CorsSupport with FreeswitchopStack with AuthenticationSupport
-with GZipSupport {
+with ContentEncodingSupport {
   implicit val timeout = new Timeout(10 seconds)
 
   protected implicit def executor: ExecutionContext = system.dispatcher

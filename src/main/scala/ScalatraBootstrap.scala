@@ -60,6 +60,6 @@ class ScalatraBootstrap extends LifeCycle {
 
   override def destroy(context:ServletContext) {
     //myConn.deinitConnection()
-    system.shutdown()
+    system.terminate()
   }
 }

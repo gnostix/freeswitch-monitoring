@@ -27,25 +27,23 @@ import _root_.akka.util.Timeout
 import gr.gnostix.api.auth.AuthenticationSupport
 import gr.gnostix.freeswitch.FreeswitchopStack
 import gr.gnostix.freeswitch.actors.ActorsProtocol._
-import gr.gnostix.freeswitch.actors.{BasicStatsTimeSeries, HeartBeat, CallEnd, CallNew}
-import gr.gnostix.freeswitch.actors.ServletProtocol.{ApiReply, ApiReplyData}
-import gr.gnostix.freeswitch.model.{IpPrefix, CompletedCallStatsByCountryByIP}
+import gr.gnostix.freeswitch.actors.ServletProtocol.ApiReplyData
+import gr.gnostix.freeswitch.actors.{BasicStatsTimeSeries, CallEnd, CallNew, HeartBeat}
+import gr.gnostix.freeswitch.model.CompletedCallStatsByCountryByIP
 import gr.gnostix.freeswitch.utilities.HelperFunctions
-import org.joda.time.DateTime
 import org.json4s.{DefaultFormats, Formats}
-import org.scalatra.json.JacksonJsonSupport
 import org.scalatra._
+import org.scalatra.json.JacksonJsonSupport
 
-import scala.concurrent.{Future, ExecutionContext}
 import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
-import scala.util.{Failure, Success}
 
 
 class EslActorApp(system:ActorSystem, myActor:ActorRef)
   extends ScalatraServlet with FutureSupport with JacksonJsonSupport
   with CorsSupport with FreeswitchopStack with AuthenticationSupport
-  with GZipSupport
+  with ContentEncodingSupport
 {
 
   implicit val timeout = new Timeout(10 seconds)

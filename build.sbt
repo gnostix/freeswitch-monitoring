@@ -9,6 +9,8 @@ ScalatraPlugin.scalatraSettings
 
 scalateSettings
 
+scalacOptions := Seq("-unchecked", "-feature", "-deprecation", "-encoding", "utf8")
+
 organization := "gr.gnostix"
 
 name := "FreeswitchOP"
@@ -48,7 +50,8 @@ libraryDependencies ++= Seq(
   "org.freeswitch.esl.client" % "org.freeswitch.esl.client" % "0.9.2",
   "ch.qos.logback" % "logback-classic" % "1.1.2" % "runtime",
   "javax.mail" % "mail" % "1.4.1",
-  "joda-time" % "joda-time" % "2.9.7"
+  "joda-time" % "joda-time" % "2.9.7",
+  "org.joda" % "joda-convert" % "1.8.1"
 )
 
 scalateTemplateConfig in Compile := {
