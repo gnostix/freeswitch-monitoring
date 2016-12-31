@@ -33,7 +33,8 @@ a) Clone the project and from the application git folder, run bellow commands.
 
 *	./sbt
 *	compile
-*	container:start
+*	jetty:start
+* jetty:stop
 
 After the last command the container will start on localhost:8080
 
