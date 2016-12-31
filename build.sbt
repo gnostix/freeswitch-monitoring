@@ -25,6 +25,8 @@ val json4sversion = "3.3.0"
 
 val jettyVersion = "9.2.10.v20150310"
 
+val akkaVersion = "2.4.16"
+
 libraryDependencies ++= Seq(
   "org.scalatra" %% "scalatra" % ScalatraVersion,
   "org.scalatra" %% "scalatra-auth" % ScalatraVersion,
@@ -38,9 +40,9 @@ libraryDependencies ++= Seq(
   "org.eclipse.jetty" % "jetty-servlets" % jettyVersion,
   "org.eclipse.jetty.websocket" % "websocket-server" % jettyVersion % "container;provided",
   "javax.servlet" % "javax.servlet-api" % "3.1.0" % "container;provided;test" artifacts Artifact("javax.servlet-api", "jar", "jar"),
-  "com.typesafe.akka" %% "akka-actor" % "2.3.12",
-  "com.typesafe.akka" %% "akka-slf4j" % "2.3.12",
-  "com.typesafe.akka" %% "akka-testkit" % "2.3.12",
+  "com.typesafe.akka" %% "akka-actor" % akkaVersion,
+  "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
+  "com.typesafe.akka" %% "akka-testkit" % akkaVersion,
   "org.scalatest" % "scalatest_2.11" % "2.2.5" % "test",
   "net.databinder.dispatch" %% "dispatch-core" % "0.11.3",
   "org.freeswitch.esl.client" % "org.freeswitch.esl.client" % "0.9.2",
