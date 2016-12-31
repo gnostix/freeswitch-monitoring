@@ -1,10 +1,7 @@
 $(function () {
     "use strict";
 	console.log("IP NAME"+sessionStorage.connection);
-	//paths for local tests and server
-	//var path='http://fs-moni.cloudapp.net:8080';
-    //var path='';
-	
+
     var detect = $("#detect");
     var header = $('#header');
     var messages = $('#messages');
@@ -14,14 +11,11 @@ $(function () {
     var myName = true;
     var author = "Alex";
     var logged = true;
-    var socket = $.atmosphere;
+    var socket = atmosphere;
     var subSocket;
-//  var transport = 'long-polling';
     var transport = 'websocket';
 	
-	//change dashboard on change options
 	$("#selectConnections").change(function() {
-    //alert($(this).find("option:selected").text()+' clicked!');
 	});
 
 
@@ -29,10 +23,11 @@ $(function () {
 
         //url: "ws://fs-moni.cloudapp.net:8080/fs-moni/live/events",
        url: "/fs-moni/live/events",
-        //url: "the-chat",
         contentType: "application/json",
         logLevel: 'debug',
         transport: transport,
+        trackMessageLength : true,
+        reconnectInterval : 5000,
         fallbackTransport: 'long-polling'
     };
 

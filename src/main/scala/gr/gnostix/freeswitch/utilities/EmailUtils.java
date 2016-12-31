@@ -35,7 +35,7 @@ public class EmailUtils {
     public static void sendMailOneRecipient(String toEmail, String msg, String subject) throws IOException {
         final String username = "username";
         final String password = "password";
-        final String fromEmailAddress = "info@vieras.eu";
+        final String fromEmailAddress = "info@domain.com";
 
         Properties props = new Properties();
         props.put("mail.smtp.host", "smtp.gmail.com");
