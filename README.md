@@ -24,6 +24,7 @@ The Scala, Scalatra ,Atmosphere and Akka.io are the tools used to achive the goa
 ### Dashboard pic
 
 ![image](http://vieras.eu/wp-content/uploads/2016/04/fsmoni-dashboard.png)
+![image](http://vieras.eu/wp-content/uploads/2017/01/live_calls.png)
 
 ## How to run
 
