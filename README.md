@@ -53,9 +53,7 @@ After the installation is complete then:
 The application will try to connect to default hostname fs-instance.com and password ClueCon. You can add to your machine in /etc/hosts file the correct entry for fs-instance.com OR you can just navigate through the interface and go to the configuration and add there your Freeswitch credentials.
 
 
-### Demo live
-
-This is [FS-Moni](http://fs-moni.cloudapp.net:8080/dashboard.html# "FS-Moni") demo app link. For login use credentials **user: admin** and **password: admin**
+Login use credentials **user: admin** and **password: admin**
 
 ### Basic events arriving in the web socket
 
